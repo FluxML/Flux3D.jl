@@ -1,0 +1,13 @@
+name = "Flux3D"
+uuid = "432009dd-59a1-4b72-8c93-6462ce9b220f"
+authors = ["Nirmal P. Suthar <nirmalps@iitk.ac.in>"]
+version = "0.1.0"
+
+[compat]
+julia = "1.1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
