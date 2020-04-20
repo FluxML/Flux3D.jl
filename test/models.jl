@@ -1,5 +1,5 @@
 @testset "PointCloud Model tests" begin
-    x_test = rand(Float32, 256, 3, 1)   #Reduced npoints to speed up tests
+    x_test = rand(Float32, 64, 3, 1)   #Reduced npoints to speed up tests
     npoints = size(x_test,1)
 
     @testset "PointNet Model tests" begin
