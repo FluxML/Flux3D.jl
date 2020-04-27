@@ -1,6 +1,7 @@
 module Flux3D
 
-using Flux, NearestNeighbors, LinearAlgebra, Makie
+using Flux, NearestNeighbors, LinearAlgebra, Makie, Statistics
+using Base: tail
 using Flux: @functor
 using Zygote: @nograd
 
@@ -10,6 +11,11 @@ include("utils.jl")
 # representation
 include("rep/utils.jl")
 include("rep/pcloud.jl")
+
+# transforms
+include("transforms/utils.jl")
+include("transforms/pcloud.jl")
+include("transforms/transforms.jl")
 
 # visualization
 include("visualize.jl")
