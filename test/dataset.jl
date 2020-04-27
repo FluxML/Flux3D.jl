@@ -1,4 +1,4 @@
-@info "Starting ModelNet tests..."
+@info "Testing ModelNet..."
 @testset "ModelNet10 PointCloud dataset" begin
 
     mn10 = ModelNet10(mode="point_cloud")
@@ -30,6 +30,7 @@
 
         dpoint = dset[1]
         @test dpoint isa Dataset.AbstractDataPoint
+        @test dpoint isa Dataset.MN10DataPoint
         @test dpoint.data isa PointCloud
     end
 end
@@ -65,6 +66,7 @@ end
 
         dpoint = dset[1]
         @test dpoint isa Dataset.AbstractDataPoint
+        @test dpoint isa Dataset.MN40DataPoint
         @test dpoint.data isa PointCloud
     end
 end

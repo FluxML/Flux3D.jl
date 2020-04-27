@@ -1,5 +1,5 @@
 @testset "PointCloud Model tests" begin
-    x_test = rand(Float32, 256, 3, 1)
+    x_test = rand(Float32, 64, 3, 1)
     npoints = size(x_test,1)
 
     @testset "PointNet Model tests" begin
@@ -15,8 +15,8 @@
                 @test y_test isa AbstractArray
                 @test size(y_test) == (num_classes,1)
 
-                # Testing Backward Propagation
-                # @test gradtest(x_test -> model(x_test), x_test)       Taking all of time
+                # Testing Backward Propagation 
+                # @test gradtest(x_test -> model(x_test), x_test)
             end
         end
     end
@@ -35,7 +35,7 @@
                 @test size(y_test) == (num_classes,1)
 
                 # Testing Backward Propagation
-                # @test gradtest(x_test -> model(x_test), x_test)       Taking all of time
+                # @test gradtest(x_test -> model(x_test), x_test)
             end
         end
     end

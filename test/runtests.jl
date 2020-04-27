@@ -1,18 +1,27 @@
 using Flux3D
-using Test
+using Test, Statistics
 
 include("utils.jl")
 
 @testset "Flux3D" begin
 
+    @info "Testing Representation..."
     @testset "Representation" begin
         include("rep.jl")
     end
 
-    @testset "Model" begin
+    @info "Testing Transforms..."
+    @testset "Transforms" begin
+        include("transforms/pcloud.jl")
+        include("transforms/transforms.jl")
+    end
+
+    @info "Testing Models..."
+    @testset "Models" begin
         include("models.jl")
     end
 
+    @info "Testing Dataset"
     @testset "Dataset" begin
         include("dataset.jl")
     end
