@@ -17,7 +17,7 @@ struct ModelNet40PCloud <: AbstractDataset
     root::String 
     path::String #contains the path to dataset
     train::Bool
-    transform #TODO Add type-assertion accordingly 
+    transform::Union{Flux3D.AbstractTransform, Nothing}
     npoints::Int
     sampling #TODO Add type-assertion accordingly to include two possible option {"top", "uniform"}
     datapaths::Array
@@ -58,8 +58,27 @@ end
 function Base.getindex(v::ModelNet40PCloud, idx::Int)
     cls = v.classes_to_idx[v.datapaths[idx][1]]
     pset = MN40_extract(v.datapaths[idx][2], v.npoints)
-    return MN40DataPoint(idx, PointCloud(pset), cls)
+    if v.transform != nothing
+        data = v.transform(PointCloud(pset))
+    else
+        data = PointCloud(pset)
+    end
+    return MN40DataPoint(idx, data, cls)
 end
 
 Base.size(v::ModelNet40PCloud) = (v.length,)
 Base.length(v::ModelNet40PCloud) = v.length
+
+Base.show(io::IO, p::MN40DataPoint) = 
+    print(io, "idx: $(p.idx), data: $(typeof(p.data)), ground_truth: $(p.ground_truth)")
+
+Base.show(io::IO, ::MIME"text/plain", p::MN40DataPoint) = 
+    print(io, "ModelNet40 DataPoint:\n   ", p)
+
+function Base.show(io::IO, dset::ModelNet40PCloud) 
+    print(io, "ModelNet40(")
+    print("mode = point_cloud, ")
+    print("root = $(dset.root), ")
+    print("train = $(dset.train), ")
+    print("length = $(dset.length))")
+end
