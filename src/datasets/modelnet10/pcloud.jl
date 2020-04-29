@@ -15,6 +15,25 @@ function pcloud_load(root::String = default_root)
     end
 end
 
+"""
+    ModelNet10PCloud
+
+PointCloud version of ModelNet10 dataset.
+
+### Fields:
+
+* `root::String`    - Root directory of dataset
+* `path::String`    - Directory of dataset                                          
+* `train::Bool`     - Specifies the trainset
+* `length::Int`     - Length of dataset.
+* `datapaths::Array`    - Array containing the shape and path for each datapoint.
+* `npoints::Int`        - Number of points and normals in each PointCloud.
+* `transform::Union{Flux3D.AbstractTransform, Nothing}` - - Transform to be applied to data point.
+* `sampling::Nothing`   - 'to be implement'
+* `classes_to_idx::Dict{String, UInt8}` - Dict mapping from shape name to class_idx
+* `classes::Array{String,1}`    - Array of shape names.
+
+"""
 struct ModelNet10PCloud <: AbstractDataset
     root::String 
     path::String

@@ -8,12 +8,10 @@ import SHA
 
 include("utils.jl")
 
-# include("autodetect.jl")
-
-# include("modelnet10.jl")
 include("modelnet10/main.jl")
 export ModelNet10
 
-include("modelnet40.jl")
+include("modelnet40/main.jl")
+export ModelNet40
 
 end # module

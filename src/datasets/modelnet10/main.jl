@@ -1,9 +1,9 @@
 module ModelNet10
 
 using ..Dataset
-using ..Dataset: download_and_verify, default_root
+using ..Dataset: download_and_verify
 
-include("cloud.jl")
+include("pcloud.jl")
 
 """
     dataset(;mode=:pointcloud, kwargs...)
@@ -16,9 +16,9 @@ Supported `mode` are {`:pointcloud`}.
 
 * #### For `mode=:pointcloud`
 
-    * `root::String=default_root`   - Root directory to save dataset
-    * `train::Bool=true`            - Specify the trainset 
-    * `npoints::Int=1024`           - Number of points in each PointCloud.
+    * `root::String=default_root`   - Root directory of dataset
+    * `train::Bool=true`            - Specifies the trainset 
+    * `npoints::Int=1024`           - Number of points and normals in each PointCloud.
     * `transform=nothing`           - Transform to be applied to data point.
     * `sampling=nothing`            - 'to be implement'
 
