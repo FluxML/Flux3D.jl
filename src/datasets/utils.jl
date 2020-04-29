@@ -2,7 +2,20 @@ abstract type AbstractDataset end
 abstract type AbstractDataPoint <: Flux3D.AbstractDataPoint end
 abstract type AbstractCustomDataset <: AbstractDataset end
 
-const default_root = normpath(@__DIR__, "..", "..", "datasets")
+function download_and_verify(url, path, hash)
+    tmppath = tempname()
+    download(url, tmppath)
+    hash_download = open(tmppath) do f
+        bytes2hex(SHA.sha256(f))
+    end
+    if hash_download !== hash
+        msg  = "Hash Mismatch!\n"
+        msg *= "  Expected sha256:   $hash\n"
+        msg *= "  Calculated sha256: $hash_download"
+        error(msg)
+    end
+    mv(tmppath, path; force=true)
+end
 
 Base.size(v::AbstractCustomDataset) = (v.length,)
 Base.length(v::AbstractCustomDataset) = v.length
