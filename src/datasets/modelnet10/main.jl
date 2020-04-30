@@ -1,7 +1,8 @@
 module ModelNet10
 
-using ..Dataset
-using ..Dataset: download_and_verify
+import ..Dataset, ...Flux3D
+import ..Dataset: download_and_verify
+import ...Flux3D: PointCloud
 
 include("pcloud.jl")
 

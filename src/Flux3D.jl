@@ -5,9 +5,6 @@ using Base: tail
 using Flux: @functor
 using Zygote: @nograd
 
-# utilities
-include("utils.jl")
-
 # representation
 include("rep/utils.jl")
 include("rep/pcloud.jl")
@@ -17,13 +14,13 @@ include("transforms/utils.jl")
 include("transforms/pcloud.jl")
 include("transforms/transforms.jl")
 
-# visualization
-include("visualize.jl")
-
 # Dataset module
 include("datasets/Dataset.jl")
 using .Dataset
 export ModelNet10, ModelNet40, AbstractCustomDataset, Dataset
+
+# visualization
+include("visualize.jl")
 
 # models
 include("models/utils.jl")

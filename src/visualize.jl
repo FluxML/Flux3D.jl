@@ -21,7 +21,7 @@ function visualize(v::PointCloud; kwargs...)
     Makie.AbstractPlotting.meshscatter(v.points[:,1],v.points[:,2],v.points[:,3]; kwargs...)
 end
 
-visualize(v::AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
+visualize(v::Dataset.AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
 
 visualize(v::AbstractCustomObject; kwargs...) = error("Define visualize function for custom type: $(typeof(v)). 
                                                         Use `import Flux3D.visualize` and define function 
