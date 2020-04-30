@@ -1,9 +1,10 @@
 module ModelNet40
 
-using ..Dataset
-using ..Dataset: download_and_verify
+import ..Dataset, ...Flux3D
+import ..Dataset: download_and_verify, AbstractDataset, AbstractDataPoint
+import ...Flux3D: PointCloud
 
-include("pcloud.jl")
+include("mn40_pcloud.jl")
 
 """
     dataset(;mode=:pointcloud, kwargs...)
@@ -31,7 +32,7 @@ julia> typeof(dset[1].data) == PointCloud
 """
 function dataset(;mode=:pointcloud, kwargs...)
     if mode == :pointcloud
-        return ModelNet40PCloud(kwargs...)
+        return ModelNet40PCloud(;kwargs...)
     else
         error("selected mode: $(mode) is not supported (Currently supported mode are {:pointcloud}).")
     end
@@ -43,7 +44,7 @@ struct MN40DataPoint <: AbstractDataPoint
     ground_truth::UInt8
 end
 
-const default_root = normpath(@__DIR__, "../../../dataset/modelnet")
+const default_root = normpath(@__DIR__, "../../../datasets/modelnet")
 
 const MN40_classes_to_idx = 
     Dict{String, UInt8}([("airplane",1), ("bathtub",2), ("bed",3), ("bench",4), ("bookshelf",5),

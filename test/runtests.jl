@@ -1,4 +1,5 @@
-using Flux3D
+include("../src/Flux3D.jl")
+using .Flux3D
 using Test, Statistics
 
 include("utils.jl")
@@ -12,7 +13,7 @@ include("utils.jl")
 
     @info "Testing Transforms..."
     @testset "Transforms" begin
-        include("transforms/pcloud.jl")
+        include("transforms/pcloud_func.jl")
         include("transforms/transforms.jl")
     end
 
@@ -21,9 +22,9 @@ include("utils.jl")
         include("models.jl")
     end
 
-    # @info "Testing Dataset"   
-    # @testset "Dataset" begin      #TODO: uncomment this part, when done with ci setup.
-    #     include("dataset.jl") 
-    # end
+    @info "Testing Dataset"   
+    @testset "Dataset" begin
+        include("dataset.jl") 
+    end
 
 end # testset Flux3D

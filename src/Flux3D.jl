@@ -11,13 +11,13 @@ include("rep/pcloud.jl")
 
 # transforms
 include("transforms/utils.jl")
-include("transforms/pcloud.jl")
+include("transforms/pcloud_func.jl")
 include("transforms/transforms.jl")
 
 # Dataset module
 include("datasets/Dataset.jl")
 using .Dataset
-export ModelNet10, ModelNet40, AbstractCustomDataset, Dataset
+export CustomDataset, ModelNet10, ModelNet40
 
 # visualization
 include("visualize.jl")

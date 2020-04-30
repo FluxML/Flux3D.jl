@@ -40,7 +40,7 @@ Base.firstindex(d::CustomDataset) = 1
 Base.lastindex(d::CustomDataset) = length(d)
 
 Base.getindex(d::CustomDataset, idx::Int) = d.getdata(idx)
-Base.getindex(d::CustomDataset, r::AbstractArray{<:Any,1}) = ([d[ri] for ri in r]...,)
+Base.getindex(d::CustomDataset, r::AbstractArray{<:Any,1}) = [d[ri] for ri in r] #TODO: revise this
 Base.getindex(d::CustomDataset, c::Colon) = d[1:length(d)]
 
 Base.show(io::IO, d::CustomDataset) = 

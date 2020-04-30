@@ -4,14 +4,12 @@ import ..Flux3D
 import ..Flux3D: PointCloud
 import SHA
 
-# export ModelNet10, ModelNet40, AbstractCustomDataset
+export CustomDataset, ModelNet10, ModelNet40
 
 include("utils.jl")
+include("modelnet10/mn10.jl")
+include("modelnet40/mn40.jl")
 
-include("modelnet10/main.jl")
-export ModelNet10
-
-include("modelnet40/main.jl")
-export ModelNet40
+# (m::Module)(kwargs...) = m.dataset(kwargs...)
 
 end # module
