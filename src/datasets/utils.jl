@@ -23,7 +23,7 @@ Minimal Custom Dataset.
 julia> x = rand(10,32)
 julia> getdata(idx) = x[idx,:]
 julia> dset = CustomDataset(size(x,1), getdata)
-julia> x[1:2,:] == dset[1:2]
+julia> [x[1,:], x[2,:]] == dset[1:2]
 ```
 """
 struct CustomDataset <: AbstractDataset

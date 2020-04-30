@@ -11,7 +11,7 @@ function pcloud_load(root::String = default_root)
             # download_and_verify("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path, hash)
             #TODO use download_and_verify to download
         end
-        run(`unzip $local_path -d $dir_path`)
+        run(`unzip $local_path -qd $local_dir`)
     end
     return local_dir
 end
