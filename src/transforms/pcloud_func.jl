@@ -107,9 +107,7 @@ julia> rotate!(p, rotmat)
 function rotate!(pcloud::PointCloud, rotmat::Array{Float32,2})
     size(rotmat) == (3,3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
     size(pcloud.points,2) == 3 || error("dimension of points in PointCloud must be 3")
-    points = similar(pcloud.points)
-    BLAS.gemm!('N', 'N', true, pcloud.points[:,1:3], rotmat, false, points)
-    pcloud.points = points     
+    pcloud.points = BLAS.gemm('N', 'N', pcloud.points, rotmat)
     return pcloud                 
 end
 

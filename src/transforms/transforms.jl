@@ -85,7 +85,7 @@ end
 
 function RotatePointCloud(rotmat::Array{T,2}; inplace::Bool=true) where {T<:Number}
     size(rotmat) == (3,3) || error("rotmat must be (3,3) array, but instead got $(size(rotmat)) array")
-    return RotatePointCloud(rotmat, inplace)
+    return RotatePointCloud(convert(Array{Float32,2},rotmat), inplace)
 end
 
 function (t::RotatePointCloud)(pcloud::PointCloud)
@@ -143,7 +143,7 @@ end
 NormalizePointCloud(; inplace::Bool=true) = NormalizePointCloud(inplace)
 
 function (t::NormalizePointCloud)(pcloud::PointCloud)
-    t.inplace || (pcloud = PointCloud(pcloud);)
+    t.inplace || (pcloud = deepcopy(pcloud);)
     normalize!(pcloud)
     return pcloud
 end
