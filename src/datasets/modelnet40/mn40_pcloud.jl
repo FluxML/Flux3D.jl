@@ -7,8 +7,8 @@ function pcloud_load(root::String = default_root)
     if(!isdir(local_dir))
         if(!isfile(local_path))
             # dataset prepared by authors of pointnet2
-            Base.download("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path)
-            # download_and_verify("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path, hash)
+            # Base.download("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path)
+            download_and_verify("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path, hash)
             #TODO use download_and_verify to download
         end
         run(`unzip -q $local_path -d $root`)
