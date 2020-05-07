@@ -101,6 +101,6 @@ end
         @test dpoint2 isa ModelNet40.MN40DataPoint
         @test dpoint2.data isa PointCloud
 
-        @test all(isapprox.(2 .* dpoint1.points, dpoint2.points, rtol = 1e-5, atol = 1e-5))
+        @test all(isapprox.(2 .* dpoint1.data.points, dpoint2.data.points, rtol = 1e-5, atol = 1e-5))
     end
 end

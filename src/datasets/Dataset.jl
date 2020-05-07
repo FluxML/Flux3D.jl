@@ -7,6 +7,7 @@ import SHA
 export CustomDataset, ModelNet10, ModelNet40
 
 include("utils.jl")
+include("custom.jl")
 include("modelnet10/mn10.jl")
 include("modelnet40/mn40.jl")
 
