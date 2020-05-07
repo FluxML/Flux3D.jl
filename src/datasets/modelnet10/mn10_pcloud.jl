@@ -2,7 +2,7 @@ function pcloud_load(root::String = default_root)
     mkpath(root)
     local_dir = joinpath(root, "modelnet40_normal_resampled")
     local_path = joinpath(root, "modelnet40_normal_resampled.zip")
-    hash = "to be included" #TODO add hash
+    hash = "d64e9c5cfc479bac3260b164ae3c75ba83e94a1d216fbcd3f59ce2a9686d3762"
 
     if(!isdir(local_dir))
         if(!isfile(local_path))
@@ -11,7 +11,7 @@ function pcloud_load(root::String = default_root)
             # download_and_verify("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path, hash)
             #TODO use download_and_verify to download
         end
-        run(`unzip -q $local_path -d $local_dir`)
+        run(`unzip -q $local_path -d $root`)
     end
     return local_dir
 end
