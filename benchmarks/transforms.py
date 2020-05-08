@@ -27,7 +27,7 @@ def run_benchmarks(arr, npoints, n_iters):
 
         print("Benchmark Time : {}".format(min(benchmark_time)))
 
-npoints = 1024
+npoints = 16384
 n_iters = 101
 arr = [(T.ScalePointCloud(torch.Tensor([.5])), "ScalePointCloud"),
        (T.RotatePointCloud(torch.randn(3,3)), "RotatePointCloud"),
