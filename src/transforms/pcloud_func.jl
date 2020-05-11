@@ -61,7 +61,7 @@ function scale!(pcloud::PointCloud, factor::Float32)
     return pcloud
 end
 
-scale!(pcloud::PointCloud, factor::Number) = scale!(pcloud, convert(Float32,factor))
+scale!(pcloud::PointCloud, factor::Number) = scale!(pcloud, Float32(factor))
 
 """
     scale(pcloud::PointCloud, factor::Number)
@@ -104,15 +104,16 @@ julia> rotmat = rand(3,3)
 julia> rotate!(p, rotmat)
 ```
 """
-function rotate!(pcloud::PointCloud, rotmat::Array{Float32,2})
+function rotate!(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
     size(rotmat) == (3,3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
     size(pcloud.points,2) == 3 || error("dimension of points in PointCloud must be 3")
-    pcloud.points = BLAS.gemm('N', 'N', pcloud.points, rotmat)
+    print("$(typeof(rotmat)) , $(typeof(pcloud.points))")
+    pcloud.points = pcloud.points*rotmat
     return pcloud                 
 end
 
-rotate!(pcloud::PointCloud, rotmat::Array{T,2}) where {T<:Number} = 
-    rotate!(pcloud, convert(Array{Float32,2}, rotmat))
+rotate!(pcloud::PointCloud, rotmat::AbstractArray{<:Number,2}) = 
+    rotate!(pcloud, Float32.(rotmat))
 
 """
     rotate(pcloud::PointCloud, rotmat::Array{Number,2})

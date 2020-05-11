@@ -55,7 +55,7 @@ end
 
 function ScalePointCloud(factor::Number; inplace::Bool=true)
     factor>0.0 || error("factor must be greater than 0.0")
-    ScalePointCloud(convert(Float32,factor), inplace)
+    ScalePointCloud(Float32(factor), inplace)
 end
 
 function (t::ScalePointCloud)(pcloud::PointCloud)
@@ -79,13 +79,13 @@ Given `rotmat`, this transform will rotate each point coordinates (ie. x,y,z) in
 See also: [`rotate`](@ref), [`rotate!`](@ref)
 """
 struct RotatePointCloud <: AbstractTransform
-    rotmat::Array{Float32,2}
+    rotmat::AbstractArray{Float32,2}
     inplace::Bool
 end
 
-function RotatePointCloud(rotmat::Array{T,2}; inplace::Bool=true) where {T<:Number}
+function RotatePointCloud(rotmat::AbstractArray{<:Number,2}; inplace::Bool=true)
     size(rotmat) == (3,3) || error("rotmat must be (3,3) array, but instead got $(size(rotmat)) array")
-    return RotatePointCloud(convert(Array{Float32,2},rotmat), inplace)
+    return RotatePointCloud(Float32.(rotmat), inplace)
 end
 
 function (t::RotatePointCloud)(pcloud::PointCloud)

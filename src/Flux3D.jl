@@ -5,6 +5,18 @@ using Base: tail
 using Flux: @functor
 using Zygote: @nograd
 
+# borowed from Flux.jl
+using CuArrays
+const use_cuda = Ref(false)
+function __init__()
+  use_cuda[] = CuArrays.functional() # Can be overridden after load with `Flux.use_cuda[] = false`
+  if CuArrays.functional()
+    if !CuArrays.has_cudnn()
+      @warn "CuArrays.jl found cuda, but did not find libcudnn. Some functionality will not be available."
+    end
+  end
+end
+
 # representation
 include("rep/utils.jl")
 include("rep/pcloud.jl")
@@ -26,5 +38,8 @@ include("visualize.jl")
 include("models/utils.jl")
 include("models/dgcnn.jl")
 include("models/pointnet.jl")
+
+#utils
+include("utils.jl")
 
 end # module
