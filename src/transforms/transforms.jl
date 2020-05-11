@@ -109,18 +109,26 @@ If `inplace` is set to `false`, it will create deepcopy of PointCloud.
 See also: [`realign`](@ref), [`realign!`](@ref)
 """
 struct ReAlignPointCloud <: AbstractTransform
-    target::PointCloud
+    target_min::AbstractArray{Float32,2}
+    target_max::AbstractArray{Float32,2}
     inplace::Bool
 end
 
-ReAlignPointCloud(target::PointCloud; inplace::Bool=true) = ReAlignPointCloud(target, inplace)
+function ReAlignPointCloud(target::PointCloud; inplace::Bool=true)
+    target_min = reshape(minimum(target.points, dims=1), (1,:))
+    target_max = reshape(maximum(target.points, dims=1), (1,:))
+    ReAlignPointCloud(target_min, target_max, inplace)
+end
 
-ReAlignPointCloud(target::Array{T, 2}; inplace::Bool=true) where {T<:Number} = 
-    ReAlignPointCloud(PointCloud(target); inplace=inplace)
+function ReAlignPointCloud(target::Array{<:Number, 2}; inplace::Bool=true) 
+    target_min = reshape(minimum(target, dims=1), (1,:))
+    target_max = reshape(maximum(target, dims=1), (1,:))
+    ReAlignPointCloud(target_min, target_max, inplace)
+end
 
 function (t::ReAlignPointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
-    realign!(pcloud, t.target)
+    realign!(pcloud, t.target_min, t.target_max)
     return pcloud
 end
 

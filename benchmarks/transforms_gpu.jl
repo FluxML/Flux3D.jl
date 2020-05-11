@@ -1,5 +1,4 @@
-include("../src/Flux3D.jl")
-using .Flux3D, BenchmarkTools
+using Flux3D, BenchmarkTools
 using CUDAapi
 if has_cuda()
     @info "CUDA is on"

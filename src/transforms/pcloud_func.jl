@@ -157,7 +157,7 @@ julia> tgt = PointCloud(rand(1024,3))
 julia> realign!(src, tgt)
 ```
 """
-function realign!(src::PointCloud, tgt::PointCloud)
+function realign!(src::PointCloud, tgt::PointCloud) #TODO: remove this method after performance check
     size(src.points,2) == size(tgt.points,2) || error("source and target pointcloud dimension mismatch")
     src_min = reshape(minimum(src.points, dims=1), (1,:))
     src_max = reshape(maximum(src.points, dims=1), (1,:))
@@ -167,6 +167,16 @@ function realign!(src::PointCloud, tgt::PointCloud)
     src.points = ((src.points .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+ tgt_min
     return src
 end
+
+function realign!(src::PointCloud, tgt_min::AbstractArray{Float32,2}, tgt_max::AbstractArray{Float32,2})
+    size(src.points,2) == size(tgt_max,2) || error("source and target pointcloud dimension mismatch")
+    src_min = reshape(minimum(src.points, dims=1), (1,:))
+    src_max = reshape(maximum(src.points, dims=1), (1,:))
+
+    src.points = ((src.points .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+ tgt_min
+    return src
+end
+
 
 """
     realign(src::PointCloud, tgt::PointCloud)
