@@ -107,7 +107,6 @@ julia> rotate!(p, rotmat)
 function rotate!(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
     size(rotmat) == (3,3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
     size(pcloud.points,2) == 3 || error("dimension of points in PointCloud must be 3")
-    print("$(typeof(rotmat)) , $(typeof(pcloud.points))")
     pcloud.points = pcloud.points*rotmat
     return pcloud                 
 end
