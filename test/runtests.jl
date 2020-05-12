@@ -21,9 +21,19 @@ include("utils.jl")
         include("models.jl")
     end
 
-    @info "Testing Dataset"
+    @info "Testing Dataset..."
     @testset "Dataset" begin
         include("dataset.jl")
+    end
+
+    @info "Testing GPU support..."
+    @testset "CUDA" begin
+        if Flux3D.use_cuda[]
+        include("cuda/rep.jl")
+        include("cuda/transforms.jl")
+        else
+        @warn "CUDA unavailable, not testing GPU support"
+        end
     end
 
 end # testset Flux3D
