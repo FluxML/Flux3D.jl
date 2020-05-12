@@ -10,7 +10,7 @@ Initialize PointCloud representation.
 field, if given should be Array of size `(N,D)` where `N` should match with the
 `N` of `points` and `D`=2 or `D`=3 (i.e. normals for 2D and 3D PointCloud respectively).
 
-### Feilds:
+### Fields:
 
 - `points`      - Points that makes up whole PointCloud.
 - `normals`     - Normals of each points in PointCloud.
