@@ -40,7 +40,4 @@ include("models/utils.jl")
 include("models/dgcnn.jl")
 include("models/pointnet.jl")
 
-#utils
-include("utils.jl")
-
 end # module
