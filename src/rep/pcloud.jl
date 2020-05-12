@@ -41,6 +41,8 @@ PointCloud(;points, normals=nothing)= PointCloud(points, normals)
 
 PointCloud(pcloud::PointCloud) = PointCloud(pcloud.points, pcloud.normals)
 
+@functor PointCloud
+
 Base.getindex(p::PointCloud, I...) = p.points[I...]
 
 function Base.show(io::IO, p::PointCloud)

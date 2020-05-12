@@ -25,6 +25,8 @@ Compose(xs...) = Compose(xs)
 applytransforms(::Tuple{}, x) = x
 applytransforms(fs::Tuple, x) = applytransforms(tail(fs), first(fs)(x))
 
+functor(::Type{<:Compose}, c) = c.transforms, ls -> Chain(ls...)
+
 (c::Compose)(x) = applytransforms(c.transforms, x)
 
 Base.getindex(c::Compose, i::AbstractArray) = Compose(c.transforms[i]...)
@@ -58,6 +60,8 @@ function ScalePointCloud(factor::Number; inplace::Bool = true)
     ScalePointCloud(Float32(factor), inplace)
 end
 
+@functor ScalePointCloud
+
 function (t::ScalePointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
     scale!(pcloud, t.factor)
@@ -85,8 +89,10 @@ end
 
 function RotatePointCloud(rotmat::AbstractArray{<:Number,2}; inplace::Bool = true)
     size(rotmat) == (3, 3) || error("rotmat must be (3,3) array, but instead got $(size(rotmat)) array")
-    return RotatePointCloud(Float32.(rotmat); inplace)
+    return RotatePointCloud(Float32.(rotmat), inplace)
 end
+
+@functor RotatePointCloud
 
 function (t::RotatePointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
@@ -121,7 +127,9 @@ function ReAlignPointCloud(target::PointCloud; inplace::Bool = true)
 end
 
 ReAlignPointCloud(target::AbstractArray{<:Number,2}; inplace::Bool = true) = 
-    ReAlignPointCloud(PointCloud(Float32.(target)), inplace)
+    ReAlignPointCloud(PointCloud(target), inplace=inplace)
+
+@functor ReAlignPointCloud
 
 function (t::ReAlignPointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
@@ -146,6 +154,8 @@ struct NormalizePointCloud <: AbstractTransform
 end
 
 NormalizePointCloud(; inplace::Bool = true) = NormalizePointCloud(inplace)
+
+@functor NormalizePointCloud
 
 function (t::NormalizePointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
