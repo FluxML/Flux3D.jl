@@ -25,7 +25,8 @@ Compose(xs...) = Compose(xs)
 applytransforms(::Tuple{}, x) = x
 applytransforms(fs::Tuple, x) = applytransforms(tail(fs), first(fs)(x))
 
-functor(::Type{<:Compose}, c) = c.transforms, ls -> Chain(ls...)
+# TODO: Update functor format according to Flux release
+functor(c::Compose) = c.transforms, ts -> Compose(ts...)
 
 (c::Compose)(x) = applytransforms(c.transforms, x)
 
