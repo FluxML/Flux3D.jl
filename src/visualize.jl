@@ -1,3 +1,5 @@
+import Makie.AbstractPlotting.meshscatter
+
 export visualize
 
 """
@@ -18,7 +20,7 @@ function visualize(v::PointCloud; kwargs...)
     get!(kwargs, :color, :blue)
     get!(kwargs, :markersize, 0.02*npoints(v)/1024)
 
-    Makie.AbstractPlotting.meshscatter(v.points[:,1],v.points[:,2],v.points[:,3]; kwargs...)
+    meshscatter(v.points[:,1],v.points[:,2],v.points[:,3]; kwargs...)
 end
 
 visualize(v::Dataset.AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
