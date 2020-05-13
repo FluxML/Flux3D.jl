@@ -7,7 +7,7 @@
 
 ## CPU Benchmarks [Google Colab, runtime:GPU]
 
-| transforms | Framework | npoints=2^14^ | npoints=2^16^ | npoints=2^20^ |
+| transforms | Framework | npoints=2<sup>14</sup> | npoints=2<sup>16</sup> | npoints=2<sup>20</sup> |
 |:--:|:--:|:--:|:--:|:--:|
 |ScalePointCloud|Flux3D|__0.0032 ms__|__0.0128 ms__|__0.4952 ms__|
 ||Kaolin|0.0224 ms|0.3638 ms|1.9645 ms|
@@ -20,7 +20,7 @@
 
 ## GPU Benchmarks [Google Colab, runtime:GPU]
 
-| transforms | Framework | npoints=2^14^ | npoints=2^16^ | npoints=2^20^ |
+| transforms | Framework | npoints=2<sup>14</sup> | npoints=2<sup>16</sup> | npoints=2<sup>20</sup> |
 |:--:|:--:|:--:|:--:|:--:|
 |ScalePointCloud|Flux3D|__0.0350 ms__|__0.0423 ms__|__0.1448 ms__|
 ||Kaolin|0.0918 ms|0.07312 ms|0.1634 ms|
