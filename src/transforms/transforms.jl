@@ -4,7 +4,7 @@ export Compose, ScalePointCloud, RotatePointCloud, ReAlignPointCloud, NormalizeP
     Compose(transforms...)
 
 Composes multiple transforms/functions sequentially.
-`Compose` also support indexing and slicing. 
+`Compose` also support indexing and slicing.
 
 ### Examples:
 
@@ -17,7 +17,7 @@ julia> p = PointCloud(rand(1024,3))
 julia> t(p) == t[2](t[1](p))
 ```
 """
-struct Compose{T<:Tuple} <: AbstractCompose
+struct Compose{T <: Tuple} <: AbstractCompose
     transforms::T
 end
 
@@ -25,10 +25,13 @@ Compose(xs...) = Compose(xs)
 applytransforms(::Tuple{}, x) = x
 applytransforms(fs::Tuple, x) = applytransforms(tail(fs), first(fs)(x))
 
+# TODO: Update functor format according to Flux release
+functor(c::Compose) = c.transforms, ts -> Compose(ts...)
+
 (c::Compose)(x) = applytransforms(c.transforms, x)
 
 Base.getindex(c::Compose, i::AbstractArray) = Compose(c.transforms[i]...)
-Base.getindex(c::Compose, i::Int) = Compose(c.transforms[i])
+Base.getindex(c::Compose, i::Int) = c[i:i]
 
 function Base.show(io::IO, c::Compose)
     print(io, "Compose(")
@@ -44,7 +47,7 @@ Scale PointCloud with a given scaling factor `factor`.
 `factor` should be strictly greater than `0.0` for obvious reason.
 `inplace` is optional keyword argument, to make transformation in-place.
 If `inplace` is set to `false`, it will create deepcopy of PointCloud.
-Given `factor`, this transform scale each point in PointCloud, ie. `point = point * factor` 
+Given `factor`, this transform scale each point in PointCloud, ie. `point = point * factor`
 
 See also: [`scale`](@ref), [`scale!`](@ref)
 """
@@ -53,10 +56,12 @@ struct ScalePointCloud <: AbstractTransform
     inplace::Bool
 end
 
-function ScalePointCloud(factor::Number; inplace::Bool=true)
-    factor>0.0 || error("factor must be greater than 0.0")
-    ScalePointCloud(convert(Float32,factor), inplace)
+function ScalePointCloud(factor::Number; inplace::Bool = true)
+    factor > 0.0 || error("factor must be greater than 0.0")
+    ScalePointCloud(Float32(factor), inplace)
 end
+
+@functor ScalePointCloud
 
 function (t::ScalePointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
@@ -67,26 +72,28 @@ end
 Base.show(io::IO, t::ScalePointCloud) = print(io, "$(typeof(t))(factor=$(t.factor); inplace=$(t.inplace))")
 
 """
-    RotatePointCloud(rotmat::Array{T,2}; inplace::Bool=true) where {T<:Number}
+    RotatePointCloud(rotmat::AbstractArray{<:Number,2}; inplace::Bool=true)
 
 Rotate PointCloud with a given rotation matrix `rotmat`.
 
-`rotmat` must be `Array{Number,2}` of size `(3,3)`.
+`rotmat` must be `AbstractArray{<:Number,2}` of size `(3,3)`.
 `inplace` is optional keyword argument, to make transformation in-place
 If `inplace` is set to `false`, it will create deepcopy of PointCloud.
-Given `rotmat`, this transform will rotate each point coordinates (ie. x,y,z) in PointCloud. 
+Given `rotmat`, this transform will rotate each point coordinates (ie. x,y,z) in PointCloud.
 
 See also: [`rotate`](@ref), [`rotate!`](@ref)
 """
 struct RotatePointCloud <: AbstractTransform
-    rotmat::Array{Float32,2}
+    rotmat::AbstractArray{Float32,2}
     inplace::Bool
 end
 
-function RotatePointCloud(rotmat::Array{T,2}; inplace::Bool=true) where {T<:Number}
-    size(rotmat) == (3,3) || error("rotmat must be (3,3) array, but instead got $(size(rotmat)) array")
-    return RotatePointCloud(convert(Array{Float32,2},rotmat), inplace)
+function RotatePointCloud(rotmat::AbstractArray{<:Number,2}; inplace::Bool = true)
+    size(rotmat) == (3, 3) || error("rotmat must be (3,3) array, but instead got $(size(rotmat)) array")
+    return RotatePointCloud(Float32.(rotmat), inplace)
 end
+
+@functor RotatePointCloud
 
 function (t::RotatePointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
@@ -98,7 +105,7 @@ Base.show(io::IO, t::RotatePointCloud) = print(io, "$(typeof(t))(rotmat; inplace
 
 """
     ReAlignPointCloud(target::PointCloud; inplace::Bool=true)
-    ReAlignPointCloud(target::Array{T, 2}; inplace::Bool=true) where {T<:Number} 
+    ReAlignPointCloud(target::AbstractArray{<:Number, 2}; inplace::Bool=true)
 
 Re-Align PointCloud to axis aligned bounding box of `target` PointCloud.
 
@@ -109,18 +116,25 @@ If `inplace` is set to `false`, it will create deepcopy of PointCloud.
 See also: [`realign`](@ref), [`realign!`](@ref)
 """
 struct ReAlignPointCloud <: AbstractTransform
-    target::PointCloud
+    t_min::AbstractArray{Float32,2}
+    t_max::AbstractArray{Float32,2}
     inplace::Bool
 end
 
-ReAlignPointCloud(target::PointCloud; inplace::Bool=true) = ReAlignPointCloud(target, inplace)
+function ReAlignPointCloud(target::PointCloud; inplace::Bool = true)
+    t_min = reshape(minimum(target.points, dims = 1), (1, :))
+    t_max = reshape(maximum(target.points, dims = 1), (1, :))
+    ReAlignPointCloud(t_min, t_max, inplace)
+end
 
-ReAlignPointCloud(target::Array{T, 2}; inplace::Bool=true) where {T<:Number} = 
-    ReAlignPointCloud(PointCloud(target); inplace=inplace)
+ReAlignPointCloud(target::AbstractArray{<:Number,2}; inplace::Bool = true) = 
+    ReAlignPointCloud(PointCloud(target), inplace=inplace)
+
+@functor ReAlignPointCloud
 
 function (t::ReAlignPointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
-    realign!(pcloud, t.target)
+    realign!(pcloud, t.t_min, t.t_max)
     return pcloud
 end
 
@@ -140,7 +154,9 @@ struct NormalizePointCloud <: AbstractTransform
     inplace::Bool
 end
 
-NormalizePointCloud(; inplace::Bool=true) = NormalizePointCloud(inplace)
+NormalizePointCloud(; inplace::Bool = true) = NormalizePointCloud(inplace)
+
+@functor NormalizePointCloud
 
 function (t::NormalizePointCloud)(pcloud::PointCloud)
     t.inplace || (pcloud = deepcopy(pcloud);)
@@ -148,4 +164,4 @@ function (t::NormalizePointCloud)(pcloud::PointCloud)
     return pcloud
 end
 
-Base.show(io::IO, t::NormalizePointCloud) = print(io, "$(typeof(t))(;inplace=$(t.inplace))") 
+Base.show(io::IO, t::NormalizePointCloud) = print(io, "$(typeof(t))(;inplace=$(t.inplace))")

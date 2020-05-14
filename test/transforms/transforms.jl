@@ -70,4 +70,14 @@
         end
     end
 
+    @testset "Compose" begin
+        p = rand(Float32, 32, 3)
+        t = Compose(ScalePointCloud(0.5), RotatePointCloud(rand(3,3)), NormalizePointCloud())
+        pc1 = PointCloud(p)
+        pc1 = t(pc1)
+        @test pc1.points isa Array
+        @test all(isapprox.(mean(pc1.points;dims=1), zeros(Float32, 1, size(p,2)), rtol = 1e-5, atol = 1e-5))
+        # @test all(isapprox.(std(pc1.points;dims=1), ones(Float32, 1, size(p,2)), rtol = 1e-5, atol = 1e-5))
+    end
+
 end # PointCloud transforms
