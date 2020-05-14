@@ -1,9 +1,22 @@
 module Flux3D
 
-using Flux, NearestNeighbors, LinearAlgebra, Makie, Statistics
+using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays
 using Base: tail
-using Flux: @functor
 using Zygote: @nograd
+import Flux: @functor, functor, gpu, cpu
+
+export gpu, cpu
+
+# borowed from Flux.jl
+const use_cuda = Ref(false)
+function __init__()
+  use_cuda[] = CuArrays.functional() # Can be overridden after load with `Flux.use_cuda[] = false`
+  if CuArrays.functional()
+    if !CuArrays.has_cudnn()
+      @warn "CuArrays.jl found cuda, but did not find libcudnn. Some functionality will not be available."
+    end
+  end
+end
 
 # representation
 include("rep/utils.jl")

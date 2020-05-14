@@ -10,9 +10,9 @@ Initialize PointCloud representation.
 field, if given should be Array of size `(N,D)` where `N` should match with the
 `N` of `points` and `D`=2 or `D`=3 (i.e. normals for 2D and 3D PointCloud respectively).
 
-### Feilds:
+### Fields:
 
-- `points`      - Points that makes up whole PointCloud. 
+- `points`      - Points that makes up whole PointCloud.
 - `normals`     - Normals of each points in PointCloud.
 
 ### Available Contructor:
@@ -22,16 +22,16 @@ field, if given should be Array of size `(N,D)` where `N` should match with the
 - `PointCloud(pcloud::PointCloud)`
 """
 mutable struct PointCloud <: AbstractObject
-    points::Array{Float32,2}
-    normals::Union{Array{Float32,2}, Nothing}
+    points::AbstractArray{Float32,2}
+    normals::Union{AbstractArray{Float32,2}, Nothing}
 end
 
-function PointCloud(points::Array{T,2}, normals::Union{Array{R,2}, Nothing}=nothing) where {T<:Number,R<:Number}
-    points = convert(Array{Float32,2},points)
+function PointCloud(points::AbstractArray{<:Number,2}, normals::Union{AbstractArray{<:Number,2}, Nothing}=nothing)
+    points = Float32.(points)
 
-    if normals != nothing
+    if !(normals isa Nothing)
         size(points,1) == size(normals,1) || error("number of points and normals must match in PointCloud.")
-        normals = convert(Array{Float32,2},normals);
+        normals = Float32.(normals);
     end
 
     PointCloud(points, normals)
@@ -40,6 +40,8 @@ end
 PointCloud(;points, normals=nothing)= PointCloud(points, normals)
 
 PointCloud(pcloud::PointCloud) = PointCloud(pcloud.points, pcloud.normals)
+
+@functor PointCloud
 
 Base.getindex(p::PointCloud, I...) = p.points[I...]
 
@@ -51,7 +53,7 @@ function Base.show(io::IO, p::PointCloud)
     end
 end
 
-Base.show(io::IO, ::MIME"text/plain", p::PointCloud) = 
+Base.show(io::IO, ::MIME"text/plain", p::PointCloud) =
     print(io, "PointCloud object:\n   ", p)
 
 """

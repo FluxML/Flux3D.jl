@@ -14,8 +14,8 @@ julia> normalize!(p)
 ```
 """
 function normalize!(pcloud::PointCloud)
-    centroid = mean(pcloud.points, dims=1)
-    pcloud.points = (pcloud.points .- centroid) ./ (std(pcloud.points, mean=centroid, dims=1) .+ EPS)
+    centroid = mean(pcloud.points, dims = 1)
+    pcloud.points = (pcloud.points .- centroid) ./ (std(pcloud.points, mean = centroid, dims = 1) .+ EPS)
     return pcloud
 end
 
@@ -61,7 +61,7 @@ function scale!(pcloud::PointCloud, factor::Float32)
     return pcloud
 end
 
-scale!(pcloud::PointCloud, factor::Number) = scale!(pcloud, convert(Float32,factor))
+scale!(pcloud::PointCloud, factor::Number) = scale!(pcloud, Float32(factor))
 
 """
     scale(pcloud::PointCloud, factor::Number)
@@ -79,16 +79,15 @@ julia> p = scale(1.0)
 ```
 """
 function scale(pcloud::PointCloud, factor::Float32)
-    factor>0.0 || error("factor must be greater than 0.0")
     p = deepcopy(pcloud)
     scale!(p, factor)
     return p
 end
 
-scale(pcloud::PointCloud, factor::Number) = scale(pcloud, convert(Float32,factor))
+scale(pcloud::PointCloud, factor::Number) = scale(pcloud, Float32(factor))
 
 """
-    rotate!(pcloud::PointCloud, rotmat::Array{Number,2})
+    rotate!(pcloud::PointCloud, rotmat::AbstractArray{Number,2})
 
 Rotate the PointCloud `pcloud` by rotation matrix `rotmat`
 and overwrite `pcloud` with rotated PointCloud.
@@ -104,15 +103,15 @@ julia> rotmat = rand(3,3)
 julia> rotate!(p, rotmat)
 ```
 """
-function rotate!(pcloud::PointCloud, rotmat::Array{Float32,2})
-    size(rotmat) == (3,3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
-    size(pcloud.points,2) == 3 || error("dimension of points in PointCloud must be 3")
-    pcloud.points = BLAS.gemm('N', 'N', pcloud.points, rotmat)
-    return pcloud                 
+function rotate!(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
+    size(rotmat) == (3, 3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
+    size(pcloud.points, 2) == 3 || error("dimension of points in PointCloud must be 3")
+    pcloud.points = pcloud.points * rotmat
+    return pcloud
 end
 
-rotate!(pcloud::PointCloud, rotmat::Array{T,2}) where {T<:Number} = 
-    rotate!(pcloud, convert(Array{Float32,2}, rotmat))
+rotate!(pcloud::PointCloud, rotmat::AbstractArray{<:Number,2}) =
+    rotate!(pcloud, Float32.(rotmat))
 
 """
     rotate(pcloud::PointCloud, rotmat::Array{Number,2})
@@ -130,18 +129,17 @@ julia> rotmat = rand(3,3)
 julia> p = rotate(p, rotmat)
 ```
 """
-function rotate(pcloud::PointCloud, rotmat::Array{Float32,2})
-    size(rotmat) == (3,3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
-    size(pcloud.points,2) == 3 || error("dimension of points in PointCloud must be 3")
+function rotate(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
     p = deepcopy(pcloud)
-    BLAS.gemm!('N', 'N', true, pcloud.points[:,1:3], rotmat, false, p.points)
-    return p                      
+    rotate!(p, rotmat)
+    return p
 end
 
-rotate(pcloud::PointCloud, rotmat::Array{Number,2}) = rotate(pcloud, convert(Float32, rotmat))
+rotate(pcloud::PointCloud, rotmat::AbstractArray{Number,2}) = rotate(pcloud, Float32.(rotmat))
 
 """
     realign!(src::PointCloud, tgt::PointCloud)
+    realign!(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
 Re-Align the PointCloud `src` with the axis aligned bounding box of PointCloud `tgt`
 and overwrite `pcloud` with rotated PointCloud.
@@ -157,19 +155,27 @@ julia> tgt = PointCloud(rand(1024,3))
 julia> realign!(src, tgt)
 ```
 """
-function realign!(src::PointCloud, tgt::PointCloud)
-    size(src.points,2) == size(tgt.points,2) || error("source and target pointcloud dimension mismatch")
-    src_min = reshape(minimum(src.points, dims=1), (1,:))
-    src_max = reshape(maximum(src.points, dims=1), (1,:))
-    tgt_min = reshape(minimum(tgt.points, dims=1), (1,:))
-    tgt_max = reshape(maximum(tgt.points, dims=1), (1,:))
-
+function realign!(src::PointCloud, tgt_min::AbstractArray{Float32,2}, tgt_max::AbstractArray{Float32,2})
+    size(src.points, 2) == size(tgt_max, 2) || error("source and target pointcloud dimension mismatch")
+    src_min = reshape(minimum(src.points, dims = 1), (1, :))
+    src_max = reshape(maximum(src.points, dims = 1), (1, :))
     src.points = ((src.points .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+ tgt_min
+    return src
+end
+
+realign!(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2}) =
+    realign!(src, Float32.(tgt_min), Float32.(tgt_max))
+
+function realign!(src::PointCloud, tgt::PointCloud)
+    tgt_min = reshape(minimum(tgt.points, dims = 1), (1, :))
+    tgt_max = reshape(maximum(tgt.points, dims = 1), (1, :))
+    realign!(src, tgt_min, tgt_max)
     return src
 end
 
 """
     realign(src::PointCloud, tgt::PointCloud)
+    realign!(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
 Re-Align the PointCloud `src` with the axis aligned bounding box of PointCloud `tgt`.
 
@@ -184,14 +190,14 @@ julia> tgt = PointCloud(rand(1024,3))
 julia> src = realign!(src, tgt)
 ```
 """
-function realign(src::PointCloud, tgt::PointCloud)
-    size(src.points,2) == size(tgt.points,2) || error("source and target pointcloud dimension mismatch")
-    src_min = reshape(minimum(src.points, dims=1), (1,:))
-    src_max = reshape(maximum(src.points, dims=1), (1,:))
-    tgt_min = reshape(minimum(tgt.points, dims=1), (1,:))
-    tgt_max = reshape(maximum(tgt.points, dims=1), (1,:))
-
+function realign(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
     p = deepcopy(src)
-    p.points = ((src.points .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+ tgt_min
+    realign!(p, tgt_min, tgt_max)
+    return p
+end
+
+function realign(src::PointCloud, tgt::PointCloud)
+    p = deepcopy(src)
+    realign!(p, tgt)
     return p
 end
