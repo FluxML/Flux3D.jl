@@ -1,8 +1,9 @@
 module Flux3D
 
-using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays
+using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays, FileIO, MeshIO
 using Base: tail
 using Zygote: @nograd
+import GeometryBasics
 import Flux: @functor, functor, gpu, cpu, Chain
 
 export gpu, cpu, Chain
@@ -21,6 +22,7 @@ end
 # representation
 include("rep/utils.jl")
 include("rep/pcloud.jl")
+include("rep/mesh.jl")
 
 # transforms
 include("transforms/utils.jl")
