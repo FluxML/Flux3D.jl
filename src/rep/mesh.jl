@@ -1,18 +1,20 @@
 # export TriMesh
 
-# TODO: discuss type for faces (use simple array or use GeometryBasics faces)
-mutable struct TriMesh{T<:Float32} <: AbstractMesh
+mutable struct TriMesh{T<:Float32,R<:UInt32} <: AbstractMesh
     vertices::AbstractArray{2,T}
-    faces::GeometryBasics.NgonFace{3,GeometryBasics.OffsetInteger{-1,UInt32}}
+    faces::AbstractArray{2,R}
+    offset::Int8
 end
 
 function load_trimesh(fn; elements_types...)
     mesh = load(fn; elements_types...)
     v = mesh.position
-    v = cat([reshape(Array.(pts), 1, :) for pts in v]..., dims=1)
+    vertices = cat([reshape(Array.(pts), 1, :) for pts in v]..., dims=1)
     names = propertynames(getfield(mesh, :simplices))
     f = getfield(getfield(mesh, :simplices), :faces)
-    return TriMesh(v,f)
+    offset = _get_offset(f[1][1])
+    faces = cat([reshape(Array(UInt32.(fi)),1,:) for fi in f]..., dims=1)
+    return TriMesh(vertices, faces, offset)
 end
 
 # TODO: Implement two variants, face_normal and vertex_normal
@@ -24,3 +26,5 @@ end
 function save_trimesh(file_name, mesh::TriMesh)
     error("Not implemented")
 end
+
+_get_offset(x::GeometryBasics.OffsetInteger{o,T}) where {o, T} = o
