@@ -1,8 +1,8 @@
 module Flux3D
 
-using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays, FileIO, MeshIO
+using Flux, Zygote, NearestNeighbors, LinearAlgebra, Statistics, CuArrays, FileIO, MeshIO
 using Base: tail
-using Zygote: @nograd
+import Zygote: @nograd
 import GeometryBasics
 import Flux: @functor, functor, gpu, cpu, Chain
 
