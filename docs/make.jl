@@ -17,5 +17,5 @@ makedocs(;
 )
 
 deploydocs(;
-    repo="github.com/nirmal-suthar/Flux3D.jl",
+    repo="github.com/nirmal-suthar/Flux3D.jl.git",
 )
