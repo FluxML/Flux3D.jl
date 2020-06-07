@@ -2,6 +2,14 @@ abstract type AbstractObject end
 abstract type AbstractCustomObject <: AbstractObject end
 abstract type AbstractMesh <: AbstractObject end
 
+#TODO: Remove this once new tagged version of Zygote is out
+my_ignore(f) = f()
+Zygote.@adjoint my_ignore(f) = my_ignore(f), _ -> nothing
+
+#TODO: Remove this when new tagged version of Zygote is out
+my_rand(args...; kwargs...) = rand(args...; kwargs...)
+Zygote.@nograd my_rand
+
 function _lg_cross(A::AbstractArray, B::AbstractArray)
     if !(size(A, 2) == size(B, 2) == 3)
         throw(DimensionMismatch("cross product is only defined for AbstractArray of dimension 3 at dims 2"))

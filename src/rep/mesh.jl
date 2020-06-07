@@ -1,6 +1,8 @@
-export TriMesh
+export TriMesh, load_trimesh, compute_vertex_normals, compute_face_normals,
+       compute_face_normals, compute_face_areas, laplacian_loss, edge_loss,
+       sample_points, get_edges, get_laplacian_sparse
+
 import GeometryBasics, Distributions
-import Zygote: ignore
 import GeometryBasics: Point3f0, GLTriangleFace, NgonFace, convert_simplex, Mesh, meta, triangle_mesh
 
 # TODO: add texture fields
@@ -9,7 +11,7 @@ mutable struct TriMesh{T<:Float32,R<:UInt32} <: AbstractMesh
     faces::AbstractArray{R,2}
     offset::Int8
     edges::Union{Nothing,AbstractArray{UInt32,2}}
-    laplacian_sparse::Union{Nothing,AbstractSparseMatrix{UInt32,Float32}}
+    laplacian_sparse::Union{Nothing,AbstractSparseMatrix{Float32,UInt32}}
 end
 
 # TODO: Add contructor according to batched format
@@ -110,7 +112,9 @@ end
 
 function laplacian_loss(m::TriMesh)
     # TODO: There will be some changes when migrating to batched format
-    L = get_laplacian_sparse(m)
+    my_ignore() do
+        L = get_laplacian_sparse(m)
+    end
     L = L * m.vertices
     L = _norm(L; dims = 2)
     return sum(L)
@@ -118,7 +122,7 @@ end
 
 function edge_loss(m::TriMesh, target_length::Number=0.0f0)
     #TODO: will change changing to batched format
-    edges = get_edges(m)
+    edges = Zygote.nograd(get_edges(m))
     v1 = m.vertices[edges[:,1],:]
     v2 = m.vertices[edges[:,2],:]
     loss =  (_norm(v1-v2; dims=2) .- Float32(target_length)) .^ 2
@@ -131,7 +135,6 @@ end
 
 # end
 
-#TODO: discuss using `Zygote.@nograd rand` as it is causing mutating error
 function sample_points(
     m::TriMesh,
     num_samples::Int = 10000;
@@ -140,28 +143,28 @@ function sample_points(
 )
     face_areas, face_normals = compute_face_areas(m; compute_normals = returns_normals)
     face_areas_prob = Float64.(face_areas) ./ sum(Float64.(face_areas))
+    # face_areas_prob = face_areas ./ sum(face_areas)
     # face_areas_prob = face_areas ./ max(sum(face_areas), eps)
     dist = Distributions.Categorical(face_areas_prob)
-    sample_faces_idx = rand(dist, num_samples)
-
-    sample_faces = Zygote.dropgrad(m.faces[sample_faces_idx, :])
+    sample_faces_idx = my_rand(dist, num_samples)
+    sample_faces_idx = Zygote.nograd(sample_faces_idx)
+    sample_faces = m.faces[sample_faces_idx, :]
     v1 = m.vertices[sample_faces[:, 1], :]
     v2 = m.vertices[sample_faces[:, 2], :]
     v3 = m.vertices[sample_faces[:, 3], :]
     (w1, w2, w3) = _rand_barycentric_coords(num_samples)
-    samples = (w1 .* v1) .+ (w2 .* v2) .+ (w3 .* v3)
+    samples = (w1 .* v1) + (w2 .* v2) + (w3 .* v3)
 
-    samples_normals = nothing
     if returns_normals
         samples_normals = face_normals[sample_faces_idx, :]
+        return (samples, samples_normals)
     end
-
-    return (samples, samples_normals)
+    return samples
 end
 
 function _rand_barycentric_coords(num_samples::Int)
-    u = sqrt.(rand(Float32, num_samples))
-    v = rand(Float32, num_samples)
+    u = sqrt.(my_rand(Float32, num_samples))
+    v = my_rand(Float32, num_samples)
     w1 = 1.0f0 .- u
     w2 = u .* (1.0f0 .- v)
     w3 = u .* v
@@ -202,8 +205,8 @@ function _compute_laplacian_sparse(m::TriMesh, refresh::Bool=false)
         e1 = edges[:, 1]
         e2 = edges[:, 2]
 
-        idx12 = cat(edges[:, 1], edges[:, 2], dims = 2)
-        idx21 = cat(edges[:, 1], edges[:, 2], dims = 2)
+        idx12 = cat(e1, e2, dims = 2)
+        idx21 = cat(e2, e1, dims = 2)
         idx = cat(idx12, idx21, dims = 1)
 
         A = sparse(
@@ -214,14 +217,14 @@ function _compute_laplacian_sparse(m::TriMesh, refresh::Bool=false)
             size(m.vertices, 1),
         )
 
-        deg = Array(sum(A, dims = 2))  # TODO: will be problematic for GPU
+        deg = Array{Float32}(sum(A, dims = 2))  # TODO: will be problematic for GPU
 
-        deg1 = 1 ./ map(x -> (x > 0 ? 1 / x : x), deg[e1])
-        deg2 = 1 ./ map(x -> (x > 0 ? 1 / x : x), deg[e2])
+        deg1 = map(x -> (x > 0 ? 1 / x : x), deg[e1])
+        deg2 = map(x -> (x > 0 ? 1 / x : x), deg[e2])
         diag = fill(-1.0f0, size(m.vertices, 1))
 
-        Is = cat(e1, e2, 1:size(m.vertices, 1); dims = 1)
-        Js = cat(e2, e1, 1:size(m.vertices, 1); dims = 1)
+        Is = cat(e1, e2, UInt32.(1:size(m.vertices, 1)); dims = 1)
+        Js = cat(e2, e1, UInt32.(1:size(m.vertices, 1)); dims = 1)
         Vs = cat(deg1, deg2, diag; dims = 1)
         m.laplacian_sparse = sparse(Is, Js, Vs, size(m.vertices, 1), size(m.vertices, 1))
     end
