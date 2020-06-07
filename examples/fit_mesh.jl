@@ -1,6 +1,13 @@
 using Flux3D, Statistics, FileIO, Zygote
 
-#TODO: add links/intructions for obj files
+mkpath(joinpath(@__DIR__,"assets"))         
+mkpath(joinpath(@__DIR__,"img"))
+
+download("https://github.com/nirmalsuthar/public_files/raw/master/dolphin.obj", 
+         joinpath(@__DIR__,"assets/dolphin.obj"))
+download("https://github.com/nirmalsuthar/public_files/raw/master/sphere.obj", 
+         joinpath(@__DIR__,"assets/sphere.obj"))
+         
 tgt = load_trimesh(joinpath(@__DIR__,"assets/dolphin.obj"))
 src = load_trimesh(joinpath(@__DIR__,"assets/sphere.obj"))
 
@@ -38,10 +45,9 @@ function loss_dolphin(x::Array, src::TriMesh, tgt::TriMesh)
     loss1 = chamfer_loss(sample_src, sample_tgt)
     loss2 = laplacian_loss(src)
     loss3 = edge_loss(src)
-    return loss1 + (1.5*loss2) + (loss3)
+    return loss1 + (0.1*loss2) + (0.05*loss3)
 end
 
-loss_dolphin(off, src, tgt)
 lr = 0.04
 
 function customtrain(off)
