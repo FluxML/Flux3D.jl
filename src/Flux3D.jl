@@ -29,6 +29,10 @@ include("transforms/utils.jl")
 include("transforms/pcloud_func.jl")
 include("transforms/transforms.jl")
 
+# metrics
+include("metrics/pcloud.jl")
+include("metrics/mesh.jl")
+
 # Dataset module
 include("datasets/Dataset.jl")
 using .Dataset

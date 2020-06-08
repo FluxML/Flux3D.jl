@@ -7,7 +7,7 @@ my_ignore(f) = f()
 Zygote.@adjoint my_ignore(f) = my_ignore(f), _ -> nothing
 
 #TODO: Remove this when new tagged version of Zygote is out
-my_rand(args...; kwargs...) = rand(args...; kwargs...)
+my_rand(args...) = rand(args...)
 Zygote.@nograd my_rand
 
 function _lg_cross(A::AbstractArray, B::AbstractArray)

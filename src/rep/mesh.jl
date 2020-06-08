@@ -1,6 +1,6 @@
 export TriMesh, load_trimesh, compute_vertex_normals, compute_face_normals,
-       compute_face_normals, compute_face_areas, laplacian_loss, edge_loss,
-       sample_points, get_edges, get_laplacian_sparse
+       compute_face_normals, compute_face_areas, sample_points, get_edges, 
+       get_laplacian_sparse
 
 import GeometryBasics, Distributions
 import GeometryBasics: Point3f0, GLTriangleFace, NgonFace, convert_simplex, Mesh, meta, triangle_mesh
@@ -110,34 +110,9 @@ function compute_face_areas(m::TriMesh; compute_normals::Bool = true, eps::Numbe
     return (face_areas, face_normals)
 end
 
-function laplacian_loss(m::TriMesh)
-    # TODO: There will be some changes when migrating to batched format
-    my_ignore() do
-        L = get_laplacian_sparse(m)
-    end
-    L = L * m.vertices
-    L = _norm(L; dims = 2)
-    return sum(L)
-end
-
-function edge_loss(m::TriMesh, target_length::Number=0.0f0)
-    #TODO: will change changing to batched format
-    edges = Zygote.nograd(get_edges(m))
-    v1 = m.vertices[edges[:,1],:]
-    v2 = m.vertices[edges[:,2],:]
-    loss =  (_norm(v1-v2; dims=2) .- Float32(target_length)) .^ 2
-    return sum(loss)
-end
-
-# function normal_consistency_loss(m::TriMesh)
-#     edges = get_edges(m)
-
-
-# end
-
 function sample_points(
     m::TriMesh,
-    num_samples::Int = 10000;
+    num_samples::Int = 5000;
     returns_normals::Bool = false,
     eps::Number = 1e-6,
 )
