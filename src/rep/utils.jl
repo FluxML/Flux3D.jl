@@ -10,6 +10,13 @@ Zygote.@adjoint my_ignore(f) = my_ignore(f), _ -> nothing
 my_rand(args...) = rand(args...)
 Zygote.@nograd my_rand
 
+include("./groupinds.jl")
+function uniqueperm(A::AbstractArray; dims::Int)
+    ic = groupslices(A; dims=dims)
+    return firstinds(ic)
+end 
+
+
 function _lg_cross(A::AbstractArray, B::AbstractArray)
     if !(size(A, 2) == size(B, 2) == 3)
         throw(DimensionMismatch("cross product is only defined for AbstractArray of dimension 3 at dims 2"))

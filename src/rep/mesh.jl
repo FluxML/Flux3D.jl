@@ -1,9 +1,18 @@
-export TriMesh, load_trimesh, compute_vertex_normals, compute_face_normals,
-       compute_face_normals, compute_face_areas, sample_points, get_edges, 
-       get_laplacian_sparse
+export TriMesh,
+    load_trimesh,
+    compute_vertex_normals,
+    compute_face_normals,
+    compute_face_normals,
+    compute_face_areas,
+    sample_points,
+    get_edges,
+    get_laplacian_sparse,
+    get_faces_to_edges,
+    get_edges_to_key
 
 import GeometryBasics, Distributions
-import GeometryBasics: Point3f0, GLTriangleFace, NgonFace, convert_simplex, Mesh, meta, triangle_mesh
+import GeometryBasics:
+    Point3f0, GLTriangleFace, NgonFace, convert_simplex, Mesh, meta, triangle_mesh
 
 # TODO: add texture fields
 mutable struct TriMesh{T<:Float32,R<:UInt32} <: AbstractMesh
@@ -12,34 +21,40 @@ mutable struct TriMesh{T<:Float32,R<:UInt32} <: AbstractMesh
     offset::Int8
     edges::Union{Nothing,AbstractArray{UInt32,2}}
     laplacian_sparse::Union{Nothing,AbstractSparseMatrix{Float32,UInt32}}
+    edges_to_key::Union{Nothing,Dict{Tuple{UInt32,UInt32},UInt32}}
+    faces_to_edges::Union{Nothing,AbstractArray{UInt32,2}}
 end
 
 # TODO: Add contructor according to batched format
 function TriMesh(
     vertices::AbstractArray{<:Number,2},
     faces::AbstractArray{<:Number,2};
-    offset::Number = -1,
+    offset::Integer = -1,
 )
     vertices = Float32.(vertices)
     faces = UInt32.(faces)
     offset = Int8(offset)
-    return TriMesh(vertices, faces, offset, nothing, nothing)
+    return TriMesh(vertices, faces, offset, nothing, nothing, nothing, nothing)
 end
 
 TriMesh(m::GeometryBasics.Mesh) = TriMesh(_load_meta(m::GeometryBasics.Mesh)...)
 
 # covert TriMesh to GeometryBasics Mesh
 function GBMesh(m::TriMesh)
-    points =  Point3f0[GeometryBasics.Point{3, Float32}(m.vertices[i,:]) for i = 1:size(m.vertices,1)]
-    vert_len = size(m.faces,2)
-    poly_face = NgonFace{vert_len, UInt32}[NgonFace{vert_len, UInt32}(m.faces[i,:]) for i = 1:size(m.faces,1)]
+    points = Point3f0[
+        GeometryBasics.Point{3,Float32}(m.vertices[i, :]) for i = 1:size(m.vertices, 1)
+    ]
+    vert_len = size(m.faces, 2)
+    poly_face = NgonFace{vert_len,UInt32}[
+        NgonFace{vert_len,UInt32}(m.faces[i, :]) for i = 1:size(m.faces, 1)
+    ]
     # faces = convert_simplex.(GLTriangleFace, poly_face)
     faces = GLTriangleFace.(poly_face)
     return Mesh(meta(points), faces)
 end
 
 function _load_meta(m::GeometryBasics.Mesh)
-    if !(m isa GeometryBasics.Mesh{3, Float32, <:GeometryBasics.Triangle})
+    if !(m isa GeometryBasics.Mesh{3,Float32,<:GeometryBasics.Triangle})
         m = triangle_mesh(m)
     end
     vs = m.position
@@ -82,7 +97,7 @@ function compute_vertex_normals(m::TriMesh)
         vert_faces[:, 2, :] - vert_faces[:, 3, :],
     )
 
-   return  _normalize(copy(vertex_normals), dims = 2)
+    return _normalize(copy(vertex_normals), dims = 2)
 end
 
 function compute_face_normals(m::TriMesh)
@@ -101,7 +116,7 @@ function compute_face_areas(m::TriMesh; compute_normals::Bool = true, eps::Numbe
         vert_faces[:, 3, :] - vert_faces[:, 1, :],
     )
     face_norm = sqrt.(sum(face_normals_vec .^ 2, dims = 2))
-    face_areas = dropdims(face_norm ./ 2; dims=2)
+    face_areas = dropdims(face_norm ./ 2; dims = 2)
     if compute_normals
         face_normals = face_normals_vec ./ max.(face_norm, eps)
     else
@@ -146,34 +161,88 @@ function _rand_barycentric_coords(num_samples::Int)
     return (w1, w2, w3)
 end
 
-function get_edges(m::TriMesh, refresh::Bool=false)
+function get_edges(m::TriMesh, refresh::Bool = false)
     _compute_edges(m, refresh)
     return m.edges
 end
 
-function get_laplacian_sparse(m::TriMesh, refresh::Bool=false)
+function get_edges_to_key(m::TriMesh, refresh::Bool = false)
+    _compute_edges(m, refresh)
+    return m.edges_to_key
+end
+
+function get_faces_to_edges(m::TriMesh, refresh::Bool = false)
+    _compute_edges(m, refresh)
+    return m.faces_to_edges
+end
+
+function get_laplacian_sparse(m::TriMesh, refresh::Bool = false)
     _compute_laplacian_sparse(m, refresh)
     return m.laplacian_sparse
 end
 
-function _compute_edges(m::TriMesh, refresh::Bool=false)
+function _compute_edges(m::TriMesh, refresh::Bool = false)
     if refresh || (m.edges isa Nothing)
         e12 = cat(m.faces[:, 1], m.faces[:, 2], dims = 2)
         e23 = cat(m.faces[:, 2], m.faces[:, 3], dims = 2)
         e31 = cat(m.faces[:, 3], m.faces[:, 1], dims = 2)
 
+        # Sort edges (v0, v1) such that v0 <= v1
+        e12 = sort(e12; dims = 2)
+        e23 = sort(e23; dims = 2)
+        e31 = sort(e31; dims = 2)
+
         # Edges including duplicates
         edges = cat(e12, e23, e31, dims = 1)
 
-        # Sort edges (v0, v1) such that v0 <= v1
-        edges = sort(edges, dims = 2)
-        # Remove duplicate edges
-        edges = unique(edges, dims = 1)
+        # Converting edge (v0, v1) into integer hash, ie. (V+1)*v0 + v1.
+        # There will be no collision, which is asserted by (V+1), as 1<=v0<=V.
+        V_hash = size(m.vertices, 1) + 1
+        edges_hash = (V_hash .* edges[:, 1]) .+ edges[:, 2]
+
+        # Sort and remove duplicate edges_hash
+        sort!(edges_hash)
+        unique!(edges_hash)
+
+        # Convert edges_hash to edges
+        edges = cat((edges_hash .÷ V_hash), (edges_hash .% V_hash); dims = 2)
+
+        # Edges to key
+        edges_to_key = Dict{Tuple{UInt32,UInt32},UInt32}([
+            (Tuple(edges[i, :]), i) for i = 1:size(edges, 1)
+        ])
+
+        # e12 -> tuple -> get
+        e12_tup = [Tuple(e12[i, :]) for i = 1:size(e12, 1)]
+        e23_tup = [Tuple(e23[i, :]) for i = 1:size(e23, 1)]
+        e31_tup = [Tuple(e31[i, :]) for i = 1:size(e31, 1)]
+        faces_to_edges_tuple = cat(e23_tup, e31_tup, e12_tup; dims = 2)
+
+        faces_to_edges = map(x -> get(edges_to_key, x, -1), faces_to_edges_tuple)
+
         m.edges = edges
+        m.edges_to_key = edges_to_key
+        m.faces_to_edges = faces_to_edges
     end
 end
 
-function _compute_laplacian_sparse(m::TriMesh, refresh::Bool=false)
+function _old_compute_edges(m::TriMesh)
+    e12 = cat(m.faces[:, 1], m.faces[:, 2], dims = 2)
+    e23 = cat(m.faces[:, 2], m.faces[:, 3], dims = 2)
+    e31 = cat(m.faces[:, 3], m.faces[:, 1], dims = 2)
+
+    # Edges including duplicates
+    edges = cat(e12, e23, e31, dims = 1)
+
+    # Sort edges (v0, v1) such that v0 <= v1
+    edges = sort(edges, dims = 2)
+
+    # Remove duplicate edges
+    edges = unique(edges; dims = 1)
+    return edges
+end
+
+function _compute_laplacian_sparse(m::TriMesh, refresh::Bool = false)
     if refresh || (m.laplacian_sparse isa Nothing)
         edges = get_edges(m, refresh)
 
