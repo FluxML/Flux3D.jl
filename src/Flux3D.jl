@@ -27,6 +27,7 @@ include("rep/mesh.jl")
 # transforms
 include("transforms/utils.jl")
 include("transforms/pcloud_func.jl")
+include("transforms/mesh_func.jl")
 include("transforms/transforms.jl")
 
 # metrics

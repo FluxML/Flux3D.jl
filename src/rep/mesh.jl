@@ -4,13 +4,12 @@ export TriMesh,
     compute_face_normals,
     compute_face_normals,
     compute_face_areas,
-    sample_points,
     get_edges,
     get_laplacian_sparse,
     get_faces_to_edges,
     get_edges_to_key
 
-import GeometryBasics, Distributions
+import GeometryBasics
 import GeometryBasics:
     Point3f0, GLTriangleFace, NgonFace, convert_simplex, Mesh, meta, triangle_mesh
 
@@ -123,42 +122,6 @@ function compute_face_areas(m::TriMesh; compute_normals::Bool = true, eps::Numbe
         face_normals = nothing
     end
     return (face_areas, face_normals)
-end
-
-function sample_points(
-    m::TriMesh,
-    num_samples::Int = 5000;
-    returns_normals::Bool = false,
-    eps::Number = 1e-6,
-)
-    face_areas, face_normals = compute_face_areas(m; compute_normals = returns_normals)
-    face_areas_prob = Float64.(face_areas) ./ sum(Float64.(face_areas))
-    # face_areas_prob = face_areas ./ sum(face_areas)
-    # face_areas_prob = face_areas ./ max(sum(face_areas), eps)
-    dist = Distributions.Categorical(face_areas_prob)
-    sample_faces_idx = my_rand(dist, num_samples)
-    sample_faces_idx = Zygote.nograd(sample_faces_idx)
-    sample_faces = m.faces[sample_faces_idx, :]
-    v1 = m.vertices[sample_faces[:, 1], :]
-    v2 = m.vertices[sample_faces[:, 2], :]
-    v3 = m.vertices[sample_faces[:, 3], :]
-    (w1, w2, w3) = _rand_barycentric_coords(num_samples)
-    samples = (w1 .* v1) + (w2 .* v2) + (w3 .* v3)
-
-    if returns_normals
-        samples_normals = face_normals[sample_faces_idx, :]
-        return (samples, samples_normals)
-    end
-    return samples
-end
-
-function _rand_barycentric_coords(num_samples::Int)
-    u = sqrt.(my_rand(Float32, num_samples))
-    v = my_rand(Float32, num_samples)
-    w1 = 1.0f0 .- u
-    w2 = u .* (1.0f0 .- v)
-    w3 = u .* v
-    return (w1, w2, w3)
 end
 
 function get_edges(m::TriMesh, refresh::Bool = false)
