@@ -142,7 +142,7 @@ rotate(pcloud::PointCloud, rotmat::AbstractArray{Number,2}) = rotate(pcloud, Flo
     realign!(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
 Re-Align the PointCloud `src` with the axis aligned bounding box of PointCloud `tgt`
-and overwrite `pcloud` with rotated PointCloud.
+and overwrite `pcloud` with re-aligned PointCloud.
 
 PointCloud `src` and `tgt` should be of same dimension.
 
@@ -175,7 +175,7 @@ end
 
 """
     realign(src::PointCloud, tgt::PointCloud)
-    realign!(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
+    realign(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
 Re-Align the PointCloud `src` with the axis aligned bounding box of PointCloud `tgt`.
 
