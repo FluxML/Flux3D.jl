@@ -1,9 +1,10 @@
 export chamfer_distance
 
+#TODO: add method for 3d points
 function chamfer_distance(A::AbstractArray{<:Number, 2}, B::AbstractArray{<:Number, 2}; w1::Number=1.0, w2::Number=1.0)
     nn_for_A, nn_for_B = _nearest_neighbors(A, B)
-    dist_to_B = sum(nn_for_A)
-    dist_to_A = sum(nn_for_B)
+    dist_to_B = mean(nn_for_A)
+    dist_to_A = mean(nn_for_B)
 
     distance = (Float32(w1)*dist_to_B) + (Float32(w2)*dist_to_A)
     return distance

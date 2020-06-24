@@ -25,14 +25,25 @@ function visualize(v::PointCloud, index::Number=1; kwargs...)
                                  kwargs...)
 end
 
-function visualize(m::TriMesh; kwargs...)
-    gb_m = GBMesh(m)
+"""
+    visualize(m::TriMesh, index::Int=1; kwargs...)
+    visualize(verts, faces; kwargs...) 
+
+Visualize mesh at `index` in TriMesh `m`.
+
+### Optional Arguments:
+"""
+
+function visualize(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}; kwargs...) where{T,R}
+    gbmesh = GBMesh(verts, faces)
 
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :red)
 
-    AbstractPlotting.mesh(normal_mesh(gb_m); kwargs...)
+    AbstractPlotting.mesh(normal_mesh(gbmesh); kwargs...)
 end
+
+visualize(m::TriMesh, index::Int=1; kwargs...) = visualize(m[index]...; kwargs...)
 
 visualize(v::Dataset.AbstractDataPoint; kwargs...) =
     visualize(v.data; kwargs...)

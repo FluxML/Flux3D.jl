@@ -1,55 +1,132 @@
-export TriMesh,
-    load_trimesh,
-    compute_vertex_normals,
-    compute_face_normals,
-    compute_face_normals,
-    compute_face_areas,
-    get_edges,
-    get_laplacian_sparse,
-    get_faces_to_edges,
-    get_edges_to_key
+export TriMesh, GBMesh, gbmeshes, load_trimesh, get_verts_list, get_verts_packed, get_verts_padded,
+       get_faces_list, get_faces_packed, get_faces_padded, get_edges_packed, get_edges_to_key, 
+       get_faces_to_edges_packed, get_laplacian_packed, get_laplacian_sparse,
+       compute_verts_normals_list, compute_verts_normals_packed, compute_verts_normals_padded,
+       compute_faces_normals_list, compute_faces_normals_packed, compute_faces_normals_padded,
+       compute_faces_areas_list, compute_faces_areas_packed, compute_faces_areas_padded
+
 
 import GeometryBasics
 import GeometryBasics:
-    Point3f0, GLTriangleFace, NgonFace, convert_simplex, Mesh, meta, triangle_mesh
+    Point3f0, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh
 
-# TODO: add texture fields
-mutable struct TriMesh{T<:Float32,R<:UInt32} <: AbstractMesh
-    vertices::AbstractArray{T,2}
-    faces::AbstractArray{R,2}
+"""
+    TriMesh
+
+Initialize Triangle Mesh representation.
+
+### Fields:
+
+- `N`                       - Batch size of TriMesh. 
+- `V`                       - Maximum vertices per mesh in TriMesh.
+- `F`                       - Maximum faces per mesh in TriMesh.
+- `equalised`               - Bool, indicates all mesh have same verts and faces size.
+- `valid`                   - 
+- `offset`                  - Offset indicating number to be added to migrate to 0-indexed system.
+
+- `_verts_len`              - Number of vertices in each mesh of TriMesh.
+- `_verts_list`             - Vertices in list format.
+- `_verts_packed`           - Vertices in packed format.
+- `_verts_padded`           - Vertices in padded format.
+
+- `_faces_len`              - Number of faces in each mesh of TriMesh.
+- `_faces_list`             - Vertices in list format.
+- `_faces_packed`           - Vertices in packed format.
+- `_faces_padded`           - Vertices in padded format.
+
+- `_edges_packed`           - Edges in packed format (according to packed vertices).      
+- `_faces_to_edges_packed`  - Faces formed by edges in packed format (according to packed edges).
+- `_laplacian_packed`       - Laplacian sparce matrix in packed format.
+- `_edges_to_key`           - Dict mapping edges tuple to unique key.
+
+### Available Contructor:
+
+- `TriMesh(verts_list, faces_list; offset::Number = -1)`
+- `TriMesh(m::Vector{<:GeometryBasics.Mesh})`
+- `TriMesh(m::GeometryBasics.Mesh)`
+
+"""
+mutable struct TriMesh{T,R} <: AbstractMesh{T,R}
+    N::Int64
+    V::Int64
+    F::Int64
+    equalised::Bool
+    valid::AbstractArray{Bool, 1}
     offset::Int8
-    edges::Union{Nothing,AbstractArray{UInt32,2}}
-    laplacian_sparse::Union{Nothing,AbstractSparseMatrix{Float32,UInt32}}
-    edges_to_key::Union{Nothing,Dict{Tuple{UInt32,UInt32},UInt32}}
-    faces_to_edges::Union{Nothing,AbstractArray{UInt32,2}}
+    _verts_len::AbstractArray{Int,1}
+    _faces_len::AbstractArray{Int,1}
+
+    _verts_packed::Union{Nothing, AbstractArray{T,2}}
+    _verts_padded::Union{Nothing, AbstractArray{T,3}}
+    _verts_list::Union{Nothing, AbstractArray{<:AbstractArray{T,2},1}}
+
+    _faces_packed::Union{Nothing, AbstractArray{R,2}}
+    _faces_padded::Union{Nothing, AbstractArray{R,3}}
+    _faces_list::Union{Nothing, AbstractArray{<:AbstractArray{R,2},1}}
+
+    _edges_packed::Union{Nothing, AbstractArray{R,2}}
+    _faces_to_edges_packed::Union{Nothing, AbstractArray{R,2}}
+    _laplacian_packed::Union{Nothing,AbstractSparseMatrix{T,R}}
+
+    _edges_to_key::Union{Nothing,Dict{Tuple{R,R},R}}
 end
 
-# TODO: Add contructor according to batched format
 function TriMesh(
-    vertices::AbstractArray{<:Number,2},
-    faces::AbstractArray{<:Number,2};
-    offset::Integer = -1,
-)
-    vertices = Float32.(vertices)
-    faces = UInt32.(faces)
+    verts::AbstractArray{<:AbstractArray{T,2},1},
+    faces::AbstractArray{<:AbstractArray{R,2},1};
+    offset::Number = -1
+)   where {T,R}
+
+    length(verts) == length(faces) || error("batch size of verts and faces should match, $(length(verts)) != $(length(faces))")
+    _verts_len = size.(verts, 1)
+    _faces_len = size.(faces, 1)
+    N = length(verts)
+    V = maximum(_verts_len)
+    F = maximum(_faces_len)
+    equalised = all(_verts_len .== V) && all(_faces_len .== F)
+    valid = _faces_len .> 0
     offset = Int8(offset)
-    return TriMesh(vertices, faces, offset, nothing, nothing, nothing, nothing)
+
+    _verts_list = verts
+    _faces_list = faces
+
+    return TriMesh(N,V,F,equalised,valid,offset,_verts_len,_faces_len,
+                   nothing, nothing,_verts_list, nothing, nothing,_faces_list,
+                   nothing, nothing, nothing, nothing)
 end
 
-TriMesh(m::GeometryBasics.Mesh) = TriMesh(_load_meta(m::GeometryBasics.Mesh)...)
+function TriMesh(ms::Vector{<:GeometryBasics.Mesh})
+    verts_list = []
+    faces_list = []
+    for (i,m) = enumerate(ms)
+        (verts, faces) = _load_meta(m)
+        push!(verts_list, verts)
+        push!(faces_list, faces)
+    end
+    return TriMesh([verts_list], [faces_list])
+end
 
-# covert TriMesh to GeometryBasics Mesh
-function GBMesh(m::TriMesh)
+TriMesh(m::GeometryBasics.Mesh) = TriMesh([m])
+
+# converts (verts, faces) to GeometryBasics Mesh
+function GBMesh(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}) where {T,R}
     points = Point3f0[
-        GeometryBasics.Point{3,Float32}(m.vertices[i, :]) for i = 1:size(m.vertices, 1)
+        GeometryBasics.Point{3,Float32}(verts[i, :]) for i = 1:size(verts, 1)
     ]
-    vert_len = size(m.faces, 2)
-    poly_face = NgonFace{vert_len,UInt32}[
-        NgonFace{vert_len,UInt32}(m.faces[i, :]) for i = 1:size(m.faces, 1)
+    verts_dim = size(faces, 2)
+    poly_face = NgonFace{verts_dim,UInt32}[
+        NgonFace{verts_dim,UInt32}(faces[i, :]) for i = 1:size(faces, 1)
     ]
     # faces = convert_simplex.(GLTriangleFace, poly_face)
     faces = GLTriangleFace.(poly_face)
-    return Mesh(meta(points), faces)
+    return GeometryBasics.Mesh(meta(points), faces)
+end
+
+GBMesh(m::TriMesh; index::Int = 1) = GBMesh(m[index]...)
+
+function gbmeshes(m::TriMesh)
+    gbmeshes = [ GBMesh(m; index=i) for i in 1:m.N ]
+    return gbmeshes
 end
 
 function _load_meta(m::GeometryBasics.Mesh)
@@ -65,33 +142,120 @@ function _load_meta(m::GeometryBasics.Mesh)
     return (vertices, faces)
 end
 
-_get_offset(x::GeometryBasics.OffsetInteger{o,T}) where {o,T} = o
 
-function load_trimesh(fn; elements_types...)
+function load_trimesh(fn::File{format}; elements_types...) where {format}
     mesh = load(fn; elements_types...)
-    vertices, faces = _load_meta(mesh)
+    verts, faces = _load_meta(mesh)
     # # offset = _get_offset(x)   #offset is always -1 when loaded from MeshIO
-    return TriMesh(vertices, faces)
+    return TriMesh([verts], [faces])
 end
 
-# TODO: extend save function for obj file (as it is not implemented yet) and use that function here
-function save_trimesh(file_name, mesh::TriMesh)
-    error("Not implemented")
+function load_trimesh(fns::Vector{<:File{format}}; elements_types...) where {format}
+    verts_list = []
+    faces_list = []
+    for (i,fn) in enumerate(fns)
+        mesh = load(fn; elements_types...)
+        verts, faces = _load_meta(mesh)
+        push!(verts_list, verts)
+        push!(faces_list, faces)
+    end
+    return TriMesh([verts_list], [faces_list])
 end
 
-function compute_vertex_normals(m::TriMesh)
-    vert_faces = m.vertices[m.faces, :]
-    vertex_normals = Zygote.bufferfrom(zeros(Float32, size(m.vertices)...))
+# # TODO: extend save function for obj file (as it is not implemented yet) and use that function here
+# function save_trimesh(file_name, mesh::TriMesh)
+#     error("Not implemented")
+# end
 
-    vertex_normals[m.faces[:, 1], :] += _lg_cross(
+function Base.setproperty!(m::TriMesh, f::Symbol, v)
+    if (f==:_verts_packed) || (f==:_verts_padded) || (f==:_verts_list)
+        if (f == :_verts_packed) && (getproperty(m,f) !== v)
+            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+            setfield!(m, :verts_padded, nothing)
+            _compute_verts_list(m, true)
+        elseif (f == :_verts_padded) && (getproperty(m,f) !== v)
+            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+            setfield!(m, :verts_packed, nothing)
+            _compute_verts_list(m, true)
+        elseif (f == :_verts_list) && (getproperty(m,f) !== v)
+            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+            setfield!(m, :verts_packed, nothing)
+            setfield!(m, :verts_padded, nothing)
+        end
+    else
+        setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+    end
+end
+
+Base.getindex(m::TriMesh, inds...) = (m._verts_list[inds...], m._faces_list[inds...])
+
+function get_verts_packed(m::TriMesh; refresh::Bool = false)
+    _compute_verts_packed(m, refresh)
+    return m._verts_packed
+end
+
+function get_verts_padded(m::TriMesh; refresh::Bool = false)
+    _compute_verts_padded(m, refresh)
+    return m._verts_padded
+end
+
+function get_verts_list(m::TriMesh; refresh::Bool = false)
+    return m._verts_list
+end
+
+function get_faces_packed(m::TriMesh; refresh::Bool = false)
+    _compute_faces_packed(m, refresh)
+    return m._faces_packed
+end
+
+function get_faces_padded(m::TriMesh; refresh::Bool = false)
+    _compute_faces_padded(m, refresh)
+    return m._faces_padded
+end
+
+function get_faces_list(m::TriMesh; refresh::Bool = false)
+    return m._faces_list
+end
+
+function get_edges_packed(m::TriMesh; refresh::Bool = false)
+    _compute_edges_packed(m, refresh)
+    return m._edges_packed
+end
+
+function get_edges_to_key(m::TriMesh; refresh::Bool = false)
+    _compute_edges_packed(m, refresh)
+    return m._edges_to_key
+end
+
+function get_faces_to_edges_packed(m::TriMesh; refresh::Bool = false)
+    _compute_edges_packed(m, refresh)
+    return m._faces_to_edges_packed
+end
+
+function get_laplacian_packed(m::TriMesh; refresh::Bool = false)
+    _compute_laplacian_packed(m, refresh)
+    return m._laplacian_packed
+end
+
+get_laplacian_sparse(m::TriMesh; refresh::Bool = false) = get_laplacian_packed(m; refresh=refresh)
+
+function compute_verts_normals_packed(m::TriMesh)
+
+    verts = get_verts_packed(m)
+    faces = get_faces_packed(m)
+
+    vert_faces = verts[faces, :]
+    vertex_normals = Zygote.bufferfrom(zeros(Float32, size(verts)...))
+
+    vertex_normals[faces[:, 1], :] += _lg_cross(
         vert_faces[:, 2, :] - vert_faces[:, 1, :],
         vert_faces[:, 3, :] - vert_faces[:, 1, :],
     )
-    vertex_normals[m.faces[:, 2], :] += _lg_cross(
+    vertex_normals[faces[:, 2], :] += _lg_cross(
         vert_faces[:, 3, :] - vert_faces[:, 2, :],
         vert_faces[:, 1, :] - vert_faces[:, 2, :],
     )
-    vertex_normals[m.faces[:, 3], :] += _lg_cross(
+    vertex_normals[faces[:, 3], :] += _lg_cross(
         vert_faces[:, 1, :] - vert_faces[:, 3, :],
         vert_faces[:, 2, :] - vert_faces[:, 3, :],
     )
@@ -99,8 +263,23 @@ function compute_vertex_normals(m::TriMesh)
     return _normalize(copy(vertex_normals), dims = 2)
 end
 
-function compute_face_normals(m::TriMesh)
-    vert_faces = m.vertices[m.faces, :]
+function compute_verts_normals_padded(m::TriMesh)
+    normals_packed = compute_verts_normals_packed(m)
+    normals_padded = _packed_to_padded(normals_packed, m._verts_len, 0.0)
+    return normals_padded
+end
+
+function compute_verts_normals_list(m::TriMesh)
+    normals_packed = compute_verts_normals_packed(m)
+    normals_list = _packed_to_list(normals_packed, m._verts_len)
+    return normals_list
+end
+
+function compute_faces_normals_packed(m::TriMesh)
+    verts = get_verts_packed(m)
+    faces = get_faces_packed(m)
+
+    vert_faces = verts[faces, :]
     face_normals = _lg_cross(
         vert_faces[:, 2, :] - vert_faces[:, 1, :],
         vert_faces[:, 3, :] - vert_faces[:, 1, :],
@@ -108,8 +287,23 @@ function compute_face_normals(m::TriMesh)
     return _normalize(face_normals, dims = 2)
 end
 
-function compute_face_areas(m::TriMesh; compute_normals::Bool = true, eps::Number = 1e-6)
-    vert_faces = m.vertices[m.faces, :]
+function compute_faces_normals_padded(m::TriMesh)
+    normals_packed = compute_faces_normals_packed(m)
+    normals_padded = _packed_to_padded(normals_packed, m._faces_len, 0.0)
+    return normals_padded
+end
+
+function compute_faces_normals_list(m::TriMesh)
+    normals_packed = compute_faces_normals_packed(m)
+    normals_list = _packed_to_list(normals_packed, m._faces_len)
+    return normals_list
+end
+
+function compute_faces_areas_packed(m::TriMesh; compute_normals::Bool = true, eps::Number = 1e-6)
+    verts = get_verts_packed(m)
+    faces = get_faces_packed(m)
+
+    vert_faces = verts[faces, :]
     face_normals_vec = _lg_cross(
         vert_faces[:, 2, :] - vert_faces[:, 1, :],
         vert_faces[:, 3, :] - vert_faces[:, 1, :],
@@ -124,31 +318,86 @@ function compute_face_areas(m::TriMesh; compute_normals::Bool = true, eps::Numbe
     return (face_areas, face_normals)
 end
 
-function get_edges(m::TriMesh, refresh::Bool = false)
-    _compute_edges(m, refresh)
-    return m.edges
+function compute_faces_areas_padded(m::TriMesh; compute_normals::Bool = true, eps::Number = 1e-6)
+    if compute_normals
+        areas_packed, normals_packed = compute_faces_areas_packed(m; compute_normals=compute_normals, eps=eps)
+        areas_padded = _packed_to_padded(areas_packed, m._faces_len, 0.0)
+        normals_padded = _packed_to_padded(normals_packed, m._faces_len, 0.0)
+        return (areas_padded, normals_padded)
+    else
+        areas_packed = compute_faces_areas_packed(m; compute_normals=compute_normals, eps=eps)
+        areas_padded = _packed_to_padded(areas_packed, m._faces_len, 0.0)
+        return areas_padded
+    end
 end
 
-function get_edges_to_key(m::TriMesh, refresh::Bool = false)
-    _compute_edges(m, refresh)
-    return m.edges_to_key
+function compute_faces_areas_list(m::TriMesh; compute_normals::Bool = true, eps::Number = 1e-6)
+    if compute_normals
+        areas_packed, normals_packed = compute_faces_areas_packed(m; compute_normals=compute_normals, eps=eps)
+        areas_list = _packed_to_list(areas_packed, m._faces_len)
+        normals_list = _packed_to_list(normals_packed, m._faces_len)
+        return (areas_list, normals_list)
+    else
+        areas_packed = compute_faces_areas_packed(m; compute_normals=compute_normals, eps=eps)
+        areas_list = _packed_to_list(areas_packed, m._faces_len)
+        return areas_list
+    end
 end
 
-function get_faces_to_edges(m::TriMesh, refresh::Bool = false)
-    _compute_edges(m, refresh)
-    return m.faces_to_edges
+function _compute_verts_packed(m::TriMesh, refresh::Bool = false)
+    if refresh || (m._verts_packed isa Nothing)
+        verts_packed = _list_to_packed(m._verts_list)
+        setfield!(m, :_verts_packed, verts_packed)
+    end
 end
 
-function get_laplacian_sparse(m::TriMesh, refresh::Bool = false)
-    _compute_laplacian_sparse(m, refresh)
-    return m.laplacian_sparse
+function _compute_verts_padded(m::TriMesh, refresh::Bool = false)
+    if refresh || (m._verts_padded isa Nothing)
+        verts_padded = _list_to_padded(m._verts_list, 0, (m.V, 3))
+        setfield!(m, :_verts_padded, verts_padded)
+    end
 end
 
-function _compute_edges(m::TriMesh, refresh::Bool = false)
-    if refresh || (m.edges isa Nothing)
-        e12 = cat(m.faces[:, 1], m.faces[:, 2], dims = 2)
-        e23 = cat(m.faces[:, 2], m.faces[:, 3], dims = 2)
-        e31 = cat(m.faces[:, 3], m.faces[:, 1], dims = 2)
+function _compute_verts_list(m::TriMesh, refresh::Bool = false)
+    if refresh || (m._verts_list isa Nothing)
+        if m._verts_packed !== nothing
+            verts_list = _packed_to_list(m._verts_packed, m._verts_len)
+        elseif m._verts_padded !== nothing
+            verts_list = _padded_to_list(m._verts_padded, m._verts_len)
+        else
+            error("not possible to contruct list without padded and packed")
+        end
+        setfield!(m, :_verts_list, verts_list)
+    end
+end
+
+function _compute_faces_packed(m::TriMesh, refresh::Bool = false)
+    if refresh || (m._faces_packed isa Nothing)
+        faces_packed = _list_to_packed(m._faces_list)
+        _,verts_packed_first_idx,_ = _auxiliary_mesh(m._verts_list)
+        _,_,faces_packed_list_idx = _auxiliary_mesh(m._faces_list)
+        faces_packed_offset = verts_packed_first_idx[faces_packed_list_idx] .- 1
+        faces_packed = faces_packed .+ faces_packed_offset
+        setfield!(m, :_faces_packed, faces_packed)
+    end
+end
+
+function _compute_faces_padded(m::TriMesh, refresh::Bool = false)
+    if refresh || (m._faces_padded isa Nothing)
+        faces_padded = _list_to_padded(m._faces_list, 0, (m.F, 3))
+        setfield!(m, :_faces_padded, faces_padded)
+    end
+end
+
+function _compute_edges_packed(m::TriMesh, refresh::Bool = false)
+    if refresh || (any([m._edges_packed, m._edges_to_key, m._faces_to_edges_packed] .=== nothing))
+
+        faces = get_faces_packed(m)
+        verts = get_verts_packed(m)
+
+        e12 = cat(faces[:, 1], faces[:, 2], dims = 2)
+        e23 = cat(faces[:, 2], faces[:, 3], dims = 2)
+        e31 = cat(faces[:, 3], faces[:, 1], dims = 2)
 
         # Sort edges (v0, v1) such that v0 <= v1
         e12 = sort(e12; dims = 2)
@@ -160,7 +409,7 @@ function _compute_edges(m::TriMesh, refresh::Bool = false)
 
         # Converting edge (v0, v1) into integer hash, ie. (V+1)*v0 + v1.
         # There will be no collision, which is asserted by (V+1), as 1<=v0<=V.
-        V_hash = size(m.vertices, 1) + 1
+        V_hash = size(verts, 1) + 1
         edges_hash = (V_hash .* edges[:, 1]) .+ edges[:, 2]
 
         # Sort and remove duplicate edges_hash
@@ -183,31 +432,16 @@ function _compute_edges(m::TriMesh, refresh::Bool = false)
 
         faces_to_edges = map(x -> get(edges_to_key, x, -1), faces_to_edges_tuple)
 
-        m.edges = edges
-        m.edges_to_key = edges_to_key
-        m.faces_to_edges = faces_to_edges
+        m._edges_packed = edges
+        m._edges_to_key = edges_to_key
+        m._faces_to_edges_packed = faces_to_edges
     end
 end
 
-function _old_compute_edges(m::TriMesh)
-    e12 = cat(m.faces[:, 1], m.faces[:, 2], dims = 2)
-    e23 = cat(m.faces[:, 2], m.faces[:, 3], dims = 2)
-    e31 = cat(m.faces[:, 3], m.faces[:, 1], dims = 2)
-
-    # Edges including duplicates
-    edges = cat(e12, e23, e31, dims = 1)
-
-    # Sort edges (v0, v1) such that v0 <= v1
-    edges = sort(edges, dims = 2)
-
-    # Remove duplicate edges
-    edges = unique(edges; dims = 1)
-    return edges
-end
-
-function _compute_laplacian_sparse(m::TriMesh, refresh::Bool = false)
-    if refresh || (m.laplacian_sparse isa Nothing)
-        edges = get_edges(m, refresh)
+function _compute_laplacian_packed(m::TriMesh, refresh::Bool = false)
+    if refresh || (m._laplacian_packed isa Nothing)
+        verts = get_verts_packed(m)
+        edges = get_edges_packed(m)
 
         e1 = edges[:, 1]
         e2 = edges[:, 2]
@@ -220,19 +454,19 @@ function _compute_laplacian_sparse(m::TriMesh, refresh::Bool = false)
             idx[:, 1],
             idx[:, 2],
             ones(Float32, size(idx, 1)),
-            size(m.vertices, 1),
-            size(m.vertices, 1),
+            size(verts, 1),
+            size(verts, 1),
         )
 
         deg = Array{Float32}(sum(A, dims = 2))  # TODO: will be problematic for GPU
 
         deg1 = map(x -> (x > 0 ? 1 / x : x), deg[e1])
         deg2 = map(x -> (x > 0 ? 1 / x : x), deg[e2])
-        diag = fill(-1.0f0, size(m.vertices, 1))
+        diag = fill(-1.0f0, size(verts, 1))
 
-        Is = cat(e1, e2, UInt32.(1:size(m.vertices, 1)); dims = 1)
-        Js = cat(e2, e1, UInt32.(1:size(m.vertices, 1)); dims = 1)
+        Is = cat(e1, e2, UInt32.(1:size(verts, 1)); dims = 1)
+        Js = cat(e2, e1, UInt32.(1:size(verts, 1)); dims = 1)
         Vs = cat(deg1, deg2, diag; dims = 1)
-        m.laplacian_sparse = sparse(Is, Js, Vs, size(m.vertices, 1), size(m.vertices, 1))
+        m._laplacian_packed = sparse(Is, Js, Vs, size(verts, 1), size(verts, 1))
     end
 end

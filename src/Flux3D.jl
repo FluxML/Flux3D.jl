@@ -23,7 +23,6 @@ end
 include("rep/utils.jl")
 include("rep/pcloud.jl")
 include("rep/mesh.jl")
-include("rep/mesh2.jl")
 
 # transforms
 include("transforms/utils.jl")

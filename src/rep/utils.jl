@@ -30,6 +30,8 @@ _normalize(A::AbstractArray; eps::Number = 1e-6, dims::Int = 2) =
 
 _norm(A::AbstractArray; dims::Int = 2) = sqrt.(sum(A .^ 2; dims = dims))
 
+_get_offset(x::GeometryBasics.OffsetInteger{o,T}) where {o,T} = o
+
 function _auxiliary_mesh(
     list::AbstractArray{<:AbstractArray{T, 2},1}
 )   where {T<:Number}
