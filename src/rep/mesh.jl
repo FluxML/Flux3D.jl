@@ -6,7 +6,7 @@ export TriMesh, GBMesh, gbmeshes, load_trimesh, get_verts_list, get_verts_packed
        compute_faces_areas_list, compute_faces_areas_packed, compute_faces_areas_padded
 
 
-import GeometryBasics
+import GeometryBasics, Printf
 import GeometryBasics:
     Point3f0, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh
 
@@ -46,7 +46,7 @@ Initialize Triangle Mesh representation.
 - `TriMesh(m::GeometryBasics.Mesh)`
 
 """
-mutable struct TriMesh{T,R} <: AbstractMesh{T,R}
+mutable struct TriMesh{T<:AbstractFloat,R<:Integer} <: AbstractMesh{T,R}
     N::Int64
     V::Int64
     F::Int64
@@ -142,30 +142,57 @@ function _load_meta(m::GeometryBasics.Mesh)
     return (vertices, faces)
 end
 
-
-function load_trimesh(fn::File{format}; elements_types...) where {format}
+function load_trimesh(fn::String; elements_types...)
     mesh = load(fn; elements_types...)
     verts, faces = _load_meta(mesh)
     # # offset = _get_offset(x)   #offset is always -1 when loaded from MeshIO
     return TriMesh([verts], [faces])
 end
 
-function load_trimesh(fns::Vector{<:File{format}}; elements_types...) where {format}
-    verts_list = []
-    faces_list = []
+function load_trimesh(fns::Vector{String}; elements_types...)
+    verts_list = Vector{<:AbstractArray{<:AbstractFloat,2}}[]
+    faces_list = Vector{<:AbstractArray{<:Integer,2}}[]
     for (i,fn) in enumerate(fns)
         mesh = load(fn; elements_types...)
         verts, faces = _load_meta(mesh)
         push!(verts_list, verts)
         push!(faces_list, faces)
     end
-    return TriMesh([verts_list], [faces_list])
+    return TriMesh(verts_list, faces_list)
 end
 
-# # TODO: extend save function for obj file (as it is not implemented yet) and use that function here
-# function save_trimesh(file_name, mesh::TriMesh)
-#     error("Not implemented")
-# end
+save_trimesh(fn::String, mesh::TriMesh, index::Int=1) = 
+    save_trimesh(fn, mesh[index]...)
+
+function save_trimesh(fn::String, verts::AbstractArray{<:AbstractFloat,2}, faces::AbstractArray{<:Integer,2})
+    verts = Float32.(verts)
+    faces = UInt32.(faces)
+    mesh = GBMesh(verts, faces)
+    save(fn, mesh)
+end
+
+# MeshIO doesn't have support for saving obj file    
+function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
+    io = stream(str)
+    vts = GeometryBasics.coordinates(msh)
+    fcs = GeometryBasics.faces(msh)
+
+    # write header
+    write(io, "# Flux3D.jl v0.1.0 OBJ File: \n")
+    write(io, "# www.github.com/nirmal-suthar/Flux3D.jl \n")
+
+    # write vertices data
+    for v in vts
+        Printf.@printf(io, "v %.6f %.6f %.6f\n", v...)
+    end
+    
+    # write faces data
+    for f in fcs
+        Printf.@printf(io, "f %d %d %d\n", f...)
+    end
+
+    close(io)
+end
 
 function Base.setproperty!(m::TriMesh, f::Symbol, v)
     if (f==:_verts_packed) || (f==:_verts_padded) || (f==:_verts_list)

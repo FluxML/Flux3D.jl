@@ -1,6 +1,6 @@
 abstract type AbstractObject end
 abstract type AbstractCustomObject <: AbstractObject end
-abstract type AbstractMesh <: AbstractObject end
+abstract type AbstractMesh{T,R} <: AbstractObject end
 
 #TODO: Remove this once new tagged version of Zygote is out
 my_ignore(f) = f()
@@ -29,8 +29,6 @@ _normalize(A::AbstractArray; eps::Number = 1e-6, dims::Int = 2) =
     A ./ max.(sqrt.(sum(A .^ 2; dims = dims)), eps)
 
 _norm(A::AbstractArray; dims::Int = 2) = sqrt.(sum(A .^ 2; dims = dims))
-
-_get_offset(x::GeometryBasics.OffsetInteger{o,T}) where {o,T} = o
 
 function _auxiliary_mesh(
     list::AbstractArray{<:AbstractArray{T, 2},1}
