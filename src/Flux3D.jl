@@ -33,7 +33,9 @@ using .Dataset
 export CustomDataset, ModelNet10, ModelNet40
 
 # visualization
-include("visualize.jl")
+function __init__()
+    @require Makie="ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("visualize.jl")
+end
 
 # models
 include("models/utils.jl")
