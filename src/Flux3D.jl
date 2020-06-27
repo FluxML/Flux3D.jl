@@ -1,6 +1,6 @@
 module Flux3D
 
-using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays
+using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays, Requires
 using Base: tail
 using Zygote: @nograd
 import Flux: @functor, functor, gpu, cpu
