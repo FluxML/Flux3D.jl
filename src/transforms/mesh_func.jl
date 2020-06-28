@@ -20,37 +20,24 @@ julia> points, normals = sample_points(m, 5000; returns_normals=true)
 function sample_points(
     m::TriMesh{T,R},
     num_samples::Int = 5000;
-    returns_normals::Bool = false,
     eps::Number = EPS,
 )   where {T,R}
     verts_padded = get_verts_padded(m)
     faces_padded = get_faces_padded(m)
-    faces_areas_padded, faces_normals_padded = compute_faces_areas_padded(m; compute_normals = returns_normals)
-    
+    faces_areas_padded = compute_faces_areas_padded(m)
+
         #(Fi,B)
     #TODO: condition for probvec fails in Float32
     faces_areas_padded = Float64.(faces_areas_padded)
-    faces_areas_prob = faces_areas_padded ./ max.(sum(faces_areas_padded; dims=2), eps)
-    samples = Zygote.Buffer(T, num_samples, 3, m.N)
-    if returns_normals
-        samples_normals = Zygote.Buffer(T, num_samples, 3, m.N)
-    end
+    faces_areas_prob = faces_areas_padded ./ max.(sum(faces_areas_padded; dims=1), eps)
+    samples = Zygote.Buffer(verts_padded, num_samples, 3, m.N)
 
     for (i,_len) in enumerate(m._faces_len)
-        
-        dist = Distributions.Categorical(faces_areas_prob[1:_len, i])
-        sample_faces_idx = my_rand(dist, num_samples)
-        sample_faces_idx = Zygote.nograd(sample_faces_idx)
+        probvec = faces_areas_prob[1:_len,1,i]
+        dist = Distributions.Categorical(probvec)
+        sample_faces_idx = Zygote.@ignore my_rand(dist, num_samples)
         sample_faces = faces_padded[sample_faces_idx, :, i]
-        samples[:,:,i] = _sample_points(verts_padded[1:m._verts_len[i], 3, i], sample_faces, num_samples)
-        
-        if returns_normals
-            samples_normals[:,:,i] = faces_normals_padded[sample_faces_idx, :, i]
-        end
-    end
-
-    if returns_normals
-        return copy(samples), copy(samples_normals)
+        samples[:,:,i] = _sample_points(verts_padded[1:m._verts_len[i], :, i], sample_faces, num_samples)
     end
 
     return copy(samples)
@@ -98,7 +85,7 @@ function normalize!(m::TriMesh)
     verts_padded = get_verts_padded(m)
     centroid = mean(verts_padded; dims = 1)
     verts_padded = (verts_padded .- centroid) ./ (std(verts_padded, mean = centroid, dims = 1) .+ EPS)
-    m._verts_padded = _padded_to_packed(verts_padded, m._verts_len)
+    m._verts_packed = _padded_to_packed(verts_padded, m._verts_len)
     return m
 end
 
@@ -242,7 +229,7 @@ end
     realign!(src::TriMesh, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
 Re-Align the TriMesh `src` with the axis aligned bounding box of first mesh in TriMesh `tgt`
-and overwrite `src` with re-aligned TriMesh. 
+and overwrite `src` with re-aligned TriMesh.
 
 See also: [`realign`](@ref)
 
@@ -319,7 +306,7 @@ julia> translate!(m, [0.0, 0.0, 0.0])
 
 """
 translate!(m::TriMesh, vector::Float32) = translate(m, fill(vector, (3,)))
- 
+
 function translate!(m::TriMesh, vector::AbstractArray{Float32})
     (size(vector) == (3,)) || error("vector must be (3, ), but instead got $(size(vector)) array")
     verts_packed = get_verts_packed(m)

@@ -2,13 +2,11 @@ export laplacian_loss, edge_loss
 
 function laplacian_loss(m::TriMesh)
     # TODO: There will be some changes when migrating to batched format
-    L = my_ignore() do
-         get_laplacian_packed(m)
-    end
+    L = Zygote.@ignore get_laplacian_packed(m)
     verts = get_verts_packed(m)
     L = L * verts
     L = _norm(L; dims = 2)
-    return sum(L)
+    return mean(L)
 end
 
 function _edge_loss2(m::TriMesh, target_length::Number=0.0f0)
@@ -36,7 +34,7 @@ end
 function edge_loss(m::TriMesh, target_length::Number=0.0f0)
     #TODO: will change changing to batched format
     verts = get_verts_packed(m)
-    edges = Zygote.nograd(get_edges_packed(m))
+    edges = Zygote.@ignore get_edges_packed(m)
     v1 = verts[edges[:,1],:]
     v2 = verts[edges[:,2],:]
     el =  (_norm(v1-v2; dims=2) .- Float32(target_length)) .^ 2
@@ -47,7 +45,7 @@ end
 function chamfer_distance(m1::TriMesh, m2::TriMesh, num_samples::Int = 5000; w1::Number=1.0, w2::Number=1.0)
     A = sample_points(m1, num_samples)
     B = sample_points(m2, num_samples)
-    return chamfer_distance(A,B;w1=w1, w2=w2)
+    return _chamfer_distance(Float32.(A), Float32.(B), Float32(w1), Float32(w2))
 end
 
 function normal_consistency_loss(m::TriMesh)
