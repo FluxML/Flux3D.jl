@@ -1,71 +1,54 @@
-using Flux3D, Statistics, FileIO, Zygote
+using Flux3D, Statistics, FileIO, Zygote, Flux
 
-mkpath(joinpath(@__DIR__,"assets"))         
+mkpath(joinpath(@__DIR__,"assets"))
 mkpath(joinpath(@__DIR__,"img"))
 
-download("https://github.com/nirmalsuthar/public_files/raw/master/dolphin.obj", 
+download("https://github.com/nirmalsuthar/public_files/raw/master/dolphin.obj",
          joinpath(@__DIR__,"assets/dolphin.obj"))
-download("https://github.com/nirmalsuthar/public_files/raw/master/sphere.obj", 
+download("https://github.com/nirmalsuthar/public_files/raw/master/sphere.obj",
          joinpath(@__DIR__,"assets/sphere.obj"))
-         
-tgt = load_trimesh(joinpath(@__DIR__,"assets/dolphin.obj"))
+
+dolphin = load_trimesh(joinpath(@__DIR__,"assets/dolphin.obj"))
 src = load_trimesh(joinpath(@__DIR__,"assets/sphere.obj"))
 
-center = mean(tgt.vertices, dims=1)
-tgt.vertices = tgt.vertices .- center
-scale = maximum(abs.(tgt.vertices))
-tgt.vertices = tgt.vertices ./ scale
+tgt = deepcopy(dolphin)
+tgt = Flux3D.normalize!(tgt)
 
-save(joinpath(@__DIR__, "img", "target.png"), visualize(tgt))
-save(joinpath(@__DIR__, "img", "source.png"), visualize(src))
+save(joinpath(@__DIR__, "results", "target.png"), visualize(tgt))
+save(joinpath(@__DIR__, "results", "source.png"), visualize(src))
 
-function distChamfer(a,b)
-    x = Float32.(a)
-    y = Float32.(b)
-    xx = sum(x.^2, dims=2)
-    yy = sum(y.^2, dims=2)
-    zz = x * transpose(y)
-    rx = reshape(xx, 1,:)
-    ry = reshape(yy, 1,:)
-    P = (transpose(reshape(xx,1,:)) .+ reshape(yy,1,:)) .- (2 .* zz)
-    return minimum(P, dims=2), minimum(P, dims=1)
-end
-
-function chamfer_loss(src, tgt)
-    d1,d2 = distChamfer(src, tgt)
-    return sum(d1)
-end
-
-offset_mesh(m::TriMesh, a::Array) = TriMesh(m.vertices + a, m.faces)
 
 function loss_dolphin(x::Array, src::TriMesh, tgt::TriMesh)
-    src = offset_mesh(src, x)
-    sample_src = sample_points(src, 5000)
-    sample_tgt = sample_points(tgt, 5000)
-    loss1 = chamfer_loss(sample_src, sample_tgt)
+    src = Flux3D.offset(src, x)
+    loss1 = chamfer_distance(src, tgt, 5000)#; w1=1., w2=0.2)
     loss2 = laplacian_loss(src)
     loss3 = edge_loss(src)
-    return loss1 + (0.1*loss2) + (0.05*loss3)
+    return (loss1) + (0.1*loss2) + (loss3)
 end
 
-lr = 0.04
+lr = 1.0
+opt = Flux.Optimise.Momentum(lr, 0.9)
 
-function customtrain(off)
-    for itr in 1:50
-        gs = gradient(x->loss_dolphin(x, src, tgt), off)[1]
-        off = off - (lr .* gs)
-        if (itr%3 == 0)
-            save(joinpath(@__DIR__, "img","new_s_$(itr).png"), visualize(offset_mesh(src, off)))
+function customtrain(_offset)
+    θ = Zygote.Params([_offset])
+    for itr in 1:2
+        gs = gradient(θ) do
+            loss_dolphin(_offset, src, tgt)
+        end
+        Flux.update!(opt, _offset, gs[_offset])
+        if (itr%2 == 0)
+            save(joinpath(@__DIR__, "results", "src_$(itr).png"), visualize(Flux3D.offset(src, off)))
         end
     end
-    return off
+    return _offset
 end
 
 @info("Training...")
-off = zeros(Float32, size(src.vertices)...)
-off = customtrain(off)
+_offset = zeros(Float32, size(get_verts_packed(src))...)
+_offset = customtrain(_offset)
 
-src.vertices = ((src.vertices+off) .* scale) .+ center
-save(joinpath(@__DIR__, "img","final.png"), visualize(src))
+final_mesh = Flux3D.offset(src, _offset)
+final_mesh = Flux3D.realign!(final_mesh, dolphin)
 
-# TODO: Save final obj, when saving function is implemented
+save(joinpath(@__DIR__, "results", "final.png"), visualize(final_mesh))
+save_trimesh(joinpath(@__DIR__, "results", "final_mesh.obj"), final_mesh)
