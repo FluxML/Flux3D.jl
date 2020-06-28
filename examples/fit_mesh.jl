@@ -1,7 +1,7 @@
 using Flux3D, Statistics, FileIO, Zygote, Flux
 
 mkpath(joinpath(@__DIR__,"assets"))
-mkpath(joinpath(@__DIR__,"img"))
+mkpath(joinpath(@__DIR__,"results"))
 
 download("https://github.com/nirmalsuthar/public_files/raw/master/dolphin.obj",
          joinpath(@__DIR__,"assets/dolphin.obj"))
@@ -17,7 +17,6 @@ tgt = Flux3D.normalize!(tgt)
 save(joinpath(@__DIR__, "results", "target.png"), visualize(tgt))
 save(joinpath(@__DIR__, "results", "source.png"), visualize(src))
 
-
 function loss_dolphin(x::Array, src::TriMesh, tgt::TriMesh)
     src = Flux3D.offset(src, x)
     loss1 = chamfer_distance(src, tgt, 5000)#; w1=1., w2=0.2)
@@ -31,12 +30,12 @@ opt = Flux.Optimise.Momentum(lr, 0.9)
 
 function customtrain(_offset)
     θ = Zygote.Params([_offset])
-    for itr in 1:2
+    for itr in 1:2000
         gs = gradient(θ) do
             loss_dolphin(_offset, src, tgt)
         end
         Flux.update!(opt, _offset, gs[_offset])
-        if (itr%2 == 0)
+        if (itr%100 == 0)
             save(joinpath(@__DIR__, "results", "src_$(itr).png"), visualize(Flux3D.offset(src, off)))
         end
     end
