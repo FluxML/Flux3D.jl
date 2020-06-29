@@ -226,12 +226,12 @@ end
 Base.getindex(m::TriMesh, inds...) = (m._verts_list[inds...], m._faces_list[inds...])
 
 function get_verts_packed(m::TriMesh; refresh::Bool = false)
-    @ignore _compute_verts_packed(m, refresh)
+    _compute_verts_packed(m, refresh)
     return m._verts_packed
 end
 
 function get_verts_padded(m::TriMesh; refresh::Bool = false)
-    @ignore _compute_verts_padded(m, refresh)
+    _compute_verts_padded(m, refresh)
     return m._verts_padded
 end
 
@@ -269,7 +269,7 @@ function get_faces_to_edges_packed(m::TriMesh; refresh::Bool = false)
 end
 
 function get_laplacian_packed(m::TriMesh; refresh::Bool = false)
-    @ignore _compute_laplacian_packed(m, refresh)
+    _compute_laplacian_packed(m, refresh)
     return m._laplacian_packed
 end
 
