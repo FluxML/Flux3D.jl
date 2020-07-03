@@ -1,5 +1,5 @@
 import Makie: AbstractPlotting
-import GeometryBasics: normal_mesh
+import GeometryBasics
 export visualize
 
 """
@@ -27,23 +27,21 @@ end
 
 """
     visualize(m::TriMesh, index::Int=1; kwargs...)
-    visualize(verts, faces; kwargs...) 
+    visualize(verts, faces; kwargs...)
 
 Visualize mesh at `index` in TriMesh `m`.
 
 ### Optional Arguments:
 """
 
-function visualize(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}; kwargs...) where{T,R}
-    gbmesh = GBMesh(verts, faces)
-
+function visualize(m::GeometryBasics.Mesh; kwargs...) where{T,R}
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :red)
 
-    AbstractPlotting.mesh(normal_mesh(gbmesh); kwargs...)
+    AbstractPlotting.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 
-visualize(m::TriMesh, index::Int=1; kwargs...) = visualize(m[index]...; kwargs...)
+visualize(m::TriMesh, index::Int=1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
 
 visualize(v::Dataset.AbstractDataPoint; kwargs...) =
     visualize(v.data; kwargs...)

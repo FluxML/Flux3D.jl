@@ -25,8 +25,8 @@ function _lg_cross(A::AbstractArray, B::AbstractArray)
     cat((a2 .* b3) - (a3 .* b2), (a3 .* b1) - (a1 .* b3), (a1 .* b2) - (a2 .* b1); dims = 2)
 end
 
-_normalize(A::AbstractArray; eps::Number = 1e-6, dims::Int = 2) =
-    A ./ max.(sqrt.(sum(A .^ 2; dims = dims)), eps)
+_normalize(A::AbstractArray{T,2}; eps::Number = 1e-6, dims::Int = 2) where {T} =
+    A ./ max.(sqrt.(sum(A .^ 2; dims = dims)), T.(eps))
 
 _norm(A::AbstractArray; dims::Int = 2) = sqrt.(sum(A .^ 2; dims = dims))
 
