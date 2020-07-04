@@ -19,6 +19,7 @@ export TriMesh,
     compute_verts_normals_padded,
     compute_faces_normals_list,
     compute_faces_normals_packed,
+    compute_faces_normals_padded,
     compute_faces_areas_list,
     compute_faces_areas_packed,
     compute_faces_areas_padded
@@ -239,7 +240,7 @@ end
     save_trimesh(fn::String, mesh::GeometryBasics.Mesh)
 
 Save mesh in given `fn`.
-`index` is an optional argument specifing the index of mesh, 
+`index` is an optional argument specifing the index of mesh,
 incase of multiple meshes in TriMesh `mesh`.
 
 Supported formats are `obj`, `stl`, `ply`, `off` and `2DM`.
@@ -433,7 +434,7 @@ end
 """
     get_edges_packed(m::TriMesh; refresh::Bool = false)
 
-Returns edges of TriMesh `m` in packed format. Edges are according 
+Returns edges of TriMesh `m` in packed format. Edges are according
 to the indices of corresponding vertices in `get_verts_packed(m)`
 
 `refresh` is an optional keyword argument to
@@ -479,12 +480,12 @@ end
 """
     get_faces_to_edges_packed(m::TriMesh; refresh::Bool = false)
 
-Returns faces of TriMesh `m` in form of edges. 
+Returns faces of TriMesh `m` in form of edges.
 Each edge corresponds to the indices of `get_edges_packed(m)`.
 
 `refresh` is an optional keyword argument to
-recompute this format for TriMesh `m`. Assuming face f consists of 
-(v1,v2,v3) vertices, and e1 = {v2,v3}, e2 = {v3,v1}, e3 = {v1,v2}, 
+recompute this format for TriMesh `m`. Assuming face f consists of
+(v1,v2,v3) vertices, and e1 = {v2,v3}, e2 = {v3,v1}, e3 = {v1,v2},
 so face f in form of edges would be (e1,e2,e3).
 
 See also: [`get_edges_packed`](@ref)
@@ -505,7 +506,7 @@ end
     get_laplacian_packed(m::TriMesh; refresh::Bool = false)
     get_laplacian_sparse(m::TriMesh; refresh::Bool = false)
 
-Returns Laplacian sparce matrix of TriMesh `m`. 
+Returns Laplacian sparce matrix of TriMesh `m`.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
@@ -529,13 +530,13 @@ const get_laplacian_sparse = get_laplacian_packed
 """
     compute_verts_normals_packed(m::TriMesh)
 
-Computes Unit normal of vertices of TriMesh `m` in packed format. 
+Computes Unit normal of vertices of TriMesh `m` in packed format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
 Normal vec of each vertex is weighted sum of normals
 of adjacent faces, weighted by corresponding faces areas
-and then normalize to unit vector. 
+and then normalize to unit vector.
 
 See also: [`compute_verts_normals_padded`](@ref), [`compute_verts_normals_list`](@ref)
 
@@ -578,13 +579,13 @@ end
 """
     compute_verts_normals_padded(m::TriMesh)
 
-Computes Unit normal of vertices of TriMesh `m` in padded format. 
+Computes Unit normal of vertices of TriMesh `m` in padded format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
 Normal vec of each vertex is weighted sum of normals
 of adjacent faces, weighted by corresponding faces areas
-and then normalize to unit vector. 
+and then normalize to unit vector.
 
 See also: [`compute_verts_normals_packed`](@ref), [`compute_verts_normals_list`](@ref)
 
@@ -604,13 +605,13 @@ end
 """
     compute_verts_normals_list(m::TriMesh)
 
-Computes Unit normal of vertices of TriMesh `m` in list format. 
+Computes Unit normal of vertices of TriMesh `m` in list format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
 Normal vec of each vertex is weighted sum of normals
 of adjacent faces, weighted by corresponding faces areas
-and then normalize to unit vector. 
+and then normalize to unit vector.
 
 See also: [`compute_verts_normals_padded`](@ref), [`compute_verts_normals_packed`](@ref)
 
@@ -630,7 +631,7 @@ end
 """
     compute_faces_normals_packed(m::TriMesh)
 
-Computes Unit normal of faces of TriMesh `m` in packed format. 
+Computes Unit normal of faces of TriMesh `m` in packed format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
@@ -660,7 +661,7 @@ end
 """
     compute_faces_normals_padded(m::TriMesh)
 
-Computes Unit normal of faces of TriMesh `m` in padded format. 
+Computes Unit normal of faces of TriMesh `m` in padded format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
@@ -683,7 +684,7 @@ end
 """
     compute_faces_normals_list(m::TriMesh)
 
-Computes Unit normal of faces of TriMesh `m` in list format. 
+Computes Unit normal of faces of TriMesh `m` in list format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
@@ -706,7 +707,7 @@ end
 """
     compute_faces_areas_packed(m::TriMesh)
 
-Computes area of faces of TriMesh `m` in packed format. 
+Computes area of faces of TriMesh `m` in packed format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
@@ -737,7 +738,7 @@ end
 """
     compute_faces_areas_padded(m::TriMesh)
 
-Computes area of faces of TriMesh `m` in padded format. 
+Computes area of faces of TriMesh `m` in padded format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
@@ -762,7 +763,7 @@ end
 """
     compute_faces_areas_list(m::TriMesh)
 
-Computes area of faces of TriMesh `m` in list format. 
+Computes area of faces of TriMesh `m` in list format.
 
 `refresh` is an optional keyword argument to
 recompute this format for TriMesh `m`.
