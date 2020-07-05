@@ -158,7 +158,7 @@ TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
     GBMesh(m::TriMesh; index::Int = 1)
     GBMesh(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}) where {T,R}
 
-Initialize GeometryBasics.Mesh
+Initialize GeometryBasics.Mesh from triangle mesh in TriMesh `m` at `index`.
 
 See also: [`gbmeshes`](@ref)
 """
@@ -318,7 +318,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_verts_packed(m)
 ````
 """
-function get_verts_packed(m::TriMesh; refresh::Bool = false)
+function get_verts_packed(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{T,2} where {T,R}
     _compute_verts_packed(m, refresh)
     return m._verts_packed
 end
@@ -340,7 +343,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_verts_padded(m)
 ````
 """
-function get_verts_padded(m::TriMesh; refresh::Bool = false)
+function get_verts_padded(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{T,3} where {T,R}
     _compute_verts_padded(m, refresh)
     return m._verts_padded
 end
@@ -362,7 +368,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_verts_list(m)
 ````
 """
-function get_verts_list(m::TriMesh; refresh::Bool = false)
+function get_verts_list(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{AbstractArray{T,2},1} where {T,R}
     return m._verts_list
 end
 
@@ -383,7 +392,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_faces_packed(m)
 ````
 """
-function get_faces_packed(m::TriMesh; refresh::Bool = false)
+function get_faces_packed(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{R,2} where {T,R}
     @ignore _compute_faces_packed(m, refresh)
     return m._faces_packed
 end
@@ -405,7 +417,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_faces_padded(m)
 ````
 """
-function get_faces_padded(m::TriMesh; refresh::Bool = false)
+function get_faces_padded(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{R,3} where {T,R}
     @ignore _compute_faces_padded(m, refresh)
     return m._faces_padded
 end
@@ -427,7 +442,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_faces_list(m)
 ````
 """
-function get_faces_list(m::TriMesh; refresh::Bool = false)
+function get_faces_list(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{AbstractArray{R,2},1} where {T,R}
     return m._faces_list
 end
 
@@ -449,7 +467,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_edges_packed(m)
 ````
 """
-function get_edges_packed(m::TriMesh; refresh::Bool = false)
+function get_edges_packed(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{R,2} where {T,R}
     @ignore _compute_edges_packed(m, refresh)
     return m._edges_packed
 end
@@ -472,7 +493,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_edges_to_key(m)
 ````
 """
-function get_edges_to_key(m::TriMesh; refresh::Bool = false)
+function get_edges_to_key(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::Dict{Tuple{R,R},R} where {T,R}
     @ignore _compute_edges_packed(m, refresh)
     return m._edges_to_key
 end
@@ -497,7 +521,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_faces_to_edges_packed(m)
 ````
 """
-function get_faces_to_edges_packed(m::TriMesh; refresh::Bool = false)
+function get_faces_to_edges_packed(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractArray{R,2} where {T,R}
     @ignore _compute_edges_packed(m, refresh)
     return m._faces_to_edges_packed
 end
@@ -520,7 +547,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_laplacian_packed(m)
 ````
 """
-function get_laplacian_packed(m::TriMesh; refresh::Bool = false)
+function get_laplacian_packed(
+    m::TriMesh{T,R};
+    refresh::Bool = false,
+)::AbstractSparseArray{T,R,2} where {T,R}
     _compute_laplacian_packed(m, refresh)
     return m._laplacian_packed
 end
