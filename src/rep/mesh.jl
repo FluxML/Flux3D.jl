@@ -224,8 +224,8 @@ function load_trimesh(fn::String; elements_types...)
 end
 
 function load_trimesh(fns::Vector{String}; elements_types...)
-    verts_list = Vector{<:AbstractArray{<:AbstractFloat,2}}[]
-    faces_list = Vector{<:AbstractArray{<:Integer,2}}[]
+    verts_list = AbstractArray{Float32,2}[]
+    faces_list = AbstractArray{UInt32,2}[]
     for (i, fn) in enumerate(fns)
         mesh = load(fn; elements_types...)
         verts, faces = _load_meta(mesh)

@@ -21,23 +21,24 @@ function sample_points(
     m::TriMesh{T,R},
     num_samples::Int = 5000;
     eps::Number = EPS,
-)   where {T,R}
+) where {T,R}
     verts_padded = get_verts_padded(m)
     faces_padded = get_faces_padded(m)
     faces_areas_padded = compute_faces_areas_padded(m)
 
-        #(Fi,B)
+    #(Fi,B)
     #TODO: condition for probvec fails in Float32
     faces_areas_padded = Float64.(faces_areas_padded)
-    faces_areas_prob = faces_areas_padded ./ max.(sum(faces_areas_padded; dims=1), eps)
+    faces_areas_prob = faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 1), eps)
     samples = Zygote.Buffer(verts_padded, num_samples, 3, m.N)
 
-    for (i,_len) in enumerate(m._faces_len)
-        probvec = faces_areas_prob[1:_len,1,i]
+    for (i, _len) in enumerate(m._faces_len)
+        probvec = faces_areas_prob[1:_len, 1, i]
         dist = Distributions.Categorical(probvec)
-        sample_faces_idx = Zygote.@ignore my_rand(dist, num_samples)
+        sample_faces_idx = @ignore rand(dist, num_samples)
         sample_faces = faces_padded[sample_faces_idx, :, i]
-        samples[:,:,i] = _sample_points(verts_padded[1:m._verts_len[i], :, i], sample_faces, num_samples)
+        samples[:, :, i] =
+            _sample_points(verts_padded[1:m._verts_len[i], :, i], sample_faces, num_samples)
     end
 
     return copy(samples)
@@ -46,8 +47,8 @@ end
 function _sample_points(
     verts::AbstractArray{T,2},
     sample_faces::AbstractArray{R,2},
-    num_samples::Int
-)   where {T,R}
+    num_samples::Int,
+) where {T,R}
 
     v1 = verts[sample_faces[:, 1], :]
     v2 = verts[sample_faces[:, 2], :]
@@ -58,8 +59,8 @@ function _sample_points(
 end
 
 function _rand_barycentric_coords(num_samples::Int)
-    u = sqrt.(my_rand(Float32, num_samples))
-    v = my_rand(Float32, num_samples)
+    u = sqrt.(rand(Float32, num_samples))
+    v = rand(Float32, num_samples)
     w1 = 1.0f0 .- u
     w2 = u .* (1.0f0 .- v)
     w3 = u .* v
@@ -83,8 +84,14 @@ julia> normalize!(m)
 """
 function normalize!(m::TriMesh)
     verts_padded = get_verts_padded(m)
-    centroid = mean(verts_padded; dims = 1)
-    verts_padded = (verts_padded .- centroid) ./ (std(verts_padded, mean = centroid, dims = 1) .+ EPS)
+    _len = reshape(m._verts_len, 1, 1, :)
+    _centroid = sum(verts_padded; dims = 1) ./ _len
+    _correction = ((_centroid .^ 2) .* (m.V .- _len))
+    _std =
+        sqrt.(
+            (sum((verts_padded .- _centroid) .^ 2; dims = 1) - _correction) ./ (_len .- 1),
+        )
+    verts_padded = (verts_padded .- _centroid) ./ max.(_std, EPS)
     m._verts_packed = _padded_to_packed(verts_padded, m._verts_len)
     return m
 end
@@ -139,7 +146,8 @@ function scale!(m::TriMesh, factor::Float32)
 end
 
 function scale!(m::TriMesh, factor::AbstractArray{Float32})
-    (size(factor) == (3,)) || error("factor must be (3, ), but instead got $(size(factor)) array")
+    (size(factor) == (3,)) ||
+        error("factor must be (3, ), but instead got $(size(factor)) array")
     (factor .> 0.0) || error("factor must be greater than 0.0")
     verts_packed = get_verts_packed(m) .* reshape(factor, 1, 3)
     m._verts_packed = verts_packed
@@ -167,7 +175,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> m = scale(m, 1.0)
 julia> m = scale!(m, [1.0, 1.0, 1.0])
 """
-function scale(m::TriMesh, factor::Union{Float32, AbstractArray{Float32}})
+function scale(m::TriMesh, factor::Union{Float32,AbstractArray{Float32}})
     m = deepcopy(m)
     scale!(m, factor)
     return m
@@ -193,14 +201,14 @@ julia> rotate!(m, rotmat)
 ```
 """
 function rotate!(m::TriMesh, rotmat::AbstractArray{Float32,2})
-    size(rotmat) == (3, 3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
+    size(rotmat) == (3, 3) ||
+        error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
     verts_packed = get_verts_packed(m) * rotmat
     m._verts_packed = verts_packed
     return m
 end
 
-rotate!(m::TriMesh, rotmat::AbstractArray{<:Number,2}) =
-    rotate!(m, Float32.(rotmat))
+rotate!(m::TriMesh, rotmat::AbstractArray{<:Number,2}) = rotate!(m, Float32.(rotmat))
 
 """
     rotate(m::TriMesh, rotmat::AbstractArray{<:Number,2})
@@ -228,7 +236,7 @@ end
     realign!(src::TriMesh, tgt::TriMesh)
     realign!(src::TriMesh, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
-Re-Align the TriMesh `src` with the axis aligned bounding box of first mesh in TriMesh `tgt`
+Re-Align the TriMesh `src` with the axis aligned bounding box of mesh at `index` in TriMesh `tgt`
 and overwrite `src` with re-aligned TriMesh.
 
 See also: [`realign`](@ref)
@@ -240,31 +248,44 @@ julia> tgt = scale(src, 2.0)
 julia> realign!(src, tgt)
 ```
 """
-function realign!(src::TriMesh, tgt_min::AbstractArray{Float32,2}, tgt_max::AbstractArray{Float32,2})
+function realign!(
+    src::TriMesh,
+    tgt_min::AbstractArray{Float32,2},
+    tgt_max::AbstractArray{Float32,2},
+)
     verts_padded = get_verts_padded(src)
     src_min = reshape(minimum(verts_padded, dims = 1), (1, 3, :))
     src_max = reshape(maximum(verts_padded, dims = 1), (1, 3, :))
-    verts_padded = ((verts_padded .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+ tgt_min
+    verts_padded =
+        ((verts_padded .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+
+        tgt_min
     src._verts_packed = _padded_to_packed(verts_padded, src._verts_len)
     return src
 end
 
-realign!(src::TriMesh, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2}) =
-    realign!(src, Float32.(tgt_min), Float32.(tgt_max))
+realign!(
+    src::TriMesh,
+    tgt_min::AbstractArray{<:Number,2},
+    tgt_max::AbstractArray{<:Number,2},
+) = realign!(src, Float32.(tgt_min), Float32.(tgt_max))
 
-function realign!(src::TriMesh, tgt::TriMesh)
-    verts = get_verts_list(tgt)[1]
-    tgt_min = reshape(minimum(verts, dims = 1), (1, :))
-    tgt_max = reshape(maximum(verts, dims = 1), (1, :))
+realign!(src::TriMesh, tgt::AbstractArray{<:Number,2}) = realign!(src, Float32.(tgt))
+
+function realign!(src::TriMesh, tgt::AbstractArray{Float32,2})
+    tgt_min = reshape(minimum(tgt, dims = 1), (1, :))
+    tgt_max = reshape(maximum(tgt, dims = 1), (1, :))
     realign!(src, tgt_min, tgt_max)
     return src
 end
 
+realign!(src::TriMesh, tgt::TriMesh, index::Integer = 1) =
+    realign!(src, Float32.(get_verts_list(tgt)[index]))
+
 """
-    realign(src::TriMesh, tgt::TriMesh)
+    realign(src::TriMesh, tgt::TriMesh, index::Integer=1)
     realign(src::TriMesh, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
 
-Re-Align the TriMesh `src` with the axis aligned bounding box of first mesh in TriMesh `tgt`.
+Re-Align the TriMesh `src` with the axis aligned bounding box of mesh at `index` in TriMesh `tgt`.
 
 See also: [`realign`](@ref)
 
@@ -275,15 +296,19 @@ julia> tgt = scale(src, 2.0)
 julia> src = realign(src, tgt)
 ```
 """
-function realign(src::TriMesh, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
+function realign(
+    src::TriMesh,
+    tgt_min::AbstractArray{<:Number,2},
+    tgt_max::AbstractArray{<:Number,2},
+)
     src = deepcopy(src)
     realign!(src, tgt_min, tgt_max)
     return src
 end
 
-function realign(src::TriMesh, tgt::TriMesh)
+function realign(src::TriMesh, tgt::TriMesh, index::Integer)
     src = deepcopy(src)
-    realign!(src, tgt)
+    realign!(src, tgt, index)
     return src
 end
 
@@ -305,10 +330,11 @@ julia> translate!(m, 0.0)
 julia> translate!(m, [0.0, 0.0, 0.0])
 
 """
-translate!(m::TriMesh, vector::Float32) = translate(m, fill(vector, (3,)))
+translate!(m::TriMesh, vector::Float32) = translate!(m, fill(vector, (3,)))
 
 function translate!(m::TriMesh, vector::AbstractArray{Float32})
-    (size(vector) == (3,)) || error("vector must be (3, ), but instead got $(size(vector)) array")
+    (size(vector) == (3,)) ||
+        error("vector must be (3, ), but instead got $(size(vector)) array")
     verts_packed = get_verts_packed(m)
     verts_packed = verts_packed .+ reshape(vector, 1, 3)
     m._verts_packed = verts_packed
@@ -334,9 +360,9 @@ julia> m = translate(m, 0.0)
 julia> m = translate(m, [0.0, 0.0, 0.0])
 
 """
-function translate(m::TriMesh, vector::Union{Number, AbstractArray{<:Number}})
+function translate(m::TriMesh, args...)
     m = deepcopy(m)
-    translate!(m, vector)
+    translate!(m, args...)
 end
 
 """
@@ -355,15 +381,16 @@ julia> offset!(m, offset_verts)
 
 """
 
-function offset!(m::TriMesh, offset_verts_packed::AbstractArray{Float32, 2})
+function offset!(m::TriMesh, offset_verts_packed::AbstractArray{Float32,2})
     verts_packed = get_verts_packed(m)
-    (size(offset_verts_packed) == size(verts_packed)) || error("mesh and offset_verts size mismatch")
+    (size(offset_verts_packed) == size(verts_packed)) ||
+        error("mesh and offset_verts size mismatch")
     verts_packed += offset_verts_packed
     m._verts_packed = verts_packed
     return m
 end
 
-offset!(m::TriMesh, offset_verts_packed::AbstractArray{<:Number, 2}) =
+offset!(m::TriMesh, offset_verts_packed::AbstractArray{<:Number,2}) =
     offset!(m, Float32.(offset_verts_packed))
 
 """
@@ -380,7 +407,7 @@ julia> offset_verts = ones(get_verts_packed(m))
 julia> m = offset(m, offset_verts)
 
 """
-function offset(m::TriMesh, offset_verts_packed::AbstractArray{<:Number, 2})
+function offset(m::TriMesh, offset_verts_packed::AbstractArray{<:Number,2})
     m = deepcopy(m)
     offset!(m, offset_verts_packed)
 end
