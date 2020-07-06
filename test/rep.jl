@@ -35,7 +35,6 @@ end
 
 @info "Testing Meshes..."
 @testset "TriMesh" begin
-    #TODO: add IO tests
 
     verts1 = [0.1 0.3 0.5;
               0.5 0.2 0.1;
@@ -65,6 +64,18 @@ end
 
     faces_list = [faces1, faces2, faces3]
     m = TriMesh(verts_list, faces_list)
+
+    # IO Tests
+    @testset "IO" begin
+        mktempdir() do tmpdir
+            for ext in ["obj", "off", "stl", "ply", "2dm"]
+                save_trimesh(joinpath(tmpdir, "test.$(ext)"), m)
+                m_loaded = load_trimesh(joinpath(tmpdir, "test.$(ext)"))
+                @test all(isapprox.(get_verts_packed(m_loaded), verts_list[1]))
+                @test get_faces_packed(m_loaded) == faces_list[1]
+            end
+        end
+    end
 
     @test all(verts_list .== get_verts_list(m))
     @test cat(verts_list...; dims=1) == get_verts_packed(m)
