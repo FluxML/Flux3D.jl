@@ -195,9 +195,8 @@ Base.show(io::IO, t::RotateTriMesh) = print(io, "$(typeof(t))(rotmat; inplace=$(
 
 """
     ReAlignTriMesh(target::TriMesh; inplace::Bool=true)
-    ReAlignTriMesh(target::AbstractArray{<:Number, 2}; inplace::Bool=true)
 
-Re-Align TriMesh to axis aligned bounding box of `target` TriMesh.
+Re-Align TriMesh to axis aligned bounding box of mesh at `index` in TriMesh `target`.
 
 `inplace` is optional keyword argument, to make transformation in-place
 If `inplace` is set to `false`, it will create deepcopy of TriMesh.
@@ -210,14 +209,12 @@ struct ReAlignTriMesh <: AbstractTransform
     inplace::Bool
 end
 
-function ReAlignTriMesh(target::TriMesh; inplace::Bool = true)
-    t_min = reshape(minimum(target.vertices, dims = 1), (1, :))
-    t_max = reshape(maximum(target.vertices, dims = 1), (1, :))
+function ReAlignTriMesh(target::TriMesh, index::Integer=1; inplace::Bool = true)
+    verts = get_verts_list(target)[index]
+    t_min = reshape(minimum(verts, dims = 1), (1, :))
+    t_max = reshape(maximum(verts, dims = 1), (1, :))
     ReAlignTriMesh(t_min, t_max, inplace)
 end
-
-ReAlignTriMesh(target::AbstractArray{<:Number,2}; inplace::Bool = true) = 
-    ReAlignTriMesh(TriMesh(target), inplace=inplace)
 
 @functor ReAlignTriMesh
 
@@ -275,6 +272,9 @@ function TranslateTriMesh(vector::AbstractArray{<:Number, 1}; inplace::Bool = tr
     TranslateTriMesh(Float32.(vector), inplace)
 end
 
+TranslateTriMesh(vector::Number; inplace::Bool = true) =
+    TranslateTriMesh(fill(vector, (3,)); inplace=inplace)
+
 @functor TranslateTriMesh
 
 function (t::TranslateTriMesh)(m::TriMesh)
@@ -300,7 +300,7 @@ struct OffsetTriMesh <: AbstractTransform
     inplace::Bool
 end
 
-OffsetTriMesh(offset_verts::AbstractArray{<:Number,2}; inplace::Bool = true) =    
+OffsetTriMesh(offset_verts::AbstractArray{<:Number,2}; inplace::Bool = true) =
     OffsetTriMesh(Float32.(offset_verts), inplace)
 
 @functor OffsetTriMesh

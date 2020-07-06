@@ -31,7 +31,7 @@ function _edge_loss2(m::TriMesh, target_length::Number=0.0f0)
     return loss
 end
 
-function edge_loss(m::TriMesh, target_length::Number=0.0f0)
+function edge_loss(m::TriMesh, target_length::Number=0.0)
     #TODO: will change changing to batched format
     verts = get_verts_packed(m)
     edges = Zygote.@ignore get_edges_packed(m)
