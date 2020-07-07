@@ -59,6 +59,7 @@
         L = L * verts
         L = Flux3D._norm(L; dims = 2)
         @test isapprox(mean(L), laplacian_loss(m))
+        @test gradient(x->laplacian_loss(x), m) isa Tuple
     end
 
     @testset "Edge Loss" begin
@@ -69,6 +70,7 @@
         v2 = verts[edges[:,2],:]
         loss =  mean((Flux3D._norm(v1-v2; dims=2)) .^ 2)
         @test edge_loss(m) == loss
+        @test gradient(x->edge_loss(x), m) isa Tuple
     end
 
     @testset "Chamfer Loss" begin
@@ -89,5 +91,6 @@
         distB = minimum(P; dims=1)
         loss = mean(distA) + mean(distB)
         @test isapprox(chamfer_distance(x,y), loss)
+        @test gradient(x->chamfer_distance(x,x), m) isa Tuple
     end
 end
