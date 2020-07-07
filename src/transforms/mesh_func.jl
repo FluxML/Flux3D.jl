@@ -28,9 +28,12 @@ function sample_points(
 
     #(Fi,B)
     #TODO: condition for probvec fails in Float32
-    faces_areas_padded = Float64.(faces_areas_padded)
-    faces_areas_prob = faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 1), eps)
-    samples = Zygote.Buffer(verts_padded, num_samples, 3, m.N)
+    faces_areas_prob = Zygote.ignore() do
+        faces_areas_padded = Float64.(faces_areas_padded)
+        return faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 1), eps)
+    end
+    samples = @ignore similar(verts_padded, num_samples, 3, m.N)
+    samples = Zygote.bufferfrom(samples)
 
     for (i, _len) in enumerate(m._faces_len)
         probvec = faces_areas_prob[1:_len, 1, i]
@@ -53,7 +56,11 @@ function _sample_points(
     v1 = verts[sample_faces[:, 1], :]
     v2 = verts[sample_faces[:, 2], :]
     v3 = verts[sample_faces[:, 3], :]
-    (w1, w2, w3) = _rand_barycentric_coords(num_samples)
+    if verts isa CuArray
+        (w1, w2, w3) = gpu(_rand_barycentric_coords(num_samples))
+    else
+        (w1, w2, w3) = _rand_barycentric_coords(num_samples)
+    end
     samples = (w1 .* v1) + (w2 .* v2) + (w3 .* v3)
     return samples
 end

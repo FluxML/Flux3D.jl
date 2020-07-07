@@ -72,21 +72,21 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer} <: AbstractMesh{T,R}
     V::Int64
     F::Int64
     equalised::Bool
-    valid::AbstractArray{Bool,1}
+    valid::BitArray{1}
     offset::Int8
     _verts_len::AbstractArray{Int,1}
     _faces_len::AbstractArray{Int,1}
+
     _verts_packed::Union{Nothing,AbstractArray{T,2}}
-
     _verts_padded::Union{Nothing,AbstractArray{T,3}}
-    _verts_list::Union{Nothing,AbstractArray{<:AbstractArray{T,2},1}}
+    _verts_list::Union{Nothing,Vector{<:AbstractArray{T,2}}}
 
-    _faces_packed::Union{Nothing,AbstractArray{R,2}}
-    _faces_padded::Union{Nothing,AbstractArray{R,3}}
-    _faces_list::Union{Nothing,AbstractArray{<:AbstractArray{R,2},1}}
+    _faces_packed::Union{Nothing,Array{R,2}}
+    _faces_padded::Union{Nothing,Array{R,3}}
+    _faces_list::Union{Nothing,Vector{<:AbstractArray{R,2}}}
 
-    _edges_packed::Union{Nothing,AbstractArray{R,2}}
-    _faces_to_edges_packed::Union{Nothing,AbstractArray{R,2}}
+    _edges_packed::Union{Nothing,Array{R,2}}
+    _faces_to_edges_packed::Union{Nothing,Array{R,2}}
     _laplacian_packed::Union{Nothing,AbstractSparseArray{T,R,2}}
 
     _edges_to_key::Union{Nothing,Dict{Tuple{R,R},R}}
@@ -118,6 +118,10 @@ function TriMesh(
     _verts_list = verts
     _faces_list = faces
 
+    if verts[1] isa CuArray
+        _verts_len = gpu(_verts_len)
+        _faces_len = gpu(_faces_len)
+    end
     return TriMesh(
         N,
         V,
@@ -153,6 +157,12 @@ end
 
 TriMesh(m::GeometryBasics.Mesh) = TriMesh([m])
 TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
+
+# @functor TriMesh
+functor(x::TriMesh) =
+    (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list)
+# functor(::Type{<:TriMesh}, x) = (_verts_list = x._verts_list,), xs->TriMesh(xs._verts_list,x._faces_list)
+# functor(::Type{<:Chain}, c) = c.layers, ls -> Chain(ls...)
 
 """
     GBMesh(m::TriMesh; index::Int = 1)
@@ -583,7 +593,9 @@ function compute_verts_normals_packed(m::TriMesh{T,R}) where {T,R}
     faces = get_faces_packed(m)
 
     vert_faces = verts[faces, :]
-    vertex_normals = Zygote.bufferfrom(zeros(T, size(verts)...))
+    vertex_normals = similar(verts, size(verts))
+    vertex_normals = @ignore fill!(vertex_normals, 0.0)
+    vertex_normals = Zygote.bufferfrom(vertex_normals)
 
     # normal of each vertex is sum of normals of its faces weighted by
     # corresponding areas, ie. (A1 .* fn1) + (A2 .* fn2) + (A2 .* fn2)
@@ -934,14 +946,9 @@ function _compute_laplacian_packed(m::TriMesh{T,R}, refresh::Bool = false) where
         idx12 = cat(e1, e2, dims = 2)
         idx21 = cat(e2, e1, dims = 2)
         idx = cat(idx12, idx21, dims = 1)
+        Vs = fill!(similar(verts, size(idx, 1)), 1)
 
-        A = sparse(
-            idx[:, 1],
-            idx[:, 2],
-            ones(Float32, size(idx, 1)),
-            size(verts, 1),
-            size(verts, 1),
-        )
+        A = sparse(idx[:, 1], idx[:, 2], Vs, size(verts, 1), size(verts, 1))
 
         # computing degree of each vertices
         deg = sum(A, dims = 2)

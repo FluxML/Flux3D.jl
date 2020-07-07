@@ -45,7 +45,8 @@ end
 function chamfer_distance(m1::TriMesh, m2::TriMesh, num_samples::Int = 5000; w1::Number=1.0, w2::Number=1.0)
     A = sample_points(m1, num_samples)
     B = sample_points(m2, num_samples)
-    return _chamfer_distance(Float32.(A), Float32.(B), Float32(w1), Float32(w2))
+    # return _chamfer_distance(Float32.(A), Float32.(B), Float32(w1), Float32(w2))
+    return _chamfer_distance(A, B, Float32(w1), Float32(w2))
 end
 
 function normal_consistency_loss(m::TriMesh)
