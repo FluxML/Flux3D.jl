@@ -14,6 +14,7 @@
             rtol = 1e-2,
             atol = 1e-5,
         ))
+        @test gradient(x->sum(sample_points(x, 1000)), m) isa Tuple
     end
 
     _mesh = load_trimesh([

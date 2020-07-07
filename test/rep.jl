@@ -331,7 +331,5 @@ end
         @test Flux3D._padded_to_packed(_padded, items_len) == _packed
         @test Flux3D._padded_to_packed(_padded, items_len) isa Array{T,2}
         @test gradient(x->sum(.5 .* sum(Flux3D._padded_to_packed(x, items_len) .^2 )), _padded)[1] == _padded
-        @test Flux3D._padded_to_packed(_padded, nothing, 0) == _packed
-        @test gradient(x->sum(.5 .* sum(Flux3D._padded_to_packed(x, nothing, 0) .^2 )), _padded)[1] == _padded
     end
 end

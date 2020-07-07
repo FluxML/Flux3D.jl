@@ -31,6 +31,7 @@ include("utils.jl")
             using CuArrays
             include("cuda/rep.jl")
             include("cuda/transforms.jl")
+            include("cuda/metrics.jl")
         else
             @warn "CUDA unavailable, not testing GPU support"
         end
