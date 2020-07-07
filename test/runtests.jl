@@ -12,7 +12,13 @@ include("utils.jl")
     @info "Testing Transforms..."
     @testset "Transforms" begin
         include("transforms/pcloud_func.jl")
+        include("transforms/mesh_func.jl")
         include("transforms/transforms.jl")
+    end
+
+    @info "Testing Metrics..."
+    @testset "Metrics" begin
+        include("metrics.jl")
     end
 
     @info "Testing Models..."
