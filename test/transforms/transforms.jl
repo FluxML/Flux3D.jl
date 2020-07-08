@@ -142,14 +142,14 @@
             end
             src_1 = t(src)
             @test all(
-                reshape(maximum(get_verts_list(_mesh)[1]; dims = 1), (1, :)) .>=
+                maximum(get_verts_list(_mesh)[1]; dims = 2) .>=
                 get_verts_list(src_1)[1] .>=
-                reshape(minimum(get_verts_list(_mesh)[1]; dims = 1), (1, :)),
+                minimum(get_verts_list(_mesh)[1]; dims = 2)
             )
             @test all(
-                reshape(maximum(get_verts_list(_mesh)[1]; dims = 1), (1, :)) .>=
+                maximum(get_verts_list(_mesh)[1]; dims = 2) .>=
                 get_verts_list(src_1)[2] .>=
-                reshape(minimum(get_verts_list(_mesh)[1]; dims = 1), (1, :)),
+                minimum(get_verts_list(_mesh)[1]; dims = 2)
             )
         end
     end
@@ -164,10 +164,10 @@
             else
                 @test m2 !== m
             end
-            @test all(isapprox.(mean(get_verts_list(m2)[1]; dims = 1), 0.0, rtol = 1e-5, atol = 1e-5))
-            @test all(isapprox.(std(get_verts_list(m2)[1]; dims = 1), 1.0, rtol = 1e-5, atol = 1e-5))
-            @test all(isapprox.(mean(get_verts_list(m2)[2]; dims = 1), 0.0, rtol = 1e-5, atol = 1e-5))
-            @test all(isapprox.(std(get_verts_list(m2)[2]; dims = 1), 1.0, rtol = 1e-5, atol = 1e-5))
+            @test all(isapprox.(mean(get_verts_list(m2)[1]; dims = 2), 0.0, rtol = 1e-5, atol = 1e-5))
+            @test all(isapprox.(std(get_verts_list(m2)[1]; dims = 2), 1.0, rtol = 1e-4, atol = 1e-5))
+            @test all(isapprox.(mean(get_verts_list(m2)[2]; dims = 2), 0.0, rtol = 1e-5, atol = 1e-5))
+            @test all(isapprox.(std(get_verts_list(m2)[2]; dims = 2), 1.0, rtol = 1e-4, atol = 1e-5))
         end
     end
 

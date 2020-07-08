@@ -1,4 +1,5 @@
-@testset "Testing Transforms pcloud_func..." begin
+@info "Testing pcloud_func..."
+@testset "Transforms pcloud_func" begin
 
     for (inplace, FUNC) in [(true, Flux3D.normalize!), (false, Flux3D.normalize)]
         @testset "$(FUNC) function" begin

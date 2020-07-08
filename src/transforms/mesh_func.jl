@@ -30,18 +30,18 @@ function sample_points(
     #TODO: condition for probvec fails in Float32
     faces_areas_prob = Zygote.ignore() do
         faces_areas_padded = Float64.(faces_areas_padded)
-        return faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 1), eps)
+        return faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 2), eps)
     end
-    samples = @ignore similar(verts_padded, num_samples, 3, m.N)
+    samples = @ignore similar(verts_padded, 3, num_samples, m.N)
     samples = Zygote.bufferfrom(samples)
 
     for (i, _len) in enumerate(m._faces_len)
-        probvec = faces_areas_prob[1:_len, 1, i]
+        probvec = faces_areas_prob[1, 1:_len, i]
         dist = Distributions.Categorical(probvec)
         sample_faces_idx = @ignore rand(dist, num_samples)
-        sample_faces = faces_padded[sample_faces_idx, :, i]
+        sample_faces = faces_padded[:, sample_faces_idx, i]
         samples[:, :, i] =
-            _sample_points(verts_padded[1:m._verts_len[i], :, i], sample_faces, num_samples)
+            _sample_points(verts_padded[:,1:m._verts_len[i],i], sample_faces, num_samples)
     end
 
     return copy(samples)
@@ -53,9 +53,9 @@ function _sample_points(
     num_samples::Int,
 ) where {T,R}
 
-    v1 = verts[sample_faces[:, 1], :]
-    v2 = verts[sample_faces[:, 2], :]
-    v3 = verts[sample_faces[:, 3], :]
+    v1 = verts[:, sample_faces[1, :]]
+    v2 = verts[:, sample_faces[2, :]]
+    v3 = verts[:, sample_faces[3, :]]
     if verts isa CuArray
         (w1, w2, w3) = gpu(_rand_barycentric_coords(num_samples))
     else
@@ -66,8 +66,8 @@ function _sample_points(
 end
 
 function _rand_barycentric_coords(num_samples::Int)
-    u = sqrt.(rand(Float32, num_samples))
-    v = rand(Float32, num_samples)
+    u = sqrt.(rand(Float32, 1, num_samples))
+    v = rand(Float32, 1, num_samples)
     w1 = 1.0f0 .- u
     w2 = u .* (1.0f0 .- v)
     w3 = u .* v
@@ -92,11 +92,11 @@ julia> normalize!(m)
 function normalize!(m::TriMesh)
     verts_padded = get_verts_padded(m)
     _len = reshape(m._verts_len, 1, 1, :)
-    _centroid = sum(verts_padded; dims = 1) ./ _len
+    _centroid = sum(verts_padded; dims = 2) ./ _len
     _correction = ((_centroid .^ 2) .* (m.V .- _len))
     _std =
         sqrt.(
-            (sum((verts_padded .- _centroid) .^ 2; dims = 1) - _correction) ./ (_len .- 1),
+            (sum((verts_padded .- _centroid) .^ 2; dims = 2) - _correction) ./ (_len .- 1),
         )
     verts_padded = (verts_padded .- _centroid) ./ max.(_std, EPS)
     m._verts_packed = _padded_to_packed(verts_padded, m._verts_len)
@@ -156,7 +156,7 @@ function scale!(m::TriMesh, factor::AbstractArray{Float32})
     (size(factor) == (3,)) ||
         error("factor must be (3, ), but instead got $(size(factor)) array")
     (factor .> 0.0) || error("factor must be greater than 0.0")
-    verts_packed = get_verts_packed(m) .* reshape(factor, 1, 3)
+    verts_packed = get_verts_packed(m) .* reshape(factor, :, 1)
     m._verts_packed = verts_packed
     return m
 end
@@ -210,7 +210,7 @@ julia> rotate!(m, rotmat)
 function rotate!(m::TriMesh, rotmat::AbstractArray{Float32,2})
     size(rotmat) == (3, 3) ||
         error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
-    verts_packed = get_verts_packed(m) * rotmat
+    verts_packed = transpose(rotmat) * get_verts_packed(m)
     m._verts_packed = verts_packed
     return m
 end
@@ -261,8 +261,8 @@ function realign!(
     tgt_max::AbstractArray{Float32,2},
 )
     verts_padded = get_verts_padded(src)
-    src_min = reshape(minimum(verts_padded, dims = 1), (1, 3, :))
-    src_max = reshape(maximum(verts_padded, dims = 1), (1, 3, :))
+    src_min = minimum(verts_padded, dims = 2)
+    src_max = maximum(verts_padded, dims = 2)
     verts_padded =
         ((verts_padded .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+
         tgt_min
@@ -279,8 +279,8 @@ realign!(
 realign!(src::TriMesh, tgt::AbstractArray{<:Number,2}) = realign!(src, Float32.(tgt))
 
 function realign!(src::TriMesh, tgt::AbstractArray{Float32,2})
-    tgt_min = reshape(minimum(tgt, dims = 1), (1, :))
-    tgt_max = reshape(maximum(tgt, dims = 1), (1, :))
+    tgt_min = minimum(tgt, dims = 2)
+    tgt_max = maximum(tgt, dims = 2)
     realign!(src, tgt_min, tgt_max)
     return src
 end
@@ -343,7 +343,7 @@ function translate!(m::TriMesh, vector::AbstractArray{Float32})
     (size(vector) == (3,)) ||
         error("vector must be (3, ), but instead got $(size(vector)) array")
     verts_packed = get_verts_packed(m)
-    verts_packed = verts_packed .+ reshape(vector, 1, 3)
+    verts_packed = verts_packed .+ reshape(vector, :, 1)
     m._verts_packed = verts_packed
     return m
 end

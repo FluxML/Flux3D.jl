@@ -1,4 +1,5 @@
-@testset "Testing Transforms mesh_func..." begin
+@info "Testing mesh_func..."
+@testset "Transforms mesh_func" begin
 
     @testset "sample_points" begin
         m = load_trimesh([
@@ -7,7 +8,7 @@
         ])
 
         samples = sample_points(m, 1000)
-        _radius = sqrt.(sum(samples.^2; dims=2))
+        _radius = sqrt.(sum(samples.^2; dims=1))
         @test all(isapprox.(
             _radius,
             1.0,
@@ -32,27 +33,27 @@
                 @test m2 !== m
             end
             @test all(isapprox.(
-                mean(get_verts_list(m2)[1]; dims = 1),
+                mean(get_verts_list(m2)[1]; dims = 2),
                 0.0,
                 rtol = 1e-5,
                 atol = 1e-5,
             ))
             @test all(isapprox.(
-                std(get_verts_list(m2)[1]; dims = 1),
+                std(get_verts_list(m2)[1]; dims = 2),
                 1.0,
-                rtol = 1e-5,
+                rtol = 1e-4,
                 atol = 1e-5,
             ))
             @test all(isapprox.(
-                mean(get_verts_list(m2)[2]; dims = 1),
+                mean(get_verts_list(m2)[2]; dims = 2),
                 0.0,
                 rtol = 1e-5,
                 atol = 1e-5,
             ))
             @test all(isapprox.(
-                std(get_verts_list(m2)[1]; dims = 1),
+                std(get_verts_list(m2)[1]; dims = 2),
                 1.0,
-                rtol = 1e-5,
+                rtol = 1e-4,
                 atol = 1e-5,
             ))
         end
@@ -109,15 +110,15 @@
             end
             # Transformed PointCloud should be inside the bounding box defined by `tgt` PointCloud
             @test all(
-                reshape(maximum(get_verts_list(_mesh)[1]; dims = 1), (1, :)) .>=
+                maximum(get_verts_list(_mesh)[1]; dims = 2) .>=
                 get_verts_list(src_1)[1] .>=
-                reshape(minimum(get_verts_list(_mesh)[1]; dims = 1), (1, :)),
+                minimum(get_verts_list(_mesh)[1]; dims = 2)
             )
             src_1 = FUNC(src, tgt, 2)
             @test all(
-                reshape(maximum(get_verts_list(_mesh)[2]; dims = 1), (1, :)) .>=
-                get_verts_list(src_1)[2] .>=
-                reshape(minimum(get_verts_list(_mesh)[2]; dims = 1), (1, :)),
+                maximum(get_verts_list(_mesh)[2]; dims = 2) .>=
+                get_verts_list(src_1)[1] .>=
+                minimum(get_verts_list(_mesh)[2]; dims = 2)
             )
         end
     end

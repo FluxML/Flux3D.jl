@@ -1,4 +1,3 @@
-@info "Testing Metrics..."
 @testset "TriMesh Metrics" begin
 
     _mesh = load_trimesh([
@@ -21,7 +20,6 @@
                   0.2 0.3 0.4;
                   0.9 0.3 0.8]
 
-        verts_list = [verts1, verts2, verts3]
 
         faces1 = [1 2 3]
         faces2 = [1 2 3;
@@ -34,11 +32,13 @@
                   5 4 2;
                   5 3 2]
 
-        faces_list = [faces1, faces2, faces3]
+        T,R = Float32, UInt32
+        verts_list = [T.(verts1'), T.(verts2'), T.(verts3')]
+        faces_list = [R.(faces1'), R.(faces2'), R.(faces3')]
         m = TriMesh(verts_list, faces_list)
 
         _edges = get_edges_packed(m)
-        V = size(get_verts_packed(m), 1)
+        V = size(get_verts_packed(m), 2)
         L = zeros(V,V)
         deg = zeros(V,V)
         for i in 1:size(_edges, 1)
@@ -56,7 +56,7 @@
         end
 
         verts = get_verts_packed(m)
-        L = L * verts
+        L = L * transpose(verts)
         L = Flux3D._norm(L; dims = 2)
         @test isapprox(mean(L), laplacian_loss(m))
         @test gradient(x->laplacian_loss(x), m) isa Tuple
@@ -66,9 +66,9 @@
         m = deepcopy(_mesh)
         verts = get_verts_packed(m)
         edges = get_edges_packed(m)
-        v1 = verts[edges[:,1],:]
-        v2 = verts[edges[:,2],:]
-        loss =  mean((Flux3D._norm(v1-v2; dims=2)) .^ 2)
+        v1 = verts[:, edges[:,1]]
+        v2 = verts[:, edges[:,2]]
+        loss =  mean((Flux3D._norm(v1-v2; dims=1)) .^ 2)
         @test edge_loss(m) == loss
         @test gradient(x->edge_loss(x), m) isa Tuple
     end
@@ -77,20 +77,20 @@
         m = deepcopy(_mesh)
         loss = chamfer_distance(m,m)
         @test all(isapprox.(loss, 0, rtol = 1e-5, atol = 1e-2))
+        @test gradient(x->chamfer_distance(x, x), m) isa Tuple
 
         # naive chamfer distance
-        x = rand(1000,3)
-        y = rand(500,3)
-        xx = sum(x .^ 2, dims=2)
-        yy = sum(y .^ 2, dims=2)
-        zz = x * y'
-        rx = reshape(xx, size(xx, 1), :)
-        ry = reshape(yy, :, size(yy, 1))
+        x = rand(3,1000)
+        y = rand(3,500)
+        xx = sum(x .^ 2, dims=1)
+        yy = sum(y .^ 2, dims=1)
+        zz = x' * y
+        rx = reshape(xx, size(xx, 2), 1)
+        ry = reshape(yy, 1, size(yy, 2))
         P = (rx .+ ry) .- (2 .* zz)
         distA = minimum(P; dims=2)
         distB = minimum(P; dims=1)
         loss = mean(distA) + mean(distB)
         @test isapprox(chamfer_distance(x,y), loss)
-        @test gradient(x->chamfer_distance(x,x), m) isa Tuple
     end
 end

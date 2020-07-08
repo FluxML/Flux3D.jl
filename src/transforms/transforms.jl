@@ -211,8 +211,8 @@ end
 
 function ReAlignTriMesh(target::TriMesh, index::Integer=1; inplace::Bool = true)
     verts = get_verts_list(target)[index]
-    t_min = reshape(minimum(verts, dims = 1), (1, :))
-    t_max = reshape(maximum(verts, dims = 1), (1, :))
+    t_min = minimum(verts, dims = 2)
+    t_max = maximum(verts, dims = 2)
     ReAlignTriMesh(t_min, t_max, inplace)
 end
 
