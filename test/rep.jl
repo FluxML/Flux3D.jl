@@ -20,7 +20,7 @@
         @test rep.points isa Array{Float32,3}
 
         for i in 1:size(points,3)
-            @test rep[i] == points[:,:,i]
+            @test all(isapprox.(rep[i], points[:,:,i]))
         end
 
         # using other contructor
