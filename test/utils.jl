@@ -1,5 +1,3 @@
-using Zygote: gradient
-
 # Borrowed from Zygote tests
 function ngradient(f, xs::AbstractArray...)
     grads = zero.(xs)
@@ -15,7 +13,7 @@ function ngradient(f, xs::AbstractArray...)
     end
     return grads
 end
-  
+
 gradcheck(f, xs...) =
     all(isapprox.(ngradient(f, xs...),
                 gradient(f, xs...), rtol = 1e-5, atol = 1e-5))

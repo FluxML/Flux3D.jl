@@ -1,13 +1,8 @@
-using Flux3D
-using CuArrays
-
-CuArrays.allowscalar(false)
-
 @testset "PointCoud transforms" begin
 
     for inplace in [true, false]
         @testset "ScalePointCloud inplace=$(inplace)" begin
-            p = rand(Float32, 32, 3) |> gpu
+            p = rand(Float32, 3, 8, 2) |> gpu
             t1 = ScalePointCloud(2.0; inplace = inplace) |> gpu
             t2 = ScalePointCloud(0.5; inplace = inplace) |> gpu
             pc1 = PointCloud(p) |> gpu
@@ -20,7 +15,7 @@ CuArrays.allowscalar(false)
 
     for inplace in [true, false]
         @testset "RotatePointCloud inplace=$(inplace)" begin
-            p = rand(Float32, 32, 3)
+            p = rand(Float32, 3, 8, 2)
             rotmat = 2 .* one(rand(Float32, 3, 3))
             rotmat_inv = inv(rotmat)
 
@@ -38,8 +33,8 @@ CuArrays.allowscalar(false)
 
     for inplace in [true, false]
         @testset "ReAlignPointCloud inplace=$(inplace)" begin
-            p1 = rand(Float32, 32, 3)
-            p2 = rand(Float32, 32, 3)
+            p1 = rand(Float32, 3, 8, 2)
+            p2 = rand(Float32, 3, 8, 1)
             tgt = PointCloud(p2)
             src = PointCloud(p1) |> gpu
             t = ReAlignPointCloud(tgt; inplace = inplace) |> gpu
@@ -52,33 +47,32 @@ CuArrays.allowscalar(false)
             # Transformed PointCloud should be inside the bounding box defined by `tgt` PointCloud
             @test all(
                 reshape(maximum(
-                    Array(tgt.points), dims = 1), (1, :)) .>= 
-                    Array(src_1.points) .>= 
-                    reshape(minimum(Array(tgt.points), dims = 1), (1, :)))
+                    Array(tgt.points), dims = 2), (:, 1)) .>=
+                    Array(src_1.points) .>=
+                    reshape(minimum(Array(tgt.points), dims = 2), (:, 1)))
         end
     end
 
     for inplace in [true, false]
         @testset "NormalizePointCloud inplace=$(inplace)" begin
-            p = rand(Float32, 32, 3)
+            p = rand(Float32, 3, 8, 2)
             t = NormalizePointCloud(; inplace = inplace)
             pc1 = PointCloud(p) |> gpu
             pc2 = t(pc1) |> gpu
             @test pc1.points isa CuArray
             @test pc2.points isa CuArray
-            @test all(isapprox.(mean(Array(pc2.points);dims = 1), zeros(Float32, 1, size(p, 2)), rtol = 1e-5, atol = 1e-5))
-            @test all(isapprox.(std(Array(pc2.points);dims = 1), ones(Float32, 1, size(p, 2)), rtol = 1e-5, atol = 1e-5))
+            @test all(isapprox.(mean(Array(pc2.points);dims = 2), 0, rtol = 1e-5, atol = 1e-5))
+            @test all(isapprox.(std(Array(pc2.points);dims = 2), 1, rtol = 1e-5, atol = 1e-5))
         end
     end
 
-    @testset "Compose" begin
+    @testset "Chain" begin
         p = rand(Float32, 32, 3)
-        t = Compose(ScalePointCloud(0.5), RotatePointCloud(rand(3,3)), NormalizePointCloud()) |> gpu
+        t = Chain(ScalePointCloud(0.5), RotatePointCloud(rand(3,3)), NormalizePointCloud()) |> gpu
         pc1 = PointCloud(p) |> gpu
         pc1 = t(pc1)
         @test pc1.points isa CuArray
-        @test all(isapprox.(mean(Array(pc1.points);dims = 1), zeros(Float32, 1, size(p, 2)), rtol = 1e-5, atol = 1e-5))
-        # @test all(isapprox.(std(Array(pc1.points);dims = 1), ones(Float32, 1, size(p, 2)), rtol = 1e-5, atol = 1e-5))
+        @test all(isapprox.(mean(Array(pc1.points);dims = 2), 0, rtol = 1e-5, atol = 1e-5))
+        @test all(isapprox.(std(Array(pc1.points);dims = 2), 1, rtol = 1e-5, atol = 1e-4))
     end
-
 end # PointCloud transforms

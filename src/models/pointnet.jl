@@ -19,26 +19,6 @@ stnKD(K::Int) = Chain(
     x -> PermutedDimsArray(x, (2,1,3)),
 )
 
-# PointNet(k::Int) = Chain(
-#     x -> batched_mul(x, stn(x)),
-#     Conv((1,), 3=>64),
-#     BatchNorm(64),
-#     x -> batched_mul(x, fstn(x)),
-#     Conv((1,), 64=>128, relu),
-#     BatchNorm(128),
-#     Conv((1,), 128=>1024),
-#     BatchNorm(1024),
-#     x -> maximum(x, dims=1),
-#     x -> reshape(x, 1024, :),
-#     Dense(1024, 512, relu),
-#     BatchNorm(512),
-#     Dense(512, 256, relu),
-#     Dropout(0.4),
-#     BatchNorm(256),
-#     Dense(256, k, relu),
-#     x -> softmax(x, dims=1),
-# )
-
 struct PointNet
     stn
     fstn
@@ -70,24 +50,27 @@ end
 
 function (m::PointNet)(X)
 
-        # X: [N, 3, B]
+    # X: [3, N, B]
 
-        X = batched_mul(X, m.stn(X))
-        # X: [3, 3, B]
+    X = permutedims(X, (2,1,3))
+    # X: [N, 3, B]
 
-        X = m.conv_block1(X)
-        # X: [3, 64, B]
+    X = batched_mul(X, m.stn(X))
+    # X: [3, 3, B]
 
-        X = batched_mul(X, m.fstn(X))
-        # X: [3, 64, B]
+    X = m.conv_block1(X)
+    # X: [3, 64, B]
 
-        X = m.feat(X)
-        # X: [256, B]
+    X = batched_mul(X, m.fstn(X))
+    # X: [3, 64, B]
 
-        X = m.cls(X)
-        # X: [num_classes, B]
+    X = m.feat(X)
+    # X: [256, B]
 
-        return softmax(X, dims=1)
+    X = m.cls(X)
+    # X: [num_classes, B]
+
+    return softmax(X, dims=1)
 end
 
 @functor PointNet

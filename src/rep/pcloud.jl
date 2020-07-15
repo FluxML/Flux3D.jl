@@ -5,10 +5,11 @@ export PointCloud, npoints
 
 Initialize PointCloud representation.
 
-`points` should be Array of size `(N,D)` where `N` is the number of points and
-`D` is dimensionality of each points (i.e. `D`=2 or `D`=3). `normals` is optional
-field, if given should be Array of size `(N,D)` where `N` should match with the
-`N` of `points` and `D`=2 or `D`=3 (i.e. normals for 2D and 3D PointCloud respectively).
+`points` should be Array of size `(D, N, B)` where `N` is the number of points, `D` is
+dimensionality of each points (i.e. `D`=2 or `D`=3) and `B` is the batch size of PointCloud.
+`normals` is optional field, if given should be Array of size `(D, N, B)` where `N` and `B`
+should match with the `N` and `B` of `points` and `D`=2 or `D`=3
+(i.e. normals for 2D and 3D PointCloud respectively).
 
 ### Fields:
 
@@ -17,24 +18,33 @@ field, if given should be Array of size `(N,D)` where `N` should match with the
 
 ### Available Contructor:
 
-- `PointCloud(points::Array{T,2}, normals::Union(Array{R,2}, nothing)=nothing) where {T<:Number,R<:Number}`
+- `PointCloud(points, normals=nothing)`
 - `PointCloud(;points, normals=nothing)`
 - `PointCloud(pcloud::PointCloud)`
 """
-mutable struct PointCloud <: AbstractObject
-    points::AbstractArray{Float32,2}
-    normals::Union{AbstractArray{Float32,2}, Nothing}
+mutable struct PointCloud{T<:Float32} <: AbstractObject
+    points::AbstractArray{T,3}
+    normals::Union{AbstractArray{T,3}, Nothing}
 end
 
-function PointCloud(points::AbstractArray{<:Number,2}, normals::Union{AbstractArray{<:Number,2}, Nothing}=nothing)
-    points = Float32.(points)
+function PointCloud(points::AbstractArray{Float32,2}, normals::Union{AbstractArray{Float32,2}, Nothing}=nothing)
+    points = reshape(points, size(points)...,1)
 
     if !(normals isa Nothing)
-        size(points,1) == size(normals,1) || error("number of points and normals must match in PointCloud.")
-        normals = Float32.(normals);
+        size(points,2) == size(normals,2) || error("number of points and normals must match in PointCloud.")
+        normals = reshape(normals, size(normals)...,1);
     end
 
-    PointCloud(points, normals)
+    return PointCloud(points, normals)
+end
+
+function PointCloud(points::AbstractArray, normals::Union{AbstractArray, Nothing}=nothing)
+    @warn "typecasting points and normals to Float32"
+    points = Float32.(points)
+    if normals !== nothing
+        normals = Float32.(normals)
+    end
+    return PointCloud(points, normals)
 end
 
 PointCloud(;points, normals=nothing)= PointCloud(points, normals)
@@ -43,7 +53,7 @@ PointCloud(pcloud::PointCloud) = PointCloud(pcloud.points, pcloud.normals)
 
 @functor PointCloud
 
-Base.getindex(p::PointCloud, I...) = p.points[I...]
+Base.getindex(p::PointCloud, index::Number) = p.points[:,:,index]
 
 function Base.show(io::IO, p::PointCloud)
     if p.normals isa Nothing
@@ -61,4 +71,4 @@ Base.show(io::IO, ::MIME"text/plain", p::PointCloud) =
 
 Returns the size of PointCloud.
 """
-npoints(p::PointCloud) = size(p.points,1)
+npoints(p::PointCloud) = size(p.points,2)

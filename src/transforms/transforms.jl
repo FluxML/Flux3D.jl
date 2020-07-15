@@ -121,13 +121,14 @@ struct ReAlignPointCloud <: AbstractTransform
     inplace::Bool
 end
 
-function ReAlignPointCloud(target::PointCloud; inplace::Bool = true)
-    t_min = reshape(minimum(target.points, dims = 1), (1, :))
-    t_max = reshape(maximum(target.points, dims = 1), (1, :))
+function ReAlignPointCloud(target::PointCloud, index::Number=1; inplace::Bool = true)
+    points = target[index]
+    t_min = minimum(points, dims = 2)
+    t_max = maximum(points, dims = 2)
     ReAlignPointCloud(t_min, t_max, inplace)
 end
 
-ReAlignPointCloud(target::AbstractArray{<:Number,2}; inplace::Bool = true) = 
+ReAlignPointCloud(target::AbstractArray{<:Number}; inplace::Bool = true) = 
     ReAlignPointCloud(PointCloud(target), inplace=inplace)
 
 @functor ReAlignPointCloud

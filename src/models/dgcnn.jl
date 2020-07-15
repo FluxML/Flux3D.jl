@@ -100,12 +100,9 @@ end
 
 function (m::DGCNN)(X)
     
-    # X: [N, 3, B]
-    
-    X = PermutedDimsArray(X, (2,1,3))
-    C,N,B = size(X)
     # X: [3, N, B]
     
+    C,N,B = size(X)
     X = m.EdgeConv1(X)
     # X: [64, N, B]
     

@@ -1,5 +1,4 @@
-using Flux3D
-using Test, Statistics
+using Flux3D, Flux, Zygote, Test, Statistics
 
 include("utils.jl")
 
@@ -21,18 +20,19 @@ include("utils.jl")
         include("models.jl")
     end
 
-    @info "Testing Dataset..."
-    @testset "Dataset" begin
-        include("dataset.jl")
-    end
+    # @info "Testing Dataset..."
+    # @testset "Dataset" begin
+    #     include("dataset.jl")
+    # end
 
     @info "Testing GPU support..."
     @testset "CUDA" begin
         if Flux3D.use_cuda[]
-        include("cuda/rep.jl")
-        include("cuda/transforms.jl")
+            using CuArrays
+            include("cuda/rep.jl")
+            include("cuda/transforms.jl")
         else
-        @warn "CUDA unavailable, not testing GPU support"
+            @warn "CUDA unavailable, not testing GPU support"
         end
     end
 
