@@ -1,5 +1,10 @@
+
 *.jl.*.cov
 *.jl.cov
 *.jl.mem
 /docs/build/
 .vscode
+/examples/results/
+/examples/assets/
+/datasets/modelnet/
+tmp.jl
