@@ -39,7 +39,6 @@ function PointCloud(points::AbstractArray{Float32,2}, normals::Union{AbstractArr
 end
 
 function PointCloud(points::AbstractArray, normals::Union{AbstractArray, Nothing}=nothing)
-    @warn "typecasting points and normals to Float32"
     points = Float32.(points)
     if normals !== nothing
         normals = Float32.(normals)
