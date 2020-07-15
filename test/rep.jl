@@ -1,8 +1,13 @@
 @info "Testing PointCloud..."
 @testset "PointCloud" begin
-    points = rand(T,3,16,4)
-    _normals = rand(T,3,16,4)
-    for T in [Float32,Float64], normals = [nothing, _normals]
+    for T = [Float32,Float64], _N = [true, false]
+        points = rand(T,3,16,4)
+        _normals = rand(T,3,16,4)
+        if _N
+            normals = _normals
+        else
+            normals = nothing
+        end
         rep = PointCloud(points, normals)
         if normals == nothing
             @test rep.normals isa Nothing
