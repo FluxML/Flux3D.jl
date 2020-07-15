@@ -7,4 +7,5 @@
 /examples/results/
 /examples/assets/
 /datasets/modelnet/
+/benchmarks/*.bson
 tmp.jl

@@ -1,7 +1,7 @@
 using Flux3D, BenchmarkTools, BSON
 
 function setup_benchmark_record(names)
-    benchmarks = Dict{String, Vector{Float64}}() 
+    benchmarks = Dict{String, Vector{Float64}}()
     for name in names
         benchmarks[name] = []
     end
@@ -9,8 +9,8 @@ function setup_benchmark_record(names)
 end
 
 function generate_point_cloud(npoints::Int)
-    points = ones(npoints, 3)
-    points = cumsum(points, dims = 1)
+    points = ones(3, npoints)
+    points = cumsum(points, dims = 2)
     return PointCloud(points / npoints)
 end
 
@@ -32,8 +32,8 @@ function realign_point_cloud(npoints)
 end
 
 ROT_MATRIX = [1.0 2.0 3.0
-	      0.2 0.5 0.9
-	      3.0 2.0 1.0]
+	      	  0.2 0.5 0.9
+	      	  3.0 2.0 1.0]
 
 npoint_arr = 2 .^ [12, 14, 16, 18, 20]
 
@@ -43,24 +43,24 @@ push!(names, "Compose")
 cpu_benchmarks = setup_benchmark_record(names)
 
 @info "DEVICE: CPU"
-for npoints in npoint_arr
+for _npoints in npoint_arr
     arr = [
 	(ScalePointCloud(0.5; inplace=false), "ScalePointCloud"),
 	(RotatePointCloud(ROT_MATRIX; inplace=false), "RotatePointCloud"),
-        (ReAlignPointCloud(realign_point_cloud(npoints); inplace=false), "RealignPointCloud"),
+        (ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false), "RealignPointCloud"),
 	(NormalizePointCloud(inplace=false), "NormalizePointCloud"),
         (Compose(
              ScalePointCloud(0.5; inplace=false),
 	     RotatePointCloud(ROT_MATRIX; inplace=false),
-	     ReAlignPointCloud(realign_point_cloud(npoints); inplace=false),
+	     ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
 	     NormalizePointCloud()), "Compose")
     ]
 
-    @info "Running benchmarks for npoints = $npoints\n"
-    run_benchmarks!(cpu_benchmarks, arr, npoints, (op, pc) -> op(pc), cpu)
+    @info "Running benchmarks for npoints = $_npoints\n"
+    run_benchmarks!(cpu_benchmarks, arr, _npoints, (op, pc) -> op(pc), cpu)
     println()
 end
-   
+
 gpu_benchmarks = setup_benchmark_record(names)
 
 using CUDAapi
@@ -70,21 +70,21 @@ if has_cuda()
     CuArrays.allowscalar(false)
 
     @info "DEVICE: GPU"
-    for npoints in npoint_arr
+    for _npoints in npoint_arr
         arr = [
 	    (ScalePointCloud(0.5; inplace=false), "ScalePointCloud"),
             (RotatePointCloud(ROT_MATRIX; inplace=false), "RotatePointCloud"),
-            (ReAlignPointCloud(realign_point_cloud(npoints); inplace=false), "RealignPointCloud"),
+            (ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false), "RealignPointCloud"),
 	    (NormalizePointCloud(inplace=false), "NormalizePointCloud"),
             (Compose(
                  ScalePointCloud(0.5; inplace=false),
 	         RotatePointCloud(ROT_MATRIX; inplace=false),
-	         ReAlignPointCloud(realign_point_cloud(npoints); inplace=false),
+	         ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
 	         NormalizePointCloud()), "Compose")
          ]
 
-        @info "Running benchmarks for npoints = $npoints\n"
-        run_benchmarks!(gpu_benchmarks, arr, npoints, (op, pc) -> CuArrays.@sync op(pc), gpu)
+        @info "Running benchmarks for npoints = $_npoints\n"
+        run_benchmarks!(gpu_benchmarks, arr, _npoints, (op, pc) -> CuArrays.@sync op(pc), gpu)
         println()
     end
 end
