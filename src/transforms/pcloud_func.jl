@@ -57,7 +57,7 @@ julia> scale!(p, 1.0)
 """
 function scale!(pcloud::PointCloud, factor::Float32)
     (factor > 0.0) || error("factor must be greater than 0.0")
-    pcloud.points = pcloud.points .* factor
+    lmul!(factor, pcloud.points)
     return pcloud
 end
 
