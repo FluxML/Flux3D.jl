@@ -53,7 +53,7 @@ PointCloud(pcloud::PointCloud) = PointCloud(pcloud.points, pcloud.normals)
 @functor PointCloud
 
 # deepcopy generate error when using on PointCloud with parent field of points not Nothing
-deepcopy_internal(p::PointCloud, dict::IdDict) = PointCloud(copy(x.points), copy(x.normals))
+deepcopy_internal(x::PointCloud, dict::IdDict) = PointCloud(copy(x.points), copy(x.normals))
 
 Base.getindex(p::PointCloud, index::Number) = p.points[:,:,index]
 
