@@ -77,13 +77,19 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer} <: AbstractMesh{T,R}
     _verts_len::AbstractArray{Int,1}
     _faces_len::AbstractArray{Int,1}
 
-    _verts_packed::Union{Nothing,AbstractArray{T,2}}
-    _verts_padded::Union{Nothing,AbstractArray{T,3}}
-    _verts_list::Union{Nothing,Vector{<:AbstractArray{T,2}}}
+    _verts_packed::AbstractArray{T,2}
+    _verts_padded::AbstractArray{T,3}
+    _verts_list::Vector{<:AbstractArray{T,2}}
+    _verts_packed_valid::Bool
+    _verts_padded_valid::Bool
+    _verts_list_valid::Bool
 
-    _faces_packed::Union{Nothing,Array{R,2}}
-    _faces_padded::Union{Nothing,Array{R,3}}
-    _faces_list::Union{Nothing,Vector{Array{R,2}}}
+    _faces_packed::Array{R,2}
+    _faces_padded::Array{R,3}
+    _faces_list::Vector{Array{R,2}}
+    _faces_packed_valid::Bool
+    _faces_padded_valid::Bool
+    _faces_list_valid::Bool
 
     _edges_packed::Union{Nothing,Array{R,2}}
     _faces_to_edges_packed::Union{Nothing,Array{R,2}}
@@ -138,12 +144,18 @@ function TriMesh(
         offset,
         _verts_len,
         _faces_len,
-        nothing,
-        nothing,
+        rand(T,1,1),
+        rand(T,1,1,1),
         _verts_list,
-        nothing,
-        nothing,
+        false,
+        false,
+        true,
+        rand(R,1,1),
+        rand(R,1,1,1),
         _faces_list,
+        false,
+        false,
+        true,
         nothing,
         nothing,
         nothing,
@@ -307,16 +319,16 @@ function Base.setproperty!(m::TriMesh, f::Symbol, v)
         # List is always valid, so to make sure that we refresh list always
         if (f == :_verts_packed) && (getproperty(m, f) !== v)
             setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-            setfield!(m, :_verts_padded, nothing)
+            setfield!(m, :_verts_padded_valid, false)
             _compute_verts_list(m, true)
         elseif (f == :_verts_padded) && (getproperty(m, f) !== v)
             setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-            setfield!(m, :_verts_packed, nothing)
+            setfield!(m, :_verts_packed_valid, false)
             _compute_verts_list(m, true)
         elseif (f == :_verts_list) && (getproperty(m, f) !== v)
             setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-            setfield!(m, :_verts_packed, nothing)
-            setfield!(m, :_verts_padded, nothing)
+            setfield!(m, :_verts_packed_valid, false)
+            setfield!(m, :_verts_padded_valid, false)
         end
     else
         setfield!(m, f, convert(fieldtype(typeof(m), f), v))
@@ -842,25 +854,27 @@ function compute_faces_areas_list(m::TriMesh; eps::Number = 1e-6)
 end
 
 function _compute_verts_packed(m::TriMesh, refresh::Bool = false)
-    if refresh || (m._verts_packed isa Nothing)
+    if refresh || !(m._verts_packed_valid)
         verts_packed = _list_to_packed(m._verts_list)
         # avoiding setproperty!, as we are building packed
         # from list and list is always valid
         setfield!(m, :_verts_packed, verts_packed)
+        setfield!(m, :_verts_packed_valid, true)
     end
 end
 
 function _compute_verts_padded(m::TriMesh, refresh::Bool = false)
-    if refresh || (m._verts_padded isa Nothing)
+    if refresh || !(m._verts_padded_valid)
         verts_padded = _list_to_padded(m._verts_list, 0, (3, m.V))
         # avoiding setproperty!, as we are building padded
         # from list and list is always valid
         setfield!(m, :_verts_padded, verts_padded)
+        setfield!(m, :_verts_padded_valid, true)
     end
 end
 
 function _compute_verts_list(m::TriMesh, refresh::Bool = false)
-    if refresh || (m._verts_list isa Nothing)
+    if refresh || !(m._verts_list_valid)
         if m._verts_packed !== nothing
             verts_list = _packed_to_list(m._verts_packed, m._verts_len)
         elseif m._verts_padded !== nothing
@@ -870,11 +884,12 @@ function _compute_verts_list(m::TriMesh, refresh::Bool = false)
         end
         # avoiding setproperty, cause verts_list is always valid.
         setfield!(m, :_verts_list, verts_list)
+        setfield!(m, :_verts_list_valid, true)
     end
 end
 
 function _compute_faces_packed(m::TriMesh{T,R}, refresh::Bool = false) where {T,R}
-    if refresh || (m._faces_packed isa Nothing)
+    if refresh || !(m._faces_packed_valid)
         faces_packed = _list_to_packed(m._faces_list)
         _, verts_packed_first_idx, _ = _auxiliary_mesh(m._verts_list)
         _, _, faces_packed_list_idx = _auxiliary_mesh(m._faces_list)
@@ -882,13 +897,15 @@ function _compute_faces_packed(m::TriMesh{T,R}, refresh::Bool = false) where {T,
         faces_packed_offset = verts_packed_first_idx[faces_packed_list_idx] .- 1
         faces_packed = faces_packed .+ reshape(faces_packed_offset, 1, :)
         setfield!(m, :_faces_packed, R.(faces_packed))
+        setfield!(m, :_faces_packed_valid, true)
     end
 end
 
 function _compute_faces_padded(m::TriMesh, refresh::Bool = false)
-    if refresh || (m._faces_padded isa Nothing)
+    if refresh || !(m._faces_padded_valid)
         faces_padded = _list_to_padded(m._faces_list, 0, (3, m.F))
         setfield!(m, :_faces_padded, faces_padded)
+        setfield!(m, :_faces_padded_valid, true)
     end
 end
 
