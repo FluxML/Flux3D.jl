@@ -42,7 +42,7 @@ push!(names, "Compose")
 
 cpu_benchmarks = setup_benchmark_record(names)
 
-@info "DEVICE: CPU"
+println("DEVICE: CPU")
 for _npoints in npoint_arr
     arr = [
 	(ScalePointCloud(0.5; inplace=false), "ScalePointCloud"),
@@ -56,20 +56,18 @@ for _npoints in npoint_arr
 	     NormalizePointCloud()), "Compose")
     ]
 
-    @info "Running benchmarks for npoints = $_npoints\n"
+    println("Running benchmarks for npoints = $_npoints")
     run_benchmarks!(cpu_benchmarks, arr, _npoints, (op, pc) -> op(pc), cpu)
     println()
 end
 
 gpu_benchmarks = setup_benchmark_record(names)
 
-using CUDAapi
+using CUDAapi, CuArrays
 if has_cuda()
-    @info "CUDA is on. Running GPU Benchmarks"
-    import CuArrays
+    println("CUDA is on. Running GPU Benchmarks")
     CuArrays.allowscalar(false)
-
-    @info "DEVICE: GPU"
+    println("DEVICE: GPU")
     for _npoints in npoint_arr
         arr = [
 	    (ScalePointCloud(0.5; inplace=false), "ScalePointCloud"),
@@ -80,11 +78,11 @@ if has_cuda()
                  ScalePointCloud(0.5; inplace=false),
 	         RotatePointCloud(ROT_MATRIX; inplace=false),
 	         ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
-	         NormalizePointCloud()), "Compose")
+	         NormalizePointCloud(inplace=false)), "Compose")
          ]
 
-        @info "Running benchmarks for npoints = $_npoints\n"
-        run_benchmarks!(gpu_benchmarks, arr, _npoints, (op, pc) -> CuArrays.@sync op(pc), gpu)
+        println("Running benchmarks for npoints = $_npoints")
+        run_benchmarks!(gpu_benchmarks, arr, _npoints, (op, pc) -> (CuArrays.@sync op(pc)), gpu)
         println()
     end
 end
