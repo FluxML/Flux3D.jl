@@ -49,7 +49,7 @@ for _npoints in npoint_arr
 	(RotatePointCloud(ROT_MATRIX; inplace=false), "RotatePointCloud"),
         (ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false), "RealignPointCloud"),
 	(NormalizePointCloud(inplace=false), "NormalizePointCloud"),
-        (Compose(
+        (Chain(
              ScalePointCloud(0.5; inplace=false),
 	     RotatePointCloud(ROT_MATRIX; inplace=false),
 	     ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
@@ -74,7 +74,7 @@ if has_cuda()
             (RotatePointCloud(ROT_MATRIX; inplace=false), "RotatePointCloud"),
             (ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false), "RealignPointCloud"),
 	    (NormalizePointCloud(inplace=false), "NormalizePointCloud"),
-            (Compose(
+            (Chain(
                  ScalePointCloud(0.5; inplace=false),
 	         RotatePointCloud(ROT_MATRIX; inplace=false),
 	         ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
