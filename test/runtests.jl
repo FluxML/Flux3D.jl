@@ -1,4 +1,4 @@
-using Flux3D, Flux, Zygote, Test, Statistics
+using Flux3D, Zygote, Test, Statistics
 
 include("utils.jl")
 

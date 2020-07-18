@@ -1,43 +1,4 @@
-export Compose, ScalePointCloud, RotatePointCloud, ReAlignPointCloud, NormalizePointCloud
-
-"""
-    Compose(transforms...)
-
-Composes multiple transforms/functions sequentially.
-`Compose` also support indexing and slicing.
-
-### Examples:
-
-```julia
-julia> t = Compose(x->2*x, x->x/2)
-julia> t(2) == 2
-
-julia> t = Compose(ScalePointCloud(2.0), NormalizePointCloud())
-julia> p = PointCloud(rand(1024,3))
-julia> t(p) == t[2](t[1](p))
-```
-"""
-struct Compose{T <: Tuple} <: AbstractCompose
-    transforms::T
-end
-
-Compose(xs...) = Compose(xs)
-applytransforms(::Tuple{}, x) = x
-applytransforms(fs::Tuple, x) = applytransforms(tail(fs), first(fs)(x))
-
-# TODO: Update functor format according to Flux release
-functor(c::Compose) = c.transforms, ts -> Compose(ts...)
-
-(c::Compose)(x) = applytransforms(c.transforms, x)
-
-Base.getindex(c::Compose, i::AbstractArray) = Compose(c.transforms[i]...)
-Base.getindex(c::Compose, i::Int) = c[i:i]
-
-function Base.show(io::IO, c::Compose)
-    print(io, "Compose(")
-    join(io, c.transforms, ", ")
-    print(io, ")")
-end
+export ScalePointCloud, RotatePointCloud, ReAlignPointCloud, NormalizePointCloud
 
 """
     ScalePointCloud(factor::Number; inplace::Bool=true)
@@ -128,7 +89,7 @@ function ReAlignPointCloud(target::PointCloud, index::Number=1; inplace::Bool = 
     ReAlignPointCloud(t_min, t_max, inplace)
 end
 
-ReAlignPointCloud(target::AbstractArray{<:Number}; inplace::Bool = true) = 
+ReAlignPointCloud(target::AbstractArray{<:Number}; inplace::Bool = true) =
     ReAlignPointCloud(PointCloud(target), inplace=inplace)
 
 @functor ReAlignPointCloud

@@ -67,7 +67,7 @@
     end
 
     @testset "Chain" begin
-        p = rand(Float32, 32, 3)
+        p = rand(Float32, 3, 8, 2)
         t = Chain(ScalePointCloud(0.5), RotatePointCloud(rand(3,3)), NormalizePointCloud()) |> gpu
         pc1 = PointCloud(p) |> gpu
         pc1 = t(pc1)

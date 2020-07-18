@@ -3,9 +3,9 @@ module Flux3D
 using Flux, NearestNeighbors, LinearAlgebra, Statistics, CuArrays
 using Base: tail
 using Zygote: @nograd
-import Flux: @functor, functor, gpu, cpu
+import Flux: @functor, functor, gpu, cpu, Chain
 
-export gpu, cpu
+export gpu, cpu, Chain
 
 # borowed from Flux.jl
 const use_cuda = Ref(false)
