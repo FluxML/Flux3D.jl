@@ -107,7 +107,7 @@ function rotate!(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
     size(rotmat) == (3, 3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
     size(pcloud.points, 1) == 3 || error("dimension of points in PointCloud must be 3")
     points_packed = transpose(rotmat) * reshape(pcloud.points, 3, :)
-    pcloud.points = reshape(points_packed, size(pcloud.points)...)
+    pcloud.points = copy(reshape(points_packed, size(pcloud.points)...))
     return pcloud
 end
 
