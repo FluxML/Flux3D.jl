@@ -1,4 +1,4 @@
-using Flux3D, BenchmarkTools, BSON
+using Flux3D, BenchmarkTools, Printf
 
 function setup_benchmark_record(names)
     benchmarks = Dict{String, Vector{Float64}}()
@@ -87,6 +87,24 @@ if has_cuda()
     end
 end
 
-fname = joinpath(@__DIR__, "transform_benchmarks.bson")
-BSON.@save fname cpu_benchmarks gpu_benchmarks
+function save_bm(fname, cpu_benchmarks, gpu_benchmarks)
+	open(fname, "w") do io
+		device = "cpu"
+		for (key, values) in cpu_benchmarks
+			for (p,v) in zip(npoint_arr, values)
+				Printf.@printf(io, "%s %s %d %f ms\n",device, key, p, v)
+			end
+		end
+
+		device = "gpu"
+		for (key, values) in gpu_benchmarks
+			for (p,v) in zip(npoint_arr, values)
+				Printf.@printf(io, "%s %s %d %f ms\n",device, key, p, v)
+			end
+		end
+	end
+end
+
+fname = joinpath(@__DIR__, "bm_flux3d.txt")
+save_bm(fname, cpu_benchmarks, gpu_benchmarks)
 @info "Benchmarks have been saved at $fname"
