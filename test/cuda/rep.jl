@@ -20,6 +20,131 @@
         @test size(crep.points) == size(points)
         @test crep.points isa CuArray{Float32,3}
     end
+end
+
+@info "Testing TriMesh..."
+@testset "TriMesh rep" begin
+
+    T,R = (Float32, Int64)
+    verts1 = [0.1 0.3 0.5;
+              0.5 0.2 0.1;
+              0.6 0.8 0.7]
+    verts2 = [0.1 0.3 0.3;
+              0.6 0.7 0.8;
+              0.2 0.3 0.4;
+              0.1 0.5 0.3]
+    verts3 = [0.7 0.3 0.6;
+              0.2 0.4 0.8;
+              0.9 0.5 0.2;
+              0.2 0.3 0.4;
+              0.9 0.3 0.8]
+
+    verts_list = [T.(verts1'), T.(verts2'), T.(verts3')]
+
+    faces1 = [1 2 3]
+    faces2 = [1 2 3;
+              2 3 4]
+    faces3 = [2 3 1;
+              1 2 4;
+              3 4 2;
+              5 4 3;
+              5 1 2;
+              5 4 2;
+              5 3 2]
+
+    faces_list = [R.(faces1'), R.(faces2'), R.(faces3')]
+    m = TriMesh(verts_list, faces_list)
+    gm = m |> gpu
+
+    # IO Tests
+    @testset "IO" begin
+        mktempdir() do tmpdir
+            # for ext in ["obj", "off", "stl", "ply", "2dm"]
+            # TODO: there is some error with obj format while setting up Flux3D from new env
+            for ext in ["off", "stl", "ply", "2dm"]
+                save_trimesh(joinpath(tmpdir, "test.$(ext)"), m)
+                m_loaded = load_trimesh(joinpath(tmpdir, "test.$(ext)"))
+                @test all(isapprox.(get_verts_packed(m_loaded), verts_list[1]))
+                @test get_faces_packed(m_loaded) == faces_list[1]
+            end
+        end
+    end
+
+    gm_list = get_verts_list(gm)
+    gm_packed = get_verts_packed(gm)
+    gm_padded = get_verts_padded(gm)
+    @test gm_list isa Vector{<:CuArray{Float32, 2}}
+    @test gm_packed isa CuArray{Float32, 2}
+    @test gm_padded isa CuArray{Float32, 3}
+    @test all(verts_list .== cpu(gm_list))
+    _padded = cpu(gm_padded)
+    @test cat(verts_list...; dims=2) == cpu(gm_packed)
+    for (i,v) in enumerate(verts_list)
+        @test _padded[:, 1:size(v,2),i] == v
+        @test all(_padded[:, size(v,2)+1:end,i] .== 0)
+    end
+
+    gm_list = get_faces_list(gm)
+    gm_packed = get_faces_packed(gm)
+    gm_padded = get_faces_padded(gm)
+    @test gm_list isa Vector{<:Array{<:Integer, 2}}
+    @test gm_packed isa Array{<:Integer, 2}
+    @test gm_padded isa Array{<:Integer, 3}
+    @test all(faces_list .== gm_list)
+    _cur_idx = 1
+    _offset = 0
+    _packed = gm_packed
+    for (i,f) in enumerate(faces_list)
+        @test _packed[:, _cur_idx:_cur_idx+size(f,2)-1] == (f .+ _offset)
+        _cur_idx += size(f,2)
+        _offset += size(verts_list[i],2)
+    end
+    _padded = gm_padded
+    for (i,v) in enumerate(faces_list)
+        @test _padded[:, 1:size(v,2),i] == v
+        @test all(_padded[:, size(v,2)+1:end,i] .== 0)
+    end
+
+    _packed = get_faces_packed(m)
+    e12 = cat(_packed[1, :], _packed[2, :], dims = 2)
+    e23 = cat(_packed[2, :], _packed[3, :], dims = 2)
+    e31 = cat(_packed[3, :], _packed[1, :], dims = 2)
+    edges = cat(e12, e23, e31, dims = 1)
+    edges = sort(edges, dims = 2)
+    edges = sortslices(edges; dims=1)
+    edges = unique(edges; dims = 1)
+    @test edges == get_edges_packed(m)
+
+    _dict = get_edges_to_key(m)
+    for i in 1:size(edges,1)
+        @test i == _dict[Tuple(edges[i,:])]
+    end
+
+    _f_edges = get_faces_to_edges_packed(m)
+    _packed = get_faces_packed(m)
+    for i in 1:size(_f_edges,1)
+        @test edges[_f_edges[i,1],:] == sort(_packed[[2,3], i])
+        @test edges[_f_edges[i,2],:] == sort(_packed[[1,3], i])
+        @test edges[_f_edges[i,3],:] == sort(_packed[[1,2], i])
+    end
+
+    _edges = get_edges_packed(m)
+    V = size(get_verts_packed(m), 2)
+    L = zeros(V,V)
+    deg = zeros(V,V)
+    for i in 1:size(_edges, 1)
+        L[_edges[i,1], _edges[i,2]] = 1
+        L[_edges[i,2], _edges[i,1]] = 1
+    end
+    deg = sum(L; dims = 2)
+    deg = map(x -> (x > 0 ? 1 / x : x), deg)
+    for i=1:V, j=1:V
+        if i==j
+            L[i,j] = -1
+        elseif L[i,j]==1
+            L[i,j] = deg[i]
+        end
+    end
     @test all(isapprox.(L, Array(get_laplacian_packed(m)), rtol = 1e-5, atol = 1e-5))
 
     # verts_normals, faces_normals, faces_areas

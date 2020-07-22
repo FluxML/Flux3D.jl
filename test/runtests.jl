@@ -35,7 +35,7 @@ include("utils.jl")
     @info "Testing GPU support..."
     @testset "CUDA" begin
         if Flux3D.use_cuda[]
-            using CuArrays
+            using CUDA
             include("cuda/rep.jl")
             include("cuda/transforms.jl")
             include("cuda/metrics.jl")

@@ -63,10 +63,10 @@ end
 
 gpu_benchmarks = setup_benchmark_record(names)
 
-using CUDAapi, CuArrays
+using CUDA
 if has_cuda()
     println("CUDA is on. Running GPU Benchmarks")
-    CuArrays.allowscalar(false)
+    CUDA.allowscalar(false)
     println("DEVICE: GPU")
     for _npoints in npoint_arr
         arr = [

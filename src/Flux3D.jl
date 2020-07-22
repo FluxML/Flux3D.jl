@@ -1,6 +1,6 @@
 module Flux3D
 
-using Flux, Zygote, NearestNeighbors, LinearAlgebra, Statistics, CuArrays, FileIO, SparseArrays, Requires
+using Flux, Zygote, NearestNeighbors, LinearAlgebra, Statistics, CUDA, FileIO, SparseArrays, Requires
 using Base: tail
 import Zygote: @nograd, @ignore
 import GeometryBasics
@@ -11,10 +11,10 @@ export gpu, cpu, Chain
 # borowed from Flux.jl
 const use_cuda = Ref(false)
 function __init__()
-  use_cuda[] = CuArrays.functional() # Can be overridden after load with `Flux.use_cuda[] = false`
-  if CuArrays.functional()
-    if !CuArrays.has_cudnn()
-      @warn "CuArrays.jl found cuda, but did not find libcudnn. Some functionality will not be available."
+  use_cuda[] = CUDA.functional() # Can be overridden after load with `Flux.use_cuda[] = false`
+  if CUDA.functional()
+    if !CUDA.has_cudnn()
+      @warn "CUDA.jl found cuda, but did not find libcudnn. Some functionality will not be available."
     end
   end
 end
