@@ -38,7 +38,7 @@ ROT_MATRIX = [1.0 2.0 3.0
 npoint_arr = 2 .^ [12, 14, 16, 18, 20]
 
 names = ["Scale", "Rotate", "Realign", "Normalize"] .* "PointCloud"
-push!(names, "Compose")
+push!(names, "Chain")
 
 cpu_benchmarks = setup_benchmark_record(names)
 
@@ -53,7 +53,7 @@ for _npoints in npoint_arr
              ScalePointCloud(0.5; inplace=false),
 	     RotatePointCloud(ROT_MATRIX; inplace=false),
 	     ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
-	     NormalizePointCloud()), "Compose")
+	     NormalizePointCloud()), "Chain")
     ]
 
     println("Running benchmarks for npoints = $_npoints")
@@ -78,7 +78,7 @@ if has_cuda()
                  ScalePointCloud(0.5; inplace=false),
 	         RotatePointCloud(ROT_MATRIX; inplace=false),
 	         ReAlignPointCloud(realign_point_cloud(_npoints); inplace=false),
-	         NormalizePointCloud(inplace=false)), "Compose")
+	         NormalizePointCloud(inplace=false)), "Chain")
          ]
 
         println("Running benchmarks for npoints = $_npoints")

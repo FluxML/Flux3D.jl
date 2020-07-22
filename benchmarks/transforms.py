@@ -70,7 +70,7 @@ ROT_MATRIX = torch.tensor([[1.0, 2.0, 3.0],
 npoint_arr = 2 ** np.array([12, 14, 16, 18, 20])
 
 names = ["ScalePointCloud", "RotatePointCloud",
-         "RealignPointCloud", "NormalizePointCloud", "Compose"]
+         "RealignPointCloud", "NormalizePointCloud", "Chain"]
 
 print("DEVICE: CPU")
 device = "cpu"
@@ -84,7 +84,7 @@ for _npoints in npoint_arr:
        (T.Compose([T.ScalePointCloud(torch.Tensor([.5]).to(device), inplace=False),
                   T.RotatePointCloud(torch.randn(3,3).to(device), inplace=False),
                   T.RealignPointCloud(realign_point_cloud(_npoints, device), inplace=False),
-                  T.NormalizePointCloud(inplace=False)]), "Compose")]
+                  T.NormalizePointCloud(inplace=False)]), "Chain")]
     print("Running benchmarks for npoints = {}".format(_npoints))
     run_benchmarks_(cpu_benchmarks, arr, _npoints, cpu_time, device)
     print()
@@ -102,7 +102,7 @@ if torch.cuda.is_available():
            (T.Compose([T.ScalePointCloud(torch.Tensor([.5]).to(device), inplace=False),
                       T.RotatePointCloud(torch.randn(3,3).to(device), inplace=False),
                       T.RealignPointCloud(realign_point_cloud(_npoints, device), inplace=False),
-                      T.NormalizePointCloud(inplace=False)]), "Compose")]
+                      T.NormalizePointCloud(inplace=False)]), "Chain")]
         print("Running benchmarks for npoints = {}".format(_npoints))
         run_benchmarks_(gpu_benchmarks, arr, _npoints, gpu_time, device)
         print()
