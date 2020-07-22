@@ -1,6 +1,5 @@
 abstract type AbstractObject end
 abstract type AbstractCustomObject <: AbstractObject end
-abstract type AbstractMesh{T,R} <: AbstractObject end
 
 function _lg_cross(A::AbstractArray, B::AbstractArray)
     if !(size(A, 1) == size(B, 1) == 3)

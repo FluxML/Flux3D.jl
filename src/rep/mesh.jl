@@ -67,19 +67,19 @@ Initialize Triangle Mesh representation.
 - `TriMesh(m::TriMesh)`
 
 """
-mutable struct TriMesh{T<:AbstractFloat,R<:Integer} <: AbstractMesh{T,R}
+mutable struct TriMesh{T<:AbstractFloat,R<:Integer,S} <: AbstractObject
     N::Int64
     V::Int64
     F::Int64
     equalised::Bool
     valid::BitArray{1}
     offset::Int8
-    _verts_len::AbstractArray{Int,1}
-    _faces_len::AbstractArray{Int,1}
+    _verts_len::S
+    _faces_len::S
 
-    _verts_packed::AbstractArray{T,2}
-    _verts_padded::AbstractArray{T,3}
-    _verts_list::Vector{<:AbstractArray{T,2}}
+    _verts_packed::S
+    _verts_padded::S
+    _verts_list::Vector{<:S}
     _verts_packed_valid::Bool
     _verts_padded_valid::Bool
     _verts_list_valid::Bool
@@ -89,7 +89,6 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer} <: AbstractMesh{T,R}
     _faces_list::Vector{Array{R,2}}
     _faces_packed_valid::Bool
     _faces_padded_valid::Bool
-    _faces_list_valid::Bool
 
     _edges_packed::Union{Nothing,Array{R,2}}
     _faces_to_edges_packed::Union{Nothing,Array{R,2}}
@@ -98,7 +97,6 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer} <: AbstractMesh{T,R}
     _edges_to_key::Union{Nothing,Dict{Tuple{R,R},R}}
 end
 
-#done
 TriMesh(
     verts::Vector{<:AbstractArray{T,2}},
     faces::Vector{<:AbstractArray{R,2}};
@@ -106,11 +104,24 @@ TriMesh(
 ) where {T<:Number,R<:Number} =
     TriMesh([Float32.(v) for v in verts], [UInt32.(f) for f in faces]; offset = offset)
 
+TriMesh(
+    verts::Vector{<:CuArray{T,2}},
+    faces::Vector{<:AbstractArray{R,2}};
+    offset::Number = -1,
+) where {T<:AbstractFloat,R<:Integer} = TriMesh(CuArray, verts, faces; offset = offset)
+
+TriMesh(
+    verts::Vector{<:Array{T,2}},
+    faces::Vector{<:AbstractArray{R,2}};
+    offset::Number = -1,
+) where {T<:AbstractFloat,R<:Integer} = TriMesh(Array, verts, faces; offset = offset)
+
 function TriMesh(
+    ::Type{S},
     verts::Vector{<:AbstractArray{T,2}},
     faces::Vector{<:AbstractArray{R,2}};
     offset::Number = -1,
-) where {T<:AbstractFloat,R<:Integer}
+) where {S,T<:AbstractFloat,R<:Integer}
 
     length(verts) == length(faces) ||
         error("batch size of verts and faces should match, $(length(verts)) != $(length(faces))")
@@ -119,8 +130,9 @@ function TriMesh(
     verts = [T.(v) for v in verts]
     faces = [R.(f) for f in faces]
 
-    _verts_len = size.(verts, 2)
-    _faces_len = size.(faces, 2)
+    _verts_len = S(size.(verts, 2))
+    _faces_len = S(size.(faces, 2))
+
     N = length(verts)
     V = maximum(_verts_len)
     F = maximum(_faces_len)
@@ -128,14 +140,10 @@ function TriMesh(
     valid = _faces_len .> 0
     offset = Int8(offset)
 
-    _verts_list = verts
-    _faces_list = faces
+    _verts_list = verts::Vector{<:S{T,2}}
+    _faces_list = faces::Vector{Array{R,2}}
 
-    if verts[1] isa CuArrays.CuArray
-        _verts_len = gpu(_verts_len)
-        _faces_len = gpu(_faces_len)
-    end
-    return TriMesh(
+    return TriMesh{T,R,S}(
         N,
         V,
         F,
@@ -144,18 +152,17 @@ function TriMesh(
         offset,
         _verts_len,
         _faces_len,
-        rand(T,1,1),
-        rand(T,1,1,1),
+        rand(T, 1, 1),
+        rand(T, 1, 1, 1),
         _verts_list,
         false,
         false,
         true,
-        rand(R,1,1),
-        rand(R,1,1,1),
+        rand(R, 1, 1),
+        rand(R, 1, 1, 1),
         _faces_list,
         false,
         false,
-        true,
         nothing,
         nothing,
         nothing,
@@ -163,7 +170,6 @@ function TriMesh(
     )
 end
 
-#done
 function TriMesh(ms::Vector{<:GeometryBasics.Mesh})
     verts_list = Array{Float32,2}[]
     faces_list = Array{UInt32,2}[]
@@ -181,8 +187,47 @@ TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
 # @functor TriMesh
 functor(x::TriMesh) =
     (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list)
-# functor(::Type{<:TriMesh}, x) = (_verts_list = x._verts_list,), xs->TriMesh(xs._verts_list,x._faces_list)
-# functor(::Type{<:Chain}, c) = c.layers, ls -> Chain(ls...)
+
+function Base.show(io::IO, m::TriMesh{T,R,S}) where {T,R,S}
+    print(
+        io,
+        "TriMesh Structure:\n    Batch size: ",
+        m.N,
+        "\n    Max verts: ",
+        m.V,
+        "\n    Max faces: ",
+        m.F,
+        "\n    offset: ",
+        m.offset,
+        "\n    Storage type: ",
+        S
+    )
+end
+
+function Base.setproperty!(m::TriMesh, f::Symbol, v)
+    if (f == :_verts_packed) || (f == :_verts_padded) || (f == :_verts_list)
+        # only attempt to change if given object is not same as object already
+        # present inside struct, which can be checked with !== operator.
+        # List is always valid, so to make sure that we refresh list always
+        if (f == :_verts_packed) && (getproperty(m, f) !== v)
+            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+            setfield!(m, :_verts_padded_valid, false)
+            _compute_verts_list(m, true)
+        elseif (f == :_verts_padded) && (getproperty(m, f) !== v)
+            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+            setfield!(m, :_verts_packed_valid, false)
+            _compute_verts_list(m, true)
+        elseif (f == :_verts_list) && (getproperty(m, f) !== v)
+            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+            setfield!(m, :_verts_packed_valid, false)
+            setfield!(m, :_verts_padded_valid, false)
+        end
+    else
+        setfield!(m, f, convert(fieldtype(typeof(m), f), v))
+    end
+end
+
+Base.getindex(m::TriMesh, inds...) = (m._verts_list[inds...], m._faces_list[inds...])
 
 """
     GBMesh(m::TriMesh; index::Int = 1)
@@ -192,7 +237,6 @@ Initialize GeometryBasics.Mesh from triangle mesh in TriMesh `m` at `index`.
 
 See also: [`gbmeshes`](@ref)
 """
-#done
 function GBMesh(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}) where {T,R}
     points = Point3f0[GeometryBasics.Point{3,Float32}(verts[:, i]) for i = 1:size(verts, 2)]
     verts_dim = size(faces, 1)
@@ -204,7 +248,6 @@ function GBMesh(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}) where {T,R
     return GeometryBasics.Mesh(meta(points), faces)
 end
 
-#done
 GBMesh(m::TriMesh, index::Int = 1) = GBMesh(m[index]...)
 
 """
@@ -214,7 +257,6 @@ Initialize list of GeometryBasics.Mesh from TriMesh `m`
 
 See also: [`gbmeshes`](@ref)
 """
-#done
 function gbmeshes(m::TriMesh)
     gbmeshes = [GBMesh(m, i) for i = 1:m.N]
     return gbmeshes
@@ -226,7 +268,6 @@ end
 Returns `vertices` and `faces` in Array format.
 
 """
-#done
 function _load_meta(m::GeometryBasics.Mesh)
     if !(m isa GeometryBasics.Mesh{3,Float32,<:GeometryBasics.Triangle})
         m = triangle_mesh(m)
@@ -250,7 +291,6 @@ It will load TriMesh with multiple meshes, if list of files `fns` is given.
 Supported formats are `obj`, `stl`, `ply`, `off` and `2DM`.
 
 """
-#done
 function load_trimesh(fn::String; elements_types...)
     mesh = load(fn; elements_types...)
     verts, faces = _load_meta(mesh)
@@ -258,7 +298,6 @@ function load_trimesh(fn::String; elements_types...)
     return TriMesh([verts], [faces])
 end
 
-#done
 function load_trimesh(fns::Vector{String}; elements_types...)
     verts_list = Array{Float32,2}[]
     faces_list = Array{UInt32,2}[]
@@ -312,31 +351,6 @@ function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
     close(io)
 end
 
-function Base.setproperty!(m::TriMesh, f::Symbol, v)
-    if (f == :_verts_packed) || (f == :_verts_padded) || (f == :_verts_list)
-        # only attempt to change if given object is not same as object already
-        # present inside struct, which can be checked with !== operator.
-        # List is always valid, so to make sure that we refresh list always
-        if (f == :_verts_packed) && (getproperty(m, f) !== v)
-            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-            setfield!(m, :_verts_padded_valid, false)
-            _compute_verts_list(m, true)
-        elseif (f == :_verts_padded) && (getproperty(m, f) !== v)
-            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-            setfield!(m, :_verts_packed_valid, false)
-            _compute_verts_list(m, true)
-        elseif (f == :_verts_list) && (getproperty(m, f) !== v)
-            setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-            setfield!(m, :_verts_packed_valid, false)
-            setfield!(m, :_verts_padded_valid, false)
-        end
-    else
-        setfield!(m, f, convert(fieldtype(typeof(m), f), v))
-    end
-end
-
-Base.getindex(m::TriMesh, inds...) = (m._verts_list[inds...], m._faces_list[inds...])
-
 """
     get_verts_packed(m::TriMesh; refresh::Bool = false)
 
@@ -354,10 +368,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_verts_packed(m)
 ````
 """
-function get_verts_packed(
-    m::TriMesh{T,R};
-    refresh::Bool = false,
-)::AbstractArray{T,2} where {T,R}
+function get_verts_packed(m::TriMesh{T,R,S}; refresh::Bool = false)::S{T,2} where {T,R,S}
     _compute_verts_packed(m, refresh)
     return m._verts_packed
 end
@@ -379,10 +390,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_verts_padded(m)
 ````
 """
-function get_verts_padded(
-    m::TriMesh{T,R};
-    refresh::Bool = false,
-)::AbstractArray{T,3} where {T,R}
+function get_verts_padded(m::TriMesh{T,R,S}; refresh::Bool = false)::S{T,3} where {T,R,S}
     _compute_verts_padded(m, refresh)
     return m._verts_padded
 end
@@ -405,9 +413,9 @@ julia> get_verts_list(m)
 ````
 """
 function get_verts_list(
-    m::TriMesh{T,R};
+    m::TriMesh{T,R,S};
     refresh::Bool = false,
-)::Vector{<:AbstractArray{T,2}} where {T,R}
+)::Vector{<:S{T,2}} where {T,R,S}
     return m._verts_list
 end
 
@@ -428,10 +436,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_faces_packed(m)
 ````
 """
-function get_faces_packed(
-    m::TriMesh{T,R};
-    refresh::Bool = false,
-)::AbstractArray{R,2} where {T,R}
+function get_faces_packed(m::TriMesh{T,R}; refresh::Bool = false)::Array{R,2} where {T,R}
     @ignore _compute_faces_packed(m, refresh)
     return m._faces_packed
 end
@@ -453,10 +458,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_faces_padded(m)
 ````
 """
-function get_faces_padded(
-    m::TriMesh{T,R};
-    refresh::Bool = false,
-)::AbstractArray{R,3} where {T,R}
+function get_faces_padded(m::TriMesh{T,R}; refresh::Bool = false)::Array{R,3} where {T,R}
     @ignore _compute_faces_padded(m, refresh)
     return m._faces_padded
 end
@@ -481,7 +483,7 @@ julia> get_faces_list(m)
 function get_faces_list(
     m::TriMesh{T,R};
     refresh::Bool = false,
-)::Array{Array{R,2},1} where {T,R}
+)::Vector{Array{R,2}} where {T,R}
     return m._faces_list
 end
 
@@ -503,10 +505,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> get_edges_packed(m)
 ````
 """
-function get_edges_packed(
-    m::TriMesh{T,R};
-    refresh::Bool = false,
-)::AbstractArray{R,2} where {T,R}
+function get_edges_packed(m::TriMesh{T,R}; refresh::Bool = false)::Array{R,2} where {T,R}
     @ignore _compute_edges_packed(m, refresh)
     return m._edges_packed
 end
@@ -560,7 +559,7 @@ julia> get_faces_to_edges_packed(m)
 function get_faces_to_edges_packed(
     m::TriMesh{T,R};
     refresh::Bool = false,
-)::AbstractArray{R,2} where {T,R}
+)::Array{R,2} where {T,R}
     @ignore _compute_edges_packed(m, refresh)
     return m._faces_to_edges_packed
 end
@@ -586,7 +585,7 @@ julia> get_laplacian_packed(m)
 function get_laplacian_packed(
     m::TriMesh{T,R};
     refresh::Bool = false,
-)::AbstractSparseArray{T,R,2} where {T,R}
+)::SparseMatrixCSC{T,R} where {T,R}
     _compute_laplacian_packed(m, refresh)
     return m._laplacian_packed
 end
@@ -613,7 +612,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_verts_normals_packed(m)
 ````
 """
-function compute_verts_normals_packed(m::TriMesh{T,R}) where {T,R}
+function compute_verts_normals_packed(m::TriMesh{T,R,S})::S{T,2} where {T,R,S}
 
     verts = get_verts_packed(m)
     faces = get_faces_packed(m)
@@ -664,7 +663,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_verts_normals_padded(m)
 ````
 """
-function compute_verts_normals_padded(m::TriMesh)
+function compute_verts_normals_padded(m::TriMesh{T,R,S})::S{T,3} where {T,R,S}
     normals_packed = compute_verts_normals_packed(m)
     normals_padded = _packed_to_padded(normals_packed, m._verts_len, 0.0)
     return normals_padded
@@ -690,7 +689,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_verts_normals_list(m)
 ````
 """
-function compute_verts_normals_list(m::TriMesh)
+function compute_verts_normals_list(m::TriMesh{T,R,S})::Vector{<:S{T,2}} where {T,R,S}
     normals_packed = compute_verts_normals_packed(m)
     normals_list = _packed_to_list(normals_packed, m._verts_len)
     return normals_list
@@ -713,7 +712,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_normals_packed(m)
 ````
 """
-function compute_faces_normals_packed(m::TriMesh)
+function compute_faces_normals_packed(m::TriMesh{T,R,S})::S{T,2} where {T,R,S}
     verts = get_verts_packed(m)
     faces = get_faces_packed(m)
 
@@ -743,7 +742,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_normals_padded(m)
 ````
 """
-function compute_faces_normals_padded(m::TriMesh)
+function compute_faces_normals_padded(m::TriMesh{T,R,S})::S{T,3} where {T,R,S}
     normals_packed = compute_faces_normals_packed(m)
     normals_padded = _packed_to_padded(normals_packed, m._faces_len, 0.0)
     return normals_padded
@@ -766,7 +765,7 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_normals_list(m)
 ````
 """
-function compute_faces_normals_list(m::TriMesh)
+function compute_faces_normals_list(m::TriMesh{T,R,S})::Vector{<:S{T,2}} where {T,R,S}
     normals_packed = compute_faces_normals_packed(m)
     normals_list = _packed_to_list(normals_packed, m._faces_len)
     return normals_list
@@ -789,7 +788,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_areas_packed(m)
 ````
 """
-function compute_faces_areas_packed(m::TriMesh; eps::Number = 1e-6)
+function compute_faces_areas_packed(
+    m::TriMesh{T,R,S};
+    eps::Number = 1e-6,
+)::S{T,1} where {T,R,S}
     verts = get_verts_packed(m)
     faces = get_faces_packed(m)
 
@@ -820,7 +822,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_areas_padded(m)
 ````
 """
-function compute_faces_areas_padded(m::TriMesh; eps::Number = 1e-6)
+function compute_faces_areas_padded(
+    m::TriMesh{T,R,S};
+    eps::Number = 1e-6,
+)::S{T,3} where {T,R,S}
     areas_packed = compute_faces_areas_packed(m; eps = eps)
     # increasing ndims to 2, to support _packed_to_list
     areas_packed = reshape(areas_packed, 1, :)
@@ -845,7 +850,10 @@ julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_areas_list(m)
 ````
 """
-function compute_faces_areas_list(m::TriMesh; eps::Number = 1e-6)
+function compute_faces_areas_list(
+    m::TriMesh{T,R,S};
+    eps::Number = 1e-6,
+)::Vector{<:S{T,2}} where {T,R,S}
     areas_packed = compute_faces_areas_packed(m; eps = eps)
     # increasing ndims to 2, to support _packed_to_list
     areas_packed = reshape(areas_packed, 1, :)

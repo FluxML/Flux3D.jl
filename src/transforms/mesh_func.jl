@@ -18,10 +18,10 @@ julia> points, normals = sample_points(m, 5000; returns_normals=true)
 
 """
 function sample_points(
-    m::TriMesh{T,R},
+    m::TriMesh{T,R,S},
     num_samples::Int = 5000;
     eps::Number = EPS,
-) where {T,R}
+)::S{T,3} where {T,R,S}
     verts_padded = get_verts_padded(m)
     faces_padded = get_faces_padded(m)
     faces_areas_padded = compute_faces_areas_padded(m)
@@ -41,26 +41,23 @@ function sample_points(
         sample_faces_idx = @ignore rand(dist, num_samples)
         sample_faces = faces_padded[:, sample_faces_idx, i]
         samples[:, :, i] =
-            _sample_points(verts_padded[:,1:m._verts_len[i],i], sample_faces, num_samples)
+            _sample_points(S,verts_padded[:,1:m._verts_len[i],i], sample_faces, num_samples)
     end
 
     return copy(samples)
 end
 
 function _sample_points(
+    ::Type{S},
     verts::AbstractArray{T,2},
     sample_faces::AbstractArray{R,2},
     num_samples::Int,
-) where {T,R}
+) where {S,T,R}
 
     v1 = verts[:, sample_faces[1, :]]
     v2 = verts[:, sample_faces[2, :]]
     v3 = verts[:, sample_faces[3, :]]
-    if verts isa CuArray
-        (w1, w2, w3) = gpu(_rand_barycentric_coords(num_samples))
-    else
-        (w1, w2, w3) = _rand_barycentric_coords(num_samples)
-    end
+    (w1, w2, w3) = S.(_rand_barycentric_coords(num_samples))
     samples = (w1 .* v1) + (w2 .* v2) + (w3 .* v3)
     return samples
 end
