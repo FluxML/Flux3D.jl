@@ -12,7 +12,13 @@ include("utils.jl")
     @info "Testing Transforms..."
     @testset "Transforms" begin
         include("transforms/pcloud_func.jl")
+        include("transforms/mesh_func.jl")
         include("transforms/transforms.jl")
+    end
+
+    @info "Testing Metrics..."
+    @testset "Metrics" begin
+        include("metrics.jl")
     end
 
     @info "Testing Models..."
@@ -20,6 +26,7 @@ include("utils.jl")
         include("models.jl")
     end
 
+    # TODO: download link for modelnet is down
     # @info "Testing Dataset..."
     # @testset "Dataset" begin
     #     include("dataset.jl")
@@ -28,9 +35,10 @@ include("utils.jl")
     @info "Testing GPU support..."
     @testset "CUDA" begin
         if Flux3D.use_cuda[]
-            using CuArrays
+            using CUDA
             include("cuda/rep.jl")
             include("cuda/transforms.jl")
+            include("cuda/metrics.jl")
         else
             @warn "CUDA unavailable, not testing GPU support"
         end
