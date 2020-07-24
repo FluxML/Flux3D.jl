@@ -345,7 +345,7 @@ function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
 
     # write faces data
     for f in fcs
-        Printf.@printf(io, "f %d %d %d\n", f...)
+        Printf.@printf(io, "f %d %d %d\n", Int.(f)...)
     end
 
     close(io)

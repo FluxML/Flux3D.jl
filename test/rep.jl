@@ -69,9 +69,7 @@ end
     # IO Tests
     @testset "IO" begin
         mktempdir() do tmpdir
-            # for ext in ["obj", "off", "stl", "ply", "2dm"]
-            # TODO: there is some error with obj format while setting up Flux3D from new env
-            for ext in ["off", "stl", "ply", "2dm"]
+            for ext in ["obj", "off", "stl", "ply", "2dm"]
                 save_trimesh(joinpath(tmpdir, "test.$(ext)"), m)
                 m_loaded = load_trimesh(joinpath(tmpdir, "test.$(ext)"))
                 @test all(isapprox.(get_verts_packed(m_loaded), verts_list[1]))
