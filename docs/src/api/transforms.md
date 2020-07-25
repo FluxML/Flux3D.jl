@@ -1,12 +1,9 @@
 ```@meta
 CurrentModule = Flux3D
 ```
-
-# Flux3D
-
-<!-- ```@index
-```
+# Tranforms
 
 ```@autodocs
 Modules = [Flux3D]
-``` -->
+Pages = ["transforms.jl"]
+```

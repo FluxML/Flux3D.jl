@@ -1,12 +1,9 @@
 ```@meta
 CurrentModule = Flux3D
 ```
-
-# Flux3D
-
-<!-- ```@index
-```
+# PointCloud Structure
 
 ```@autodocs
 Modules = [Flux3D]
-``` -->
+Pages = ["src/rep/pcloud.jl"]
+```

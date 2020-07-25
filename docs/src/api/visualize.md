@@ -1,12 +1,9 @@
 ```@meta
 CurrentModule = Flux3D
 ```
-
-# Flux3D
-
-<!-- ```@index
-```
+# Vusualize functions
 
 ```@autodocs
 Modules = [Flux3D]
-``` -->
+Pages = ["visualize.jl"]
+```

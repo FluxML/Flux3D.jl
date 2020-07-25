@@ -13,6 +13,25 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Tutorials"         => [
+            "PointNet classication"        => "tutorials/pointnet.md",
+            "DGCNN classication"           => "tutorials/dgcnn.md",
+            "Supervised 3D reconstruction" => "tutorials/fit_mesh.md",
+        ],
+        "3D Structure"      => [
+            "PointCloud"                   => "rep/pointcloud.md",
+            "TriMesh"                      => "rep/trimesh.md",
+        ],
+        "Datasets"          => [
+            "ModelNet"                     => "datasets/modelnet.md",
+            "Utilities"                    => "datasets/utils.md"
+        ],
+        "API Documentation" => [
+            "Transforms"                   => "api/transforms.md",
+            "Metrics"                      => "api/metrics.md",
+            "Visualization"                => "api/visualize.md",
+            # "3D Models"     => "api/models.md"
+        ]
     ],
 )
 
