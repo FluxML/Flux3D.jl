@@ -96,7 +96,7 @@ function normalize!(m::TriMesh)
             (sum((verts_padded .- _centroid) .^ 2; dims = 2) - _correction) ./ (_len .- 1),
         )
     verts_padded = (verts_padded .- _centroid) ./ max.(_std, EPS)
-    m._verts_packed = _padded_to_packed(verts_padded, m._verts_len)
+    m._verts_list = _padded_to_list(verts_padded, m._verts_len)
     return m
 end
 
