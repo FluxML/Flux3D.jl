@@ -16,7 +16,7 @@ end
 
 function generate_trimesh(npoints::Int)
     v = ones(3, npoints)
-    v = cumsum(points, dims = 2) / npoints
+    v = cumsum(v, dims = 2) / npoints
     f = reshape(collect(1:npoints*3), 3, npoints)
     return TriMesh([v], [f])
 end
@@ -50,7 +50,7 @@ ROT_MATRIX = [
     3.0 2.0 1.0
 ]
 
-npoint_arr = 2 .^ [12]#, 14, 16, 18, 20]
+npoint_arr = 2 .^ [12, 14, 16, 18, 20]
 
 names = [
     "ScalePointCloud",
@@ -152,16 +152,16 @@ if has_cuda()
             pcloud_arr,
             _npoints,
             generate_point_cloud,
-            (op, pc) -> (CuArrays.@sync op(pc)),
-            gpu,
+            (op, pc) -> (CUDA.@sync op(pc)),
+            gpu
         )
         run_benchmarks!(
             gpu_bm_trimesh,
             trimesh_arr,
             _npoints,
             generate_trimesh,
-            (op, pc) -> (CuArrays.@sync op(pc)),
-            gpu,
+            (op, pc) -> (CUDA.@sync op(pc)),
+            gpu
         )
         println()
     end

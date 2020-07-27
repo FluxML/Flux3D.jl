@@ -73,16 +73,16 @@ ROT_MATRIX = torch.tensor([[1.0, 2.0, 3.0],
                            [0.2, 0.5, 0.9],
                            [3.0, 2.0, 1.0]])
 
-npoint_arr = 2 ** np.array([12])#, 14, 16, 18, 20])
+npoint_arr = 2 ** np.array([12, 14, 16, 18, 20])
 
 names = ["ScalePointCloud", "RotatePointCloud",
-         "RealignPointCloud", "NormalizePointCloud", "Chain"]
+         "ReAlignPointCloud", "NormalizePointCloud", "Chain"]
 
 cpu_bm_pcloud = setup_benchmark_record(names)
 gpu_bm_pcloud = setup_benchmark_record(names)
 
 names = ["ScaleTriMesh", "RotateTriMesh",
-         "RealignTriMesh", "NormalizeTriMesh", "Chain"]
+         "ReAlignTriMesh", "NormalizeTriMesh", "Chain"]
 
 cpu_bm_trimesh = setup_benchmark_record(names)
 gpu_bm_trimesh = setup_benchmark_record(names)
@@ -184,7 +184,8 @@ def save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks):
                 io.write("{} {} {} {} {} ms\n".format(rep, device, key, p, v))
 
 fname = os.path.join(os.path.dirname(__file__), "bm_kaolin.txt")
-os.remove(fname)
+if os.path.exists(fname):
+    os.remove(fname)
 save_bm(fname, "PointCloud", cpu_bm_pcloud, gpu_bm_pcloud)
 save_bm(fname, "TriMesh", cpu_bm_trimesh, gpu_bm_trimesh)
 print("Benchmarks have been saved at {}".format(fname))
