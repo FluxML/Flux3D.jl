@@ -418,6 +418,7 @@ function get_verts_list(
     m::TriMesh{T,R,S};
     refresh::Bool = false,
 )::Vector{<:S{T,2}} where {T,R,S}
+    _compute_verts_list(m, refresh)
     return m._verts_list
 end
 
