@@ -17,7 +17,7 @@ function read_benchmarks(fname, framework)
     return data
 end
 
-function plot_benchmarks(fname, bm, category)
+function save_benchmarks(fname, bm, category)
     # using Theme(background_color = colorant"white")
     # as arg in plot to force white background
     p = plot(
@@ -37,5 +37,5 @@ bm_flux3d = read_benchmarks(joinpath(@__DIR__, "bm_flux3d.txt"), "Flux3D.jl")
 bm_kaolin = read_benchmarks(joinpath(@__DIR__, "bm_kaolin.txt"), "Kaolin")
 bm = vcat(bm_flux3d, bm_kaolin)
 
-plot_benchmarks(joinpath(@__DIR__,"pics/bm_pcloud.png"), bm, "PointCloud")
-plot_benchmarks(joinpath(@__DIR__,"pics/bm_trimesh.png"), bm, "TriMesh")
+save_benchmarks(joinpath(@__DIR__,"pics/bm_pcloud.png"), bm, "PointCloud")
+save_benchmarks(joinpath(@__DIR__,"pics/bm_trimesh.png"), bm, "TriMesh")

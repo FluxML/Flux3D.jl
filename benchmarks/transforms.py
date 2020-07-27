@@ -92,7 +92,7 @@ device = "cpu"
 for _npoints in npoint_arr:
     pcloud_arr = [(T.ScalePointCloud(torch.Tensor([.5]).to(device), inplace=False), "ScalePointCloud"),
        (T.RotatePointCloud(ROT_MATRIX.to(device), inplace=False), "RotatePointCloud"),
-       (T.RealignPointCloud(realign_point_cloud(_npoints, device), inplace=False), "RealignPointCloud"),
+       (T.RealignPointCloud(realign_point_cloud(_npoints, device), inplace=False), "ReAlignPointCloud"),
        (T.NormalizePointCloud(inplace=False), "NormalizePointCloud"),
        (T.Compose([T.ScalePointCloud(torch.Tensor([.5]).to(device), inplace=False),
                   T.RotatePointCloud(torch.randn(3,3).to(device), inplace=False),
@@ -102,7 +102,7 @@ for _npoints in npoint_arr:
 
     trimesh_arr = [(T.ScaleMesh(.5, inplace=True), "ScaleTriMesh"),
        (T.RotateMesh(ROT_MATRIX.to(device), inplace=True), "RotateTriMesh"),
-       (T.RealignMesh(realign_trimesh(_npoints, device).vertices), "RealignTriMesh"),
+       (T.RealignMesh(realign_trimesh(_npoints, device).vertices), "ReAlignTriMesh"),
        (T.NormalizeMesh(inplace=True), "NormalizeTriMesh"),
        (T.Compose([T.ScaleMesh(.5, inplace=True),
               T.RotateMesh(ROT_MATRIX.to(device), inplace=True),
@@ -135,7 +135,7 @@ if torch.cuda.is_available():
     for _npoints in npoint_arr:
         pcloud_arr = [(T.ScalePointCloud(torch.Tensor([.5]).to(device), inplace=False), "ScalePointCloud"),
            (T.RotatePointCloud(ROT_MATRIX.to(device), inplace=False), "RotatePointCloud"),
-           (T.RealignPointCloud(realign_point_cloud(_npoints, device), inplace=False), "RealignPointCloud"),
+           (T.RealignPointCloud(realign_point_cloud(_npoints, device), inplace=False), "ReAlignPointCloud"),
            (T.NormalizePointCloud(inplace=False), "NormalizePointCloud"),
            (T.Compose([T.ScalePointCloud(torch.Tensor([.5]).to(device), inplace=False),
                       T.RotatePointCloud(torch.randn(3,3).to(device), inplace=False),
@@ -145,7 +145,7 @@ if torch.cuda.is_available():
 
         trimesh_arr = [(T.ScaleMesh(.5, inplace=True), "ScaleTriMesh"),
            (T.RotateMesh(ROT_MATRIX.to(device), inplace=True), "RotateTriMesh"),
-           (T.RealignMesh(realign_trimesh(_npoints, device).vertices), "RealignTriMesh"),
+           (T.RealignMesh(realign_trimesh(_npoints, device).vertices), "ReAlignTriMesh"),
            (T.NormalizeMesh(inplace=True), "NormalizeTriMesh"),
            (T.Compose([T.ScaleMesh(.5, inplace=True),
                   T.RotateMesh(ROT_MATRIX.to(device), inplace=True),
