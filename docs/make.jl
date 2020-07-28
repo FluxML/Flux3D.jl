@@ -3,6 +3,7 @@ using Documenter
 
 makedocs(;
     modules=[Flux3D],
+    doctest = false,
     authors="Nirmal P. Suthar <nirmalps@iitk.ac.in>",
     repo="https://github.com/nirmal-suthar/Flux3D.jl/blob/{commit}{path}#L{line}",
     sitename="Flux3D.jl",

@@ -15,7 +15,7 @@ Supported `mode` are {`:pointcloud`}.
 
 ### Optional Arguments:
 
-* #### For `mode=:pointcloud`
+* For `mode=:pointcloud`
 
     * `root::String=default_root`   - Root directory of dataset
     * `train::Bool=true`            - Specifies the trainset 
@@ -25,7 +25,7 @@ Supported `mode` are {`:pointcloud`}.
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> dset = ModelNet10.dataset(;mode=:pointcloud, train=false)
 julia> typeof(dset[1].data) == PointCloud
 ```
