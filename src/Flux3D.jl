@@ -40,7 +40,7 @@ using .Dataset
 export CustomDataset, ModelNet10, ModelNet40
 
 # visualization
-@init @require Makie="ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a" include("visualize.jl")
+@init @require AbstractPlotting="537997a7-5e4e-5d89-9595-2241ea00577e" include("visualize.jl")
 
 # models
 include("models/utils.jl")
