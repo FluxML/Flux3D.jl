@@ -47,10 +47,28 @@ function _list_to_padded(
     is_similar::Bool = false
 )   where {T<:Number}
 
-    all(ndims.(list) .== 2) || error("only 2d arrays are supported")
-    if is_similar
-        return Flux.stack(list, ndims(list[1])+1)
+    if pad_size isa Nothing
+        pad_size = (maximum(size.(list,1)), maximum(size.(list, 2)))
+    else
+        length(pad_size) == 2 || error("pad_size should be a tuple of length 2")
     end
+    padded = similar(list[1], pad_size..., length(list))
+    padded = _list_to_padded!(padded, list, pad_value, pad_size, is_similar=is_similar)
+    return padded
+end
+
+function _list_to_padded!(
+    padded::AbstractArray{T,3},
+    list::Vector{<:AbstractArray{T, 2}},
+    pad_value::Number,
+    pad_size::Union{Nothing, Tuple}=nothing;
+    is_similar::Bool = false
+)   where {T<:Number}
+
+    all(ndims.(list) .== 2) || error("only 2d arrays are supported")
+    # if is_similar
+    #     return Flux.stack(list, ndims(list[1])+1)
+    # end
 
     if pad_size isa Nothing
         pad_size = (maximum(size.(list,1)), maximum(size.(list, 2)))
@@ -58,14 +76,14 @@ function _list_to_padded(
         length(pad_size) == 2 || error("pad_size should be a tuple of length 2")
     end
 
-    padded = @ignore fill!(similar(list[1], pad_size..., length(list)), T.(pad_value))
+    padded = @ignore fill!(padded, T.(pad_value))
     padded = Zygote.bufferfrom(padded)
 
     for (i,x) in enumerate(list)
         padded[1:size(x,1), 1:size(x,2),i] = x
     end
 
-    return copy(padded)
+    padded = copy(padded)
 end
 
 function _list_to_packed(
@@ -78,11 +96,22 @@ function _list_to_packed(
     return packed
 end
 
+# function _list_to_packed!(
+#     packed::AbstractArray{T,2},
+#     list::Vector{<:AbstractArray{T, 2}}
+# )   where {T<:Number}
+#
+#     all(ndims.(list) .== 2) || error("only 2d arrays are supported")
+#     packed = Zygote.bufferfrom(packed)
+#     cur_idx=1
+#     for x in list
+#         packed[:, cur_idx:cur_idx+size(x,2)-1] .= x
+#         cur_idx += size(x,2)
+#     end
+#     packed = copy(packed)
+#     return packed
+# end
 
-"""
-packed (sum(Mi),3)
-padded (N, max(Mi), 3)
-"""
 function _packed_to_padded(
     packed::AbstractArray{T, 2},
     items_len::AbstractArray{<:Number, 1},
@@ -93,7 +122,20 @@ function _packed_to_padded(
 
     _N = length(items_len)
     _M = maximum(items_len)
-    padded = @ignore fill!(similar(packed, size(packed,1), _M, _N), T.(pad_value))
+    padded = similar(packed, size(packed,1), _M, _N)
+    padded = _packed_to_padded!(padded, packed, items_len, pad_value)
+    return padded
+end
+
+function _packed_to_padded!(
+    padded::AbstractArray{T, 3},
+    packed::AbstractArray{T, 2},
+    items_len::AbstractArray{<:Number, 1},
+    pad_value::Number,
+)   where {T<:Number}
+
+    ndims(packed) == 2 || error("only 2d arrays are supported")
+    padded = @ignore fill!(padded, T.(pad_value))
     padded = Zygote.bufferfrom(padded)
     cur_idx = 1
     for (i,_len) in enumerate(items_len)
@@ -101,7 +143,8 @@ function _packed_to_padded(
         cur_idx += _len
     end
 
-    return copy(padded)
+    padded = copy(padded)
+    return padded
 end
 
 function _packed_to_list(
