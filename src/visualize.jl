@@ -21,7 +21,7 @@ function visualize(v::PointCloud, index::Number=1; kwargs...)
     get!(kwargs, :color, :blue)
     get!(kwargs, :markersize, 40 / npoints(v))
 
-    AbstractPlotting.meshscatter(v.points[:, 1], v.points[:, 2],v.points[:, 3];
+    AbstractPlotting.meshscatter(v.points[1,:], v.points[2,:],v.points[3,:];
                                  kwargs...)
 end
 

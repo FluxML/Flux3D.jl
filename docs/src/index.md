@@ -25,8 +25,7 @@ Currently the library is under development and is not registered. But to install
 ```
 
 !!! note
-    Rendering of 3D structure is done using Makie.jl, so do run `] add Makie` to use visualization utilities
-
+    Rendering of 3D structure is done using AbstractPlotting. Therefore, for visualization purpose we will be required to install AbstractPlotting and compatible backend (GLMakie or WGLMakie). To install it simply run `] add AbstractPlotting GLMakie` in the julia prompt
 ---
 
 ## Contents

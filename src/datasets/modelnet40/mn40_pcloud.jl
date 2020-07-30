@@ -22,7 +22,7 @@ PointCloud version of ModelNet40 dataset.
 ### Fields:
 
 * `root::String`    - Root directory of dataset
-* `path::String`    - Directory of dataset                                          
+* `path::String`    - Directory of dataset
 * `train::Bool`     - Specifies the trainset
 * `length::Int`     - Length of dataset.
 * `datapaths::Array`    - Array containing the shape and path for each datapoint.
@@ -34,7 +34,7 @@ PointCloud version of ModelNet40 dataset.
 
 """
 struct ModelNet40PCloud <: AbstractDataset
-    root::String 
+    root::String
     path::String
     train::Bool
     length::Int
@@ -47,13 +47,13 @@ struct ModelNet40PCloud <: AbstractDataset
 end
 
 function pcloud_extract(path, npoints)
-    pset = Array{Float32}(undef, npoints, 3)
-    nset = Array{Float32}(undef, npoints, 3)
+    pset = Array{Float32}(undef, 3, npoints)
+    nset = Array{Float32}(undef, 3, npoints)
     stream = open(path, "r")
     for i in 1:npoints
         tmp = map((x->parse(Float32, x)), split(readline(stream, keep=false), ","))
-        pset[i,:] = tmp[1:3]
-        nset[i,:] = tmp[4:6]
+        pset[:, i] = tmp[1:3]
+        nset[:, i] = tmp[4:6]
     end
     return (pset,nset)
 end
@@ -82,7 +82,7 @@ end
 Base.size(v::ModelNet40PCloud) = (v.length,)
 Base.length(v::ModelNet40PCloud) = v.length
 
-function Base.show(io::IO, dset::ModelNet40PCloud) 
+function Base.show(io::IO, dset::ModelNet40PCloud)
     print(io, "ModelNet40(")
     print("mode = point_cloud, ")
     print("root = $(dset.root), ")

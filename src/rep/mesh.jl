@@ -97,12 +97,12 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer,S} <: AbstractObject
     _edges_to_key::Union{Nothing,Dict{Tuple{R,R},R}}
 end
 
-TriMesh(
-    verts::Vector{<:AbstractArray{T,2}},
-    faces::Vector{<:AbstractArray{R,2}};
-    offset::Number = -1,
-) where {T<:Number,R<:Number} =
-    TriMesh([Float32.(v) for v in verts], [UInt32.(f) for f in faces]; offset = offset)
+# TriMesh(
+#     verts::Vector{<:AbstractArray{T,2}},
+#     faces::Vector{<:AbstractArray{R,2}};
+#     offset::Number = -1,
+# ) where {T<:Number,R<:Number} =
+#     TriMesh([Float32.(v) for v in verts], [UInt32.(f) for f in faces]; offset = offset)
 
 TriMesh(
     verts::Vector{<:CuArray{T,2}},
@@ -186,7 +186,7 @@ TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
 
 # @functor TriMesh
 functor(x::TriMesh) =
-    (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list)
+    (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list; offset=x.offset)
 
 function Base.show(io::IO, m::TriMesh{T,R,S}) where {T,R,S}
     print(

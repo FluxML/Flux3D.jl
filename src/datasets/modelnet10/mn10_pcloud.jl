@@ -22,7 +22,7 @@ PointCloud version of ModelNet10 dataset.
 ### Fields:
 
 * `root::String`    - Root directory of dataset
-* `path::String`    - Directory of dataset                                          
+* `path::String`    - Directory of dataset
 * `train::Bool`     - Specifies the trainset
 * `length::Int`     - Length of dataset.
 * `datapaths::Array`    - Array containing the shape and path for each datapoint.
@@ -34,7 +34,7 @@ PointCloud version of ModelNet10 dataset.
 
 """
 struct ModelNet10PCloud <: AbstractDataset
-    root::String 
+    root::String
     path::String
     train::Bool
     length::Int
@@ -48,13 +48,13 @@ end
 
 function pcloud_extract(datapath, npoints)
     cls = MN10_classes_to_idx[datapath[1]]
-    pset = Array{Float32}(undef, npoints, 3)
-    nset = Array{Float32}(undef, npoints, 3)
+    pset = Array{Float32}(undef, 3, npoints)
+    nset = Array{Float32}(undef, 3, npoints)
     stream = open(datapath[2], "r")
     for i in 1:npoints
         tmp = map((x->parse(Float32, x)), split(readline(stream, keep=false), ","))
-        pset[i, :] = tmp[1:3]
-        nset[i, :] = tmp[4:6]
+        pset[:, i] = tmp[1:3]
+        nset[:, i] = tmp[4:6]
     end
     return (pset, nset, cls)
 end
@@ -82,7 +82,7 @@ end
 Base.size(v::ModelNet10PCloud) = (v.length,)
 Base.length(v::ModelNet10PCloud) = v.length
 
-function Base.show(io::IO, dset::ModelNet10PCloud) 
+function Base.show(io::IO, dset::ModelNet10PCloud)
     print(io, "ModelNet10(")
     print("mode = point_cloud, ")
     print("root = $(dset.root), ")
