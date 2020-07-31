@@ -2,7 +2,7 @@ abstract type AbstractObject end
 abstract type AbstractCustomObject <: AbstractObject end
 
 #TODO: remove when CUDA.jl v1.2.0+ is out.
-stdev(a; mean, dims) = sqrt.(sum((a .- m) .^ 2, dims = dims) / size(a, 2))
+stdev(a; mean, dims) = sqrt.(sum((a .- mean) .^ 2, dims = dims) / size(a, 2))
 
 function _lg_cross(A::AbstractArray, B::AbstractArray)
     if !(size(A, 1) == size(B, 1) == 3)
