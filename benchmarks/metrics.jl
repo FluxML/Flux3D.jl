@@ -8,6 +8,12 @@ function setup_benchmark_record(names)
     return benchmarks
 end
 
+function generate_pcloud(npoints::Int)
+    points = ones(Float32, 3, npoints)
+    points = cumsum(points, dims = 2) / npoints
+    return points
+end
+
 function generate_trimesh(npoints::Int)
     v = ones(3, npoints)
     v = cumsum(v, dims = 2) / npoints
@@ -25,7 +31,7 @@ function run_benchmarks!(benchmarks, x, benchmark_func, device)
     end
 end
 
-npoint_arr = 2 .^ [6, 8, 10, 12, 14]
+npoint_arr = 2 .^ [4, 8, 12, 15, 17]
 
 names = [
     "sample_points",
@@ -33,14 +39,18 @@ names = [
     "edge_loss",
     "laplacian_loss"
 ]
+
 cpu_bm = setup_benchmark_record(names)
 gpu_bm = setup_benchmark_record(names)
 
 println("DEVICE: CPU")
 for _npoints in npoint_arr
     arr = [
-        (sample_points, [generate_trimesh(_npoints), _npoints], "sample_points"),
-        (chamfer_distance, [generate_trimesh(_npoints), generate_trimesh(_npoints),_npoints], "chamfer_distance"),
+        (sample_points, [generate_trimesh(_npoints), _npoints],
+         "sample_points"),
+        (chamfer_distance,
+         [generate_pcloud(_npoints), generate_pcloud(_npoints)],
+         "chamfer_distance"),
         (edge_loss, [generate_trimesh(_npoints)], "edge_loss"),
         (laplacian_loss, [generate_trimesh(_npoints)], "laplacian_loss")
     ]
@@ -60,8 +70,11 @@ if has_cuda()
     println("DEVICE: GPU")
     for _npoints in npoint_arr
         arr = [
-            (sample_points, [generate_trimesh(_npoints), _npoints], "sample_points"),
-            (chamfer_distance, [generate_trimesh(_npoints), generate_trimesh(_npoints),_npoints], "chamfer_distance"),
+            (sample_points, [generate_trimesh(_npoints), _npoints],
+             "sample_points"),
+            (chamfer_distance,
+             [generate_pcloud(_npoints), generate_pcloud(_npoints)],
+             "chamfer_distance"),
             (edge_loss, [generate_trimesh(_npoints)], "edge_loss"),
             (laplacian_loss, [generate_trimesh(_npoints)], "laplacian_loss")
         ]
@@ -69,7 +82,7 @@ if has_cuda()
         run_benchmarks!(
             gpu_bm,
             arr,
-            (op, pc) -> (CUDA.@sync op(pc)),
+            (op, pc) -> (CUDA.@sync op(pc...)),
             gpu
         )
         println()

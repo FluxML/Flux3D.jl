@@ -15,7 +15,8 @@ julia> normalize!(p)
 """
 function normalize!(pcloud::PointCloud)
     centroid = mean(pcloud.points, dims = 2)
-    pcloud.points = (pcloud.points .- centroid) ./ (std(pcloud.points, mean = centroid, dims = 2) .+ EPS)
+    pcloud.points = (pcloud.points .- centroid) ./
+        max.(stdev(pcloud.points, mean = centroid, dims = 2), EPS)
     return pcloud
 end
 
