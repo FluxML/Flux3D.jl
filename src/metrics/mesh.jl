@@ -3,7 +3,7 @@ export laplacian_loss, edge_loss
 function laplacian_loss(m::TriMesh)
     L = @ignore get_laplacian_packed(m)
     verts = get_verts_packed(m)
-    L = L * transpose(verts)
+    L = L * cpu(transpose(verts))
     L = _norm(L; dims = 2)
     return mean(L)
 end
