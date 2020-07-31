@@ -8,7 +8,10 @@
 ## Benchmarks
 
 ### PointCloud Transforms
-![Benchmark plot for PointCloud transforms](benchmarks/pics/bm_pcloud.png)
+![Benchmark plot for PointCloud transforms](docs/src/assets/bm_pcloud.png)
 
 ### TriMesh Transforms
-![Benchmark plot for PointCloud transforms](benchmarks/pics/bm_trimesh.png)
+![Benchmark plot for TriMesh transforms](docs/src/assets/bm_trimesh.png)
+
+### Metrics Transforms
+![Benchmark plot for Metrics](docs/src/assets/bm_metrics.png)

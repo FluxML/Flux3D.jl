@@ -17,7 +17,7 @@ function read_benchmarks(fname, framework)
     return data
 end
 
-function save_benchmarks(fname, bm, category)
+function save_benchmarks(fname, bm, category, xlabel)
     # using Theme(background_color = colorant"white")
     # as arg in plot to force white background
     p = plot(
@@ -27,6 +27,8 @@ function save_benchmarks(fname, bm, category)
         color = "framework",
         x = "npoints",
         y = "time_ms",
+        Guide.ylabel("Time (milliseconds)"),
+        Guide.xlabel(xlabel),
         Theme(background_color = colorant"white"),
         Geom.subplot_grid(Geom.point, Geom.line, Scale.x_log2, Scale.y_log10),
     )
@@ -37,5 +39,6 @@ bm_flux3d = read_benchmarks(joinpath(@__DIR__, "bm_flux3d.txt"), "Flux3D.jl")
 bm_kaolin = read_benchmarks(joinpath(@__DIR__, "bm_kaolin.txt"), "Kaolin")
 bm = vcat(bm_flux3d, bm_kaolin)
 
-save_benchmarks(joinpath(@__DIR__,"pics/bm_pcloud.png"), bm, "PointCloud")
-save_benchmarks(joinpath(@__DIR__,"pics/bm_trimesh.png"), bm, "TriMesh")
+save_benchmarks(joinpath(@__DIR__,"pics/bm_pcloud.png"), bm, "PointCloud", "No. of points in PointCloud")
+save_benchmarks(joinpath(@__DIR__,"pics/bm_trimesh.png"), bm, "TriMesh", "No. of verts in TriMesh")
+save_benchmarks(joinpath(@__DIR__,"pics/bm_metrics.png"), bm, "Metrics", "No. of verts in TriMesh")

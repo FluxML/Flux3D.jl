@@ -55,7 +55,7 @@ function _list_to_padded(
     else
         length(pad_size) == 2 || error("pad_size should be a tuple of length 2")
     end
-    padded = similar(list[1], pad_size..., length(list))
+    padded = @ignore similar(list[1], pad_size..., length(list))
     padded = _list_to_padded!(padded, list, pad_value, pad_size, is_similar=is_similar)
     return padded
 end
@@ -125,7 +125,7 @@ function _packed_to_padded(
 
     _N = length(items_len)
     _M = maximum(items_len)
-    padded = similar(packed, size(packed,1), _M, _N)
+    padded = @ignore similar(packed, size(packed,1), _M, _N)
     padded = _packed_to_padded!(padded, packed, items_len, pad_value)
     return padded
 end
