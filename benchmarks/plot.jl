@@ -10,7 +10,7 @@ function read_benchmarks(fname, framework)
     )
     for line in eachline(fname)
         raw = split(line)
-        push!(data,(raw[1], raw[2], parse(Int, raw[3]), parse(Float64, raw[4])))
+        push!(data, (raw[1], raw[2], parse(Int, raw[3]), parse(Float64, raw[4])))
     end
     data[!, :framework] .= framework
     return data

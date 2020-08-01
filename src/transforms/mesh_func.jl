@@ -40,8 +40,12 @@ function sample_points(
         dist = Distributions.Categorical(probvec)
         sample_faces_idx = @ignore rand(dist, num_samples)
         sample_faces = faces_padded[:, sample_faces_idx, i]
-        samples[:, :, i] =
-            _sample_points(S,verts_padded[:,1:m._verts_len[i],i], sample_faces, num_samples)
+        samples[:, :, i] = _sample_points(
+            S,
+            verts_padded[:, 1:m._verts_len[i], i],
+            sample_faces,
+            num_samples,
+        )
     end
 
     return copy(samples)

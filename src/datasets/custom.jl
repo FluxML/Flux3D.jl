@@ -28,7 +28,7 @@ struct CustomDataset <: AbstractDataset
     getdata::Function
 end
 
-CustomDataset(;length::Int, getdata::Function) = CustomDataset(length, getdata)
+CustomDataset(; length::Int, getdata::Function) = CustomDataset(length, getdata)
 
 Base.size(d::CustomDataset) = (d.length,)
 Base.length(d::CustomDataset) = d.length
@@ -40,5 +40,5 @@ Base.getindex(d::CustomDataset, idx::Int) = d.getdata(idx)
 Base.getindex(d::CustomDataset, r::AbstractArray{<:Any,1}) = [d[ri] for ri in r] #TODO: revise this
 Base.getindex(d::CustomDataset, c::Colon) = d[1:length(d)]
 
-Base.show(io::IO, d::CustomDataset) = 
+Base.show(io::IO, d::CustomDataset) =
     print(io, "CustomDataset(length=$(d.length), getdata=$(d.getdata))")

@@ -8,14 +8,9 @@
         ])
 
         samples = sample_points(m, 1000)
-        _radius = sqrt.(sum(samples.^2; dims=1))
-        @test all(isapprox.(
-            _radius,
-            1.0,
-            rtol = 1e-2,
-            atol = 1e-5,
-        ))
-        @test gradient(x->sum(sample_points(x, 1000)), m) isa Tuple
+        _radius = sqrt.(sum(samples .^ 2; dims = 1))
+        @test all(isapprox.(_radius, 1.0, rtol = 1e-2, atol = 1e-5))
+        @test gradient(x -> sum(sample_points(x, 1000)), m) isa Tuple
     end
 
     _mesh = load_trimesh([
@@ -112,13 +107,13 @@
             @test all(
                 maximum(get_verts_list(_mesh)[1]; dims = 2) .>=
                 get_verts_list(src_1)[1] .>=
-                minimum(get_verts_list(_mesh)[1]; dims = 2)
+                minimum(get_verts_list(_mesh)[1]; dims = 2),
             )
             src_1 = FUNC(src, tgt, 2)
             @test all(
                 maximum(get_verts_list(_mesh)[2]; dims = 2) .>=
                 get_verts_list(src_1)[1] .>=
-                minimum(get_verts_list(_mesh)[2]; dims = 2)
+                minimum(get_verts_list(_mesh)[2]; dims = 2),
             )
         end
     end
@@ -145,7 +140,7 @@
         @testset "$(FUNC)" begin
             m = deepcopy(_mesh)
             _offset = ones(size(get_verts_packed(m)))
-            m2 = FUNC(FUNC(m, _offset), (_offset.*-1))
+            m2 = FUNC(FUNC(m, _offset), (_offset .* -1))
             if inplace
                 @test m2 === m
             else
