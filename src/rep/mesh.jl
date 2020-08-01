@@ -200,7 +200,7 @@ function Base.show(io::IO, m::TriMesh{T,R,S}) where {T,R,S}
         "\n    offset: ",
         m.offset,
         "\n    Storage type: ",
-        S
+        S,
     )
 end
 

@@ -1,36 +1,33 @@
 @info "Testing CustomDataset..."
 @testset "CustomDataset" begin
-    x = rand(100,8)
-    getdata(idx) = x[idx,:]
-    dset = CustomDataset(size(x,1), getdata)
+    x = rand(100, 8)
+    getdata(idx) = x[idx, :]
+    dset = CustomDataset(size(x, 1), getdata)
 
-    @test size(dset) == (size(x,1),)
-    @test length(dset) == size(x,1)
+    @test size(dset) == (size(x, 1),)
+    @test length(dset) == size(x, 1)
     @test firstindex(dset) == 1
-    @test lastindex(dset) == size(x,1)
-    @test lastindex(dset) == size(x,1)
-    @test dset[1] == x[1,:]
-    @test dset[3:8] == [x[i,:] for i in 3:8]
-    @test dset[:] == [x[i,:] for i in 1:size(x,1)]
+    @test lastindex(dset) == size(x, 1)
+    @test lastindex(dset) == size(x, 1)
+    @test dset[1] == x[1, :]
+    @test dset[3:8] == [x[i, :] for i = 3:8]
+    @test dset[:] == [x[i, :] for i = 1:size(x, 1)]
 end
 
 @info "Testing ModelNet..."
 @testset "ModelNet10 PointCloud dataset" begin
-    for (split, train) in [
-            ("train", true),
-            ("test", false)           
-        ]
-        
-        npoints=32
-        dset = ModelNet10.dataset(;mode=:pointcloud, train=train, npoints=npoints)
+    for (split, train) in [("train", true), ("test", false)]
+        npoints = 32
+        dset = ModelNet10.dataset(; mode = :pointcloud, train = train, npoints = npoints)
         print(@__DIR__)
         @test dset isa Flux3D.Dataset.AbstractDataset
         @test dset.root == normpath(@__DIR__, "../datasets/modelnet")
-        @test dset.path == normpath(@__DIR__, "../datasets/modelnet/modelnet40_normal_resampled")
+        @test dset.path ==
+              normpath(@__DIR__, "../datasets/modelnet/modelnet40_normal_resampled")
         @test dset.train == train
         @test dset.npoints == npoints
         @test dset.sampling isa Nothing   #TODO: add appropriate test
-        @test dset.transform  isa Nothing
+        @test dset.transform isa Nothing
         @test dset.datapaths isa AbstractArray
 
         if train
@@ -42,36 +39,43 @@ end
             @test size(dset) == (908,)
             @test length(dset) == 908
         end
-        
+
         dpoint1 = dset[1]
         @test dpoint1 isa Flux3D.Dataset.AbstractDataPoint
         @test dpoint1 isa ModelNet10.MN10DataPoint
         @test dpoint1.data isa PointCloud
 
         t = Compose(ScalePointCloud(2))
-        dset = ModelNet10.dataset(;mode=:pointcloud, train=train, npoints=npoints, transform = t)
+        dset = ModelNet10.dataset(;
+            mode = :pointcloud,
+            train = train,
+            npoints = npoints,
+            transform = t,
+        )
         @test dset.transform isa Compose
         dpoint2 = dset[1]
         @test dpoint2 isa Flux3D.Dataset.AbstractDataPoint
         @test dpoint2 isa ModelNet10.MN10DataPoint
         @test dpoint2.data isa PointCloud
 
-        @test all(isapprox.(2 .* dpoint1.data.points, dpoint2.data.points, rtol = 1e-5, atol = 1e-5))
+        @test all(isapprox.(
+            2 .* dpoint1.data.points,
+            dpoint2.data.points,
+            rtol = 1e-5,
+            atol = 1e-5,
+        ))
     end
 end
 
 @testset "ModelNet40 PointCloud dataset" begin
-    for (split, train) in [
-            ("train", true),
-            ("test", false)           
-        ]
-        
-        npoints=32
-        dset = ModelNet40.dataset(;mode=:pointcloud, train=train, npoints=npoints)
+    for (split, train) in [("train", true), ("test", false)]
+        npoints = 32
+        dset = ModelNet40.dataset(; mode = :pointcloud, train = train, npoints = npoints)
 
         @test dset isa Flux3D.Dataset.AbstractDataset
         @test dset.root == normpath(@__DIR__, "../datasets/modelnet")
-        @test dset.path == normpath(@__DIR__, "../datasets/modelnet/modelnet40_normal_resampled")
+        @test dset.path ==
+              normpath(@__DIR__, "../datasets/modelnet/modelnet40_normal_resampled")
         @test dset.train == train
         @test dset.npoints == npoints
         @test dset.sampling isa Nothing  #TODO: add appropriate test
@@ -94,13 +98,23 @@ end
         @test dpoint1.data isa PointCloud
 
         t = Compose(ScalePointCloud(2))
-        dset = ModelNet40.dataset(;mode=:pointcloud, train=train, npoints=npoints, transform = t)
+        dset = ModelNet40.dataset(;
+            mode = :pointcloud,
+            train = train,
+            npoints = npoints,
+            transform = t,
+        )
         @test dset.transform isa Compose
         dpoint2 = dset[1]
         @test dpoint2 isa Flux3D.Dataset.AbstractDataPoint
         @test dpoint2 isa ModelNet40.MN40DataPoint
         @test dpoint2.data isa PointCloud
 
-        @test all(isapprox.(2 .* dpoint1.data.points, dpoint2.data.points, rtol = 1e-5, atol = 1e-5))
+        @test all(isapprox.(
+            2 .* dpoint1.data.points,
+            dpoint2.data.points,
+            rtol = 1e-5,
+            atol = 1e-5,
+        ))
     end
 end
