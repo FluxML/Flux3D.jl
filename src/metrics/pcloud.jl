@@ -1,8 +1,7 @@
 export chamfer_distance
 
-#TODO: change PointCloud to 3xV format
-# chamfer_distance(A::PointCloud, B::PointCloud; w1::Number=1.0, w2::Number=1.0) =
-#     _chamfer_distance(A.points, B.points, Float32(w1), Float32(w2))
+chamfer_distance(A::PointCloud, B::PointCloud; w1::Number=1.0, w2::Number=1.0) =
+    _chamfer_distance(A.points, B.points, Float32(w1), Float32(w2))
 
 chamfer_distance(
     A::AbstractArray{<:Number},
@@ -11,11 +10,14 @@ chamfer_distance(
     w2::Number = 1.0,
 ) = _chamfer_distance(Float32.(A), Float32.(B), Float32(w1), Float32(w2))
 
+chamfer_distance(A::AbstractArray{Float32}, B::AbstractArray{Float32}; w1::Number=1.0, w2::Number=1.0) =
+    _chamfer_distance(A, B, Float32(w1), Float32(w2))
+
 function _chamfer_distance(
     A::AbstractArray{Float32,2},
     B::AbstractArray{Float32,2},
-    w1::Float32 = 1.0,
-    w2::Float32 = 1.0,
+    w1::Float32 = 1.f0,
+    w2::Float32 = 1.f0,
 )
     A = reshape(A, size(A)..., 1)
     B = reshape(B, size(B)..., 1)
@@ -25,8 +27,8 @@ end
 function _chamfer_distance(
     A::AbstractArray{Float32,3},
     B::AbstractArray{Float32,3},
-    w1::Float32 = 1.0,
-    w2::Float32 = 1.0,
+    w1::Float32 = 1.f0,
+    w2::Float32 = 1.f0,
 )
     nn_for_A, nn_for_B = _nearest_neighbors(A, B)
     # pcloud Batch reduction

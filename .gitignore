@@ -2,9 +2,11 @@
 *.jl.cov
 *.jl.mem
 /docs/build/
+Manifest.toml
 .vscode
 /examples/results/
 /examples/assets/
 /datasets/modelnet/
 /benchmarks/bm_*
+/benchmarks/pics/*
 tmp.jl

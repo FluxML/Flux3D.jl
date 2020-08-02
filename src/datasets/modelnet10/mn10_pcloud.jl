@@ -1,4 +1,8 @@
 function pcloud_load(root::String = default_root)
+    #TODO: donwload link of ModelNet is down
+    error("Autodownload is currently not supported for ModelNet. \n
+           Download dataset from following link
+           https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip")
     mkpath(root)
     local_dir = joinpath(root, "modelnet40_normal_resampled")
     local_path = joinpath(root, "modelnet40_normal_resampled.zip")
@@ -26,7 +30,7 @@ PointCloud version of ModelNet10 dataset.
 ### Fields:
 
 * `root::String`    - Root directory of dataset
-* `path::String`    - Directory of dataset                                          
+* `path::String`    - Directory of dataset
 * `train::Bool`     - Specifies the trainset
 * `length::Int`     - Length of dataset.
 * `datapaths::Array`    - Array containing the shape and path for each datapoint.
