@@ -37,7 +37,7 @@ function run_benchmarks!(benchmarks, x, benchmark_func, device)
     end
 end
 
-npoint_arr = 2 .^ [4, 8, 10, 12, 14]
+npoint_arr = 2 .^ [6, 8, 10, 12, 14]
 
 names = [
     "sample_points",

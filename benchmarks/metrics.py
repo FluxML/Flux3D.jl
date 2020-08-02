@@ -90,7 +90,7 @@ ROT_MATRIX = torch.tensor([[1.0, 2.0, 3.0],
                            [0.2, 0.5, 0.9],
                            [3.0, 2.0, 1.0]])
 
-npoint_arr = 2 ** np.array([4, 8, 10, 12, 14])
+npoint_arr = 2 ** np.array([6, 8, 10, 12, 14])
 
 names = [
     "chamfer_distance",

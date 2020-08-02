@@ -7,5 +7,5 @@
 /examples/assets/
 /datasets/modelnet/
 /benchmarks/bm_*
-/benchmarks/pics/
+/benchmarks/pics/*
 tmp.jl
