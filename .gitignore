@@ -2,6 +2,7 @@
 *.jl.cov
 *.jl.mem
 /docs/build/
+Manifest.toml
 .vscode
 /examples/results/
 /examples/assets/
