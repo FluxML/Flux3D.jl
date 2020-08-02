@@ -11,6 +11,7 @@ function read_bm_transforms(fname, framework)
     )
     for line in eachline(fname)
         raw = split(line)
+<<<<<<< HEAD
         push!(
             data,
             (
@@ -21,6 +22,9 @@ function read_bm_transforms(fname, framework)
                 parse(Float64, raw[5]),
             ),
         )
+=======
+        push!(data, (raw[1], raw[2], parse(Int, raw[3]), parse(Float64, raw[4])))
+>>>>>>> master
     end
     data[!, :framework] .= framework
     return data

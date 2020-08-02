@@ -15,8 +15,9 @@ julia> normalize!(p)
 """
 function normalize!(pcloud::PointCloud)
     centroid = mean(pcloud.points, dims = 2)
-    pcloud.points = (pcloud.points .- centroid) ./
-        max.(std(pcloud.points, mean = centroid, dims = 2), EPS)
+    pcloud.points =
+        (pcloud.points .- centroid) ./
+        (std(pcloud.points, mean = centroid, dims = 2) .+ EPS)
     return pcloud
 end
 
@@ -105,7 +106,8 @@ julia> rotate!(p, rotmat)
 ```
 """
 function rotate!(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
-    size(rotmat) == (3, 3) || error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
+    size(rotmat) == (3, 3) ||
+        error("rotmat must be (3, 3) array, but instead got $(size(rotmat)) array")
     size(pcloud.points, 1) == 3 || error("dimension of points in PointCloud must be 3")
     points_packed = transpose(rotmat) * reshape(pcloud.points, 3, :)
     pcloud.points = reshape(points_packed, size(pcloud.points)...)
@@ -137,7 +139,8 @@ function rotate(pcloud::PointCloud, rotmat::AbstractArray{Float32,2})
     return p
 end
 
-rotate(pcloud::PointCloud, rotmat::AbstractArray{Number,2}) = rotate(pcloud, Float32.(rotmat))
+rotate(pcloud::PointCloud, rotmat::AbstractArray{Number,2}) =
+    rotate(pcloud, Float32.(rotmat))
 
 """
     realign!(src::PointCloud, tgt::PointCloud)
@@ -157,18 +160,28 @@ julia> tgt = PointCloud(rand(1024,3))
 julia> realign!(src, tgt)
 ```
 """
-function realign!(src::PointCloud, tgt_min::AbstractArray{Float32,2}, tgt_max::AbstractArray{Float32,2})
-    size(src.points, 1) == size(tgt_max, 1) || error("source and target pointcloud dimension mismatch")
+function realign!(
+    src::PointCloud,
+    tgt_min::AbstractArray{Float32,2},
+    tgt_max::AbstractArray{Float32,2},
+)
+    size(src.points, 1) == size(tgt_max, 1) ||
+        error("source and target pointcloud dimension mismatch")
     src_min = minimum(src.points, dims = 2)
     src_max = maximum(src.points, dims = 2)
-    src.points = ((src.points .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+ tgt_min
+    src.points =
+        ((src.points .- src_min) ./ (src_max - src_min .+ EPS)) .* (tgt_max - tgt_min) .+
+        tgt_min
     return src
 end
 
-realign!(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2}) =
-    realign!(src, Float32.(tgt_min), Float32.(tgt_max))
+realign!(
+    src::PointCloud,
+    tgt_min::AbstractArray{<:Number,2},
+    tgt_max::AbstractArray{<:Number,2},
+) = realign!(src, Float32.(tgt_min), Float32.(tgt_max))
 
-function realign!(src::PointCloud, tgt::PointCloud, index::Number=1)
+function realign!(src::PointCloud, tgt::PointCloud, index::Number = 1)
     points = tgt[index]
     tgt_min = minimum(points, dims = 2)
     tgt_max = maximum(points, dims = 2)
@@ -193,13 +206,17 @@ julia> tgt = PointCloud(rand(1024,3))
 julia> src = realign!(src, tgt)
 ```
 """
-function realign(src::PointCloud, tgt_min::AbstractArray{<:Number,2}, tgt_max::AbstractArray{<:Number,2})
+function realign(
+    src::PointCloud,
+    tgt_min::AbstractArray{<:Number,2},
+    tgt_max::AbstractArray{<:Number,2},
+)
     p = deepcopy(src)
     realign!(p, tgt_min, tgt_max)
     return p
 end
 
-function realign(src::PointCloud, tgt::PointCloud, index::Number=1)
+function realign(src::PointCloud, tgt::PointCloud, index::Number = 1)
     p = deepcopy(src)
     realign!(p, tgt, index)
     return p
