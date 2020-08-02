@@ -7,6 +7,9 @@ export chamfer_distance
 chamfer_distance(A::AbstractArray{<:Number}, B::AbstractArray{<:Number}; w1::Number=1.0, w2::Number=1.0) =
     _chamfer_distance(Float32.(A), Float32.(B), Float32(w1), Float32(w2))
 
+chamfer_distance(A::AbstractArray{Float32}, B::AbstractArray{Float32}; w1::Number=1.0, w2::Number=1.0) =
+    _chamfer_distance(A, B, Float32(w1), Float32(w2))
+
 function _chamfer_distance(A::AbstractArray{Float32, 2}, B::AbstractArray{Float32, 2}, w1::Float32=1.0, w2::Float32=1.0)
     A = reshape(A, size(A)..., 1)
     B = reshape(B, size(B)..., 1)

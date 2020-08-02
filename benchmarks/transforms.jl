@@ -168,7 +168,7 @@ if has_cuda()
 end
 
 function save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks)
-    open(fname, "a") do io
+    open(fname, "w") do io
         device = "cpu"
         for (key, values) in cpu_benchmarks
             for (p, v) in zip(npoint_arr, values)
@@ -188,7 +188,6 @@ function save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks)
 end
 
 fname = joinpath(@__DIR__, "bm_flux3d.txt")
-rm(fname)
 save_bm(fname, "PointCloud", cpu_bm_pcloud, gpu_bm_pcloud)
 save_bm(fname, "TriMesh", cpu_bm_trimesh, gpu_bm_trimesh)
 @info "Benchmarks have been saved at $fname"

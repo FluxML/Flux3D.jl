@@ -172,7 +172,7 @@ if torch.cuda.is_available():
         print()
 
 def save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks):
-    with open(fname, 'a') as io:
+    with open(fname, 'w') as io:
         device = "cpu"
         for key, values in cpu_benchmarks.items():
             for p,v in zip(npoint_arr, values):
@@ -184,8 +184,6 @@ def save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks):
                 io.write("{} {} {} {} {} ms\n".format(rep, device, key, p, v))
 
 fname = os.path.join(os.path.dirname(__file__), "bm_kaolin.txt")
-if os.path.exists(fname):
-    os.remove(fname)
 save_bm(fname, "PointCloud", cpu_bm_pcloud, gpu_bm_pcloud)
 save_bm(fname, "TriMesh", cpu_bm_trimesh, gpu_bm_trimesh)
 print("Benchmarks have been saved at {}".format(fname))
