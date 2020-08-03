@@ -63,7 +63,7 @@ visualize(dset[11], markersize = 0.1)
 
 # ```@raw html
 # <p align="center">
-#     <img width=256 height=256 src="../../src/assets/chair.png">
+#     <img width=256 height=256 src="../../assets/chair.png">
 # </p>
 # ```
 

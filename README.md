@@ -51,28 +51,28 @@ julia> ] add https://github.com/nirmal-suthar/Flux3D.jl#ns/benchmarks
   <table>
     <tr>
       <th style="text-align:center">
-        <a href="examples/pointnet_classification.jl">PointNet Classfication</a>
+        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/pointnet">PointNet Classfication</a>
       </th>
       <th style="text-align:center">
-        <a href="examples/pointnet_classification.jl">DGCNN Classification</a>
+        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/dgcnn">DGCNN Classification</a>
       </th>
       <th style="text-align:center">
-        <a href="examples/fit_mesh.jl">Supervised 3D recontruction</a>
+        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/fit_mesh">Supervised 3D recontruction</a>
       </th>
     </tr>
     <tr>
       <td align="center">
-        <a href="examples/teapot_rendering.jl">
+        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/pointnet">
           <img border="0" src="docs/src/assets/pcloud_anim.gif" width="200" height="200">
         </a>
       </td>
       <td align="center">
-        <a href="examples/inverse_lighting.jl">
+        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/dgcnn">
           <img border="0" src="docs/src/assets/edgeconv.png" width="200" height="200">
         </a>
       </td>
       <td align="center">
-        <a href="examples/fit_mesh.jl">
+        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/fit_mesh">
           <img border="0" src="docs/src/assets/fitmesh_anim.gif" width="180" height="200">
         </a>
       </td>

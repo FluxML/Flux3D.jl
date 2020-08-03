@@ -11,7 +11,8 @@ makedocs(;
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
         canonical="https://nirmal-suthar.github.io/Flux3D.jl",
-        assets=String[],
+        assets=String["assets/favicon.ico"],
+        analytics = "UA-154580699-2"
     ),
     pages=[
         "Home" => "index.md",

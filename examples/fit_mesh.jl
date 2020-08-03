@@ -60,7 +60,7 @@ Flux3D.AbstractPlotting.vbox(visualize(src), visualize(tgt))
 
 # ```@raw html
 # <p align="center">
-#     <img width=480 height=270 src="../../src/assets/fitmesh_initial.png">
+#     <img width=480 height=270 src="../../assets/fitmesh_initial.png">
 # </p>
 # ```
 
@@ -121,7 +121,7 @@ gif(anim, "src_deform.gif", fps = 2)
 # ```@raw html
 # <p align="center">
 
-#     <img width=256 height=256 src="../../src/assets/fitmesh_anim.gif">
+#     <img width=256 height=256 src="../../assets/fitmesh_anim.gif">
 # </p>
 # ```
 # ## Postprocessing the predicted mesh
@@ -142,7 +142,7 @@ Flux3D.AbstractPlotting.vbox(visualize(final_mesh), visualize(dolphin))
 
 # ```@raw html
 # <p align="center">
-#     <img width=480 height=270 src="../../src/assets/fitmesh_final.png">
+#     <img width=480 height=270 src="../../assets/fitmesh_final.png">
 # </p>
 # ```
 
