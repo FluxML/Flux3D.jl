@@ -12,9 +12,9 @@ target surface. Also, the number of vertices and faces is not equal in source
 and target shape.
 
 !!! note
-    For visualization purpose we will require to install AbstractPlotting and
+    For visualization purpose we will require to install Makie and
     compatible backend (GLMakie or WGLMakie). To install it simply run
-    `] add AbstractPlotting GLMakie` in the julia prompt.
+    `] add Makie` in the julia prompt.
 
 ```julia
 using Flux3D, Zygote, Flux, FileIO, Statistics, Plots

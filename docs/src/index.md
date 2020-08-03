@@ -25,26 +25,14 @@ Currently the library is under development and is not registered. But to install
 ```
 
 !!! note
-    Rendering of 3D structure is done using AbstractPlotting. Therefore, for visualization purpose we will be required to install AbstractPlotting and compatible backend (GLMakie or WGLMakie). To install it simply run `] add AbstractPlotting GLMakie` in the julia prompt
+    Rendering of 3D structure is done using AbstractPlotting. Therefore, for visualization purpose we will be required to install Makie and compatible backend (GLMakie or WGLMakie). To install it simply run `] add Makie` in the julia prompt.
+
 ---
 
 ## Contents
 
-### Home
-
 ```@contents
 Pages = ["index.md"]
-Depth = 2
-```
-
-### Tutorials
-
-```@contents
-Pages = [
-    "tutorials/pointnet.md"
-    "tutorials/dgcnn.md",
-    "tutorials/fit_mesh.md",
-]
 Depth = 2
 ```
 

@@ -1,5 +1,6 @@
 using Flux3D
 using Documenter
+using AbstractPlotting
 
 makedocs(;
     modules=[Flux3D],
@@ -25,14 +26,15 @@ makedocs(;
         ],
         "Datasets"          => [
             "ModelNet"                     => "datasets/modelnet.md",
-            "Utilities"                    => "datasets/utils.md"
+            "Custom Dataset"                => "datasets/utils.md"
         ],
+        "Transforms"        => "api/transforms.md",
+        "Metrics"           => "api/metrics.md",
         "API Documentation" => [
-            "Transforms"                   => "api/transforms.md",
-            "Metrics"                      => "api/metrics.md",
+            "Helper function"              => "api/utils.md",
             "Visualization"                => "api/visualize.md",
-            # "3D Models"     => "api/models.md"
-        ]
+            "3D Models"                    => "api/models.md",
+        ],
     ],
 )
 

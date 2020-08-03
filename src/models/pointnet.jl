@@ -15,10 +15,21 @@ stnKD(K::Int) = Chain(
     BatchNorm(256),
     Dense(256,K*K),
     x -> reshape(x, K, K, size(x, 2)),
-    x -> x .+ reshape(Matrix{Float64}(I, K, K), K, K, 1),
+    # x -> x .+ I, #TODO: add identity matrix compatible with gpu
     x -> PermutedDimsArray(x, (2,1,3)),
 )
 
+"""
+    PointNet(num_classes::Int=10, hidden_dims::Int=64)    
+
+Flux implementation of PointNet classification model.
+
+### Fields:
+
+- `num_classes` - Number of classes in dataset.
+- `hidden_dims` - Hiddem dimension in PointNet model.
+
+"""
 struct PointNet
     stn
     fstn
@@ -55,7 +66,7 @@ function (m::PointNet)(X)
     X = permutedims(X, (2,1,3))
     # X: [N, 3, B]
 
-    X = batched_mul(X, m.stn(X))
+    X = Flux.batched_mul(X, m.stn(X))
     # X: [3, 3, B]
 
     X = m.conv_block1(X)

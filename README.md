@@ -44,39 +44,6 @@ To reproduce the benchmarks, install the ns/benchmarks branch by typing followin
 ```julia
 julia> ] add https://github.com/nirmal-suthar/Flux3D.jl#ns/benchmarks
 ```
-## Usage Examples
-
-```julia
-
-julia> using Flux3D
-
-julia> m = load_trimesh("teapot.obj") |> gpu
-TriMesh{Float32, UInt32, CUDA.CuArray} Structure:
-    Batch size: 1
-    Max verts: 1202
-    Max faces: 2256
-    offset: -1
-    Storage type: CUDA.CuArray
-
-julia> laplacian_loss(m)
-0.05888283f0
-
-julia> compute_verts_normals_packed(m)
-3×1202 CUDA.CuArray{Float32,2,Nothing}:
-  0.00974202   0.00940375   0.0171322   …   0.841262   0.777704   0.812894
- -0.999953    -0.999953    -0.999848       -0.508064  -0.607522  -0.557358
-  6.14616f-6   0.00249814  -0.00317568     -0.184795  -0.161533  -0.168985
-
-julia> new_m = Flux3D.normalize(m)
-TriMesh{Float32, UInt32, CUDA.CuArray} Structure:
-    Batch size: 1
-    Max verts: 1202
-    Max faces: 2256
-    offset: -1
-    Storage type: CUDA.CuArray
-
-julia> save_trimesh("normalized_teapot.obj", new_m)
-```
 
 ## Examples
 
@@ -114,6 +81,39 @@ julia> save_trimesh("normalized_teapot.obj", new_m)
 </div>
 
 
+## Usage Examples
+
+```julia
+
+julia> using Flux3D
+
+julia> m = load_trimesh("teapot.obj") |> gpu
+TriMesh{Float32, UInt32, CUDA.CuArray} Structure:
+    Batch size: 1
+    Max verts: 1202
+    Max faces: 2256
+    offset: -1
+    Storage type: CUDA.CuArray
+
+julia> laplacian_loss(m)
+0.05888283f0
+
+julia> compute_verts_normals_packed(m)
+3×1202 CUDA.CuArray{Float32,2,Nothing}:
+  0.00974202   0.00940375   0.0171322   …   0.841262   0.777704   0.812894
+ -0.999953    -0.999953    -0.999848       -0.508064  -0.607522  -0.557358
+  6.14616f-6   0.00249814  -0.00317568     -0.184795  -0.161533  -0.168985
+
+julia> new_m = Flux3D.normalize(m)
+TriMesh{Float32, UInt32, CUDA.CuArray} Structure:
+    Batch size: 1
+    Max verts: 1202
+    Max faces: 2256
+    offset: -1
+    Storage type: CUDA.CuArray
+
+julia> save_trimesh("normalized_teapot.obj", new_m)
+```
 
 ## Benchmarks
 

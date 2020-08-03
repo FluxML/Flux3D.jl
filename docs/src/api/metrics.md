@@ -1,9 +1,14 @@
 ```@meta
 CurrentModule = Flux3D
 ```
-# Metrics and Helper functions
+
+# Metrics for TriMesh and PointCloud
+
+```@docs
+sample_points
+```
 
 ```@autodocs
 Modules = [Flux3D]
-Pages = ["metrics/mesh.jl", "metrics/pcloud.jl", "mesh_func.jl", "pcloud_func.jl"]
+Pages = ["metrics/mesh.jl", "metrics/pcloud.jl"]
 ```
