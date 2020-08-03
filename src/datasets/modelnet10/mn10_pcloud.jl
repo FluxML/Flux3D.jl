@@ -1,13 +1,21 @@
 function pcloud_load(root::String = default_root)
+    #TODO: donwload link of ModelNet is down
+    error("Autodownload is currently not supported for ModelNet. \n
+           Download dataset from following link
+           https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip")
     mkpath(root)
     local_dir = joinpath(root, "modelnet40_normal_resampled")
     local_path = joinpath(root, "modelnet40_normal_resampled.zip")
     hash = "d64e9c5cfc479bac3260b164ae3c75ba83e94a1d216fbcd3f59ce2a9686d3762"
 
-    if(!isdir(local_dir))
-        if(!isfile(local_path))
+    if (!isdir(local_dir))
+        if (!isfile(local_path))
             # dataset prepared by authors of pointnet2
-            download_and_verify("https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip", local_path, hash)
+            download_and_verify(
+                "https://shapenet.cs.stanford.edu/media/modelnet40_normal_resampled.zip",
+                local_path,
+                hash,
+            )
         end
         run(`unzip -q $local_path -d $root`)
     end
@@ -40,9 +48,9 @@ struct ModelNet10PCloud <: AbstractDataset
     length::Int
     datapaths::Array
     npoints::Int
-    transform::Union{Flux3D.AbstractTransform, Nothing}
-    sampling #TODO Add type-assertion accordingly to include two possible option {"top", "uniform"}
-    classes_to_idx::Dict{String, UInt8}
+    transform::Union{Flux3D.AbstractTransform,Nothing}
+    sampling::Any #TODO Add type-assertion accordingly to include two possible option {"top", "uniform"}
+    classes_to_idx::Dict{String,UInt8}
     classes::Array{String,1}
 end
 
@@ -59,14 +67,34 @@ function pcloud_extract(datapath, npoints)
     return (pset, nset, cls)
 end
 
-function ModelNet10PCloud(;root::String=default_root, train::Bool=true, npoints::Int=1024, transform=nothing, sampling=nothing)
+function ModelNet10PCloud(;
+    root::String = default_root,
+    train::Bool = true,
+    npoints::Int = 1024,
+    transform = nothing,
+    sampling = nothing,
+)
     _path = pcloud_load(root)
-    train ? _split="train" : _split="test"
+    train ? _split = "train" : _split = "test"
     shapeids = [line for line in readlines(joinpath(_path, "modelnet10_$(_split).txt"))]
-    shape_names = [join(split(shapeids[i], "_")[1:end-1], "_") for i in 1:length(shapeids)]
-    datapaths = [(shape_names[i], joinpath(_path, shape_names[i], (shapeids[i])*".txt")) for i in 1:length(shapeids)]
+    shape_names = [join(split(shapeids[i], "_")[1:end-1], "_") for i = 1:length(shapeids)]
+    datapaths = [
+        (shape_names[i], joinpath(_path, shape_names[i], (shapeids[i]) * ".txt"))
+        for i = 1:length(shapeids)
+    ]
     _length = length(datapaths)
-    ModelNet10PCloud(root, _path, train, _length, datapaths, npoints, transform, sampling, MN10_classes_to_idx, MN10_classes)
+    ModelNet10PCloud(
+        root,
+        _path,
+        train,
+        _length,
+        datapaths,
+        npoints,
+        transform,
+        sampling,
+        MN10_classes_to_idx,
+        MN10_classes,
+    )
 end
 
 function Base.getindex(v::ModelNet10PCloud, idx::Int)

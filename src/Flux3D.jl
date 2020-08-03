@@ -1,6 +1,14 @@
 module Flux3D
 
-using Flux, Zygote, NearestNeighbors, LinearAlgebra, Statistics, CUDA, FileIO, SparseArrays, Requires
+using Flux,
+    Zygote,
+    NearestNeighbors,
+    LinearAlgebra,
+    Statistics,
+    CUDA,
+    FileIO,
+    SparseArrays,
+    Requires
 using Base: tail
 import Zygote: @nograd, @ignore
 import GeometryBasics

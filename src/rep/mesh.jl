@@ -152,14 +152,14 @@ function TriMesh(
         offset,
         _verts_len,
         _faces_len,
-        rand(T, 1, 1),
-        rand(T, 1, 1, 1),
+        S{T,2}(undef, 3, sum(_verts_len)),
+        S{T,3}(undef, 3, V, N),
         _verts_list,
         false,
         false,
         true,
-        rand(R, 1, 1),
-        rand(R, 1, 1, 1),
+        Array{R,2}(undef, 3, sum(_faces_len)),
+        Array{R,3}(undef, 3, F, N),
         _faces_list,
         false,
         false,
@@ -200,7 +200,7 @@ function Base.show(io::IO, m::TriMesh{T,R,S}) where {T,R,S}
         "\n    offset: ",
         m.offset,
         "\n    Storage type: ",
-        S
+        S,
     )
 end
 
@@ -212,11 +212,13 @@ function Base.setproperty!(m::TriMesh, f::Symbol, v)
         if (f == :_verts_packed) && (getproperty(m, f) !== v)
             setfield!(m, f, convert(fieldtype(typeof(m), f), v))
             setfield!(m, :_verts_padded_valid, false)
-            _compute_verts_list(m, true)
+            setfield!(m, :_verts_list_valid, false)
+            # _compute_verts_list(m, true)
         elseif (f == :_verts_padded) && (getproperty(m, f) !== v)
             setfield!(m, f, convert(fieldtype(typeof(m), f), v))
             setfield!(m, :_verts_packed_valid, false)
-            _compute_verts_list(m, true)
+            setfield!(m, :_verts_list_valid, false)
+            # _compute_verts_list(m, true)
         elseif (f == :_verts_list) && (getproperty(m, f) !== v)
             setfield!(m, f, convert(fieldtype(typeof(m), f), v))
             setfield!(m, :_verts_packed_valid, false)
@@ -416,6 +418,7 @@ function get_verts_list(
     m::TriMesh{T,R,S};
     refresh::Bool = false,
 )::Vector{<:S{T,2}} where {T,R,S}
+    _compute_verts_list(m, refresh)
     return m._verts_list
 end
 
@@ -868,16 +871,18 @@ function _compute_verts_packed(m::TriMesh, refresh::Bool = false)
         # from list and list is always valid
         setfield!(m, :_verts_packed, verts_packed)
         setfield!(m, :_verts_packed_valid, true)
+        return nothing
     end
 end
 
 function _compute_verts_padded(m::TriMesh, refresh::Bool = false)
     if refresh || !(m._verts_padded_valid)
-        verts_padded = _list_to_padded(m._verts_list, 0, (3, m.V))
+        _list_to_padded!(m._verts_padded, m._verts_list, 0, (3, m.V))
         # avoiding setproperty!, as we are building padded
         # from list and list is always valid
-        setfield!(m, :_verts_padded, verts_padded)
+        # setfield!(m, :_verts_padded, verts_padded)
         setfield!(m, :_verts_padded_valid, true)
+        return nothing
     end
 end
 
@@ -893,6 +898,7 @@ function _compute_verts_list(m::TriMesh, refresh::Bool = false)
         # avoiding setproperty, cause verts_list is always valid.
         setfield!(m, :_verts_list, verts_list)
         setfield!(m, :_verts_list_valid, true)
+        return nothing
     end
 end
 
@@ -906,14 +912,16 @@ function _compute_faces_packed(m::TriMesh{T,R}, refresh::Bool = false) where {T,
         faces_packed = faces_packed .+ reshape(faces_packed_offset, 1, :)
         setfield!(m, :_faces_packed, R.(faces_packed))
         setfield!(m, :_faces_packed_valid, true)
+        return nothing
     end
 end
 
 function _compute_faces_padded(m::TriMesh, refresh::Bool = false)
     if refresh || !(m._faces_padded_valid)
-        faces_padded = _list_to_padded(m._faces_list, 0, (3, m.F))
-        setfield!(m, :_faces_padded, faces_padded)
+        _list_to_padded!(m._faces_padded, m._faces_list, 0, (3, m.F))
+        # setfield!(m, :_faces_padded, faces_padded)
         setfield!(m, :_faces_padded_valid, true)
+        return nothing
     end
 end
 
@@ -963,6 +971,7 @@ function _compute_edges_packed(m::TriMesh{T,R}, refresh::Bool = false) where {T,
         m._edges_packed = edges
         m._edges_to_key = edges_to_key
         m._faces_to_edges_packed = faces_to_edges
+        return nothing
     end
 end
 
@@ -1009,5 +1018,6 @@ function _compute_laplacian_packed(m::TriMesh{T,R}, refresh::Bool = false) where
         Js = cat(e2, e1, R.(1:size(verts, 2)); dims = 1)
         Vs = cat(deg1, deg2, diag; dims = 1)
         m._laplacian_packed = sparse(Is, Js, Vs, size(verts, 2), size(verts, 2))
+        return nothing
     end
 end

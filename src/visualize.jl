@@ -43,10 +43,9 @@ function visualize(m::GeometryBasics.Mesh; kwargs...) where{T,R}
     AbstractPlotting.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 
-visualize(m::TriMesh, index::Int=1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
+visualize(m::TriMesh, index::Int = 1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
 
-visualize(v::Dataset.AbstractDataPoint; kwargs...) =
-    visualize(v.data; kwargs...)
+visualize(v::Dataset.AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
 
 visualize(v::AbstractCustomObject; kwargs...) =
     error("Define visualize function for custom type: $(typeof(v)).

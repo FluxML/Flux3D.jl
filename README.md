@@ -118,10 +118,13 @@ julia> save_trimesh("normalized_teapot.obj", new_m)
 ## Benchmarks
 
 ### PointCloud Transforms (Flux3D.jl and Kaolin)
-![Benchmark plot for PointCloud transforms](benchmarks/pics/bm_pcloud.png)
+![Benchmark plot for PointCloud transforms](docs/src/assets/bm_pcloud.png)
 
 ### TriMesh Transforms (Flux3D.jl and Kaolin)
-![Benchmark plot for PointCloud transforms](benchmarks/pics/bm_trimesh.png)
+![Benchmark plot for TriMesh transforms](docs/src/assets/bm_trimesh.png)
+
+### Metrics (Flux3D.jl and Kaolin)
+![Benchmark plot for Metrics](docs/src/assets/bm_metrics.png)
 
 ## Current Roadmap
 

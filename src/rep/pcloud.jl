@@ -24,21 +24,25 @@ should match with the `N` and `B` of `points` and `D`=2 or `D`=3
 """
 mutable struct PointCloud{T<:Float32} <: AbstractObject
     points::AbstractArray{T,3}
-    normals::Union{AbstractArray{T,3}, Nothing}
+    normals::Union{AbstractArray{T,3},Nothing}
 end
 
-function PointCloud(points::AbstractArray{Float32,2}, normals::Union{AbstractArray{Float32,2}, Nothing}=nothing)
-    points = reshape(points, size(points)...,1)
+function PointCloud(
+    points::AbstractArray{Float32,2},
+    normals::Union{AbstractArray{Float32,2},Nothing} = nothing,
+)
+    points = reshape(points, size(points)..., 1)
 
     if !(normals isa Nothing)
-        size(points,2) == size(normals,2) || error("number of points and normals must match in PointCloud.")
-        normals = reshape(normals, size(normals)...,1);
+        size(points, 2) == size(normals, 2) ||
+            error("number of points and normals must match in PointCloud.")
+        normals = reshape(normals, size(normals)..., 1)
     end
 
     return PointCloud(points, normals)
 end
 
-function PointCloud(points::AbstractArray, normals::Union{AbstractArray, Nothing}=nothing)
+function PointCloud(points::AbstractArray, normals::Union{AbstractArray,Nothing} = nothing)
     points = Float32.(points)
     if normals !== nothing
         normals = Float32.(normals)
@@ -46,7 +50,7 @@ function PointCloud(points::AbstractArray, normals::Union{AbstractArray, Nothing
     return PointCloud(points, normals)
 end
 
-PointCloud(;points, normals=nothing)= PointCloud(points, normals)
+PointCloud(; points, normals = nothing) = PointCloud(points, normals)
 
 PointCloud(pcloud::PointCloud) = PointCloud(pcloud.points, pcloud.normals)
 
@@ -54,9 +58,9 @@ PointCloud(pcloud::PointCloud) = PointCloud(pcloud.points, pcloud.normals)
 
 # deepcopy generate error when using on PointCloud with parent field of points not Nothing
 Base.deepcopy_internal(x::PointCloud, dict::IdDict) =
-    PointCloud(copy(x.points), (x.normals===nothing ? nothing : copy(x.normals)))
+    PointCloud(copy(x.points), (x.normals === nothing ? nothing : copy(x.normals)))
 
-Base.getindex(p::PointCloud, index::Number) = p.points[:,:,index]
+Base.getindex(p::PointCloud, index::Number) = p.points[:, :, index]
 
 function Base.show(io::IO, m::PointCloud{T}) where {T}
     print(
@@ -77,4 +81,4 @@ end
 
 Returns the size of PointCloud.
 """
-npoints(p::PointCloud) = size(p.points,2)
+npoints(p::PointCloud) = size(p.points, 2)
