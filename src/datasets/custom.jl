@@ -16,7 +16,7 @@ Minimal Custom Dataset.
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> x = rand(10,32)
 julia> getdata(idx) = x[idx,:]
 julia> dset = CustomDataset(size(x,1), getdata)

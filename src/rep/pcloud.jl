@@ -62,16 +62,19 @@ Base.deepcopy_internal(x::PointCloud, dict::IdDict) =
 
 Base.getindex(p::PointCloud, index::Number) = p.points[:, :, index]
 
-function Base.show(io::IO, p::PointCloud)
-    if p.normals isa Nothing
-        print(io, "points: $(size(p.points)), normals: nothing")
-    else
-        print(io, "points: $(size(p.points)), normals: $(size(p.normals))")
-    end
+function Base.show(io::IO, m::PointCloud{T}) where {T}
+    print(
+        io,
+        "PointCloud{$(T)} Structure:\n    Batch size: ",
+        size(m.points,3),
+        "\n    Points: ",
+        size(m.points,2),
+        "\n    Normals ",
+        (m.normals===nothing ? 0 : size(m.normals,2)),
+        "\n    Storage type: ",
+        typeof(m.points)
+    )
 end
-
-Base.show(io::IO, ::MIME"text/plain", p::PointCloud) =
-    print(io, "PointCloud object:\n   ", p)
 
 """
     npoints(p::PointCloud)

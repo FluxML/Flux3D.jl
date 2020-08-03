@@ -12,10 +12,11 @@ from respective faces of samples. `eps` is optional keyword argument for
 a small number to prevent division by zero for small surface areas.
 
 ### Examples:
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> points = sample_points(m, 5000)
 julia> points, normals = sample_points(m, 5000; returns_normals=true)
-
+```
 """
 function sample_points(
     m::TriMesh{T,R,S},
@@ -87,7 +88,7 @@ See also: [`normalize`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> normalize!(m)
 ```
@@ -115,7 +116,7 @@ See also: [`normalize!`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> m = normalize(m)
 ```
@@ -141,7 +142,7 @@ should be strictly greater than `0.0`.
 See also: [`scale`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> scale!(m, 1.0)
 julia> scale!(m, [1.0, 1.0, 1.0])
@@ -180,10 +181,11 @@ should be strictly greater than `0.0`.
 See also: [`scale!`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> m = scale(m, 1.0)
 julia> m = scale!(m, [1.0, 1.0, 1.0])
+```
 """
 function scale(m::TriMesh, factor::Union{Float32,AbstractArray{Float32}})
     m = deepcopy(m)
@@ -204,7 +206,7 @@ Rotation matrix `rotmat` should be of size `(3,3)`
 See also: [`rotate`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> rotmat = rand(3,3)
 julia> rotate!(m, rotmat)
@@ -230,7 +232,7 @@ Rotation matrix `rotmat` should be of size `(3,3)`
 See also: [`rotate!`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> rotmat = rand(3,3)
 julia> m = rotate(m, rotmat)
@@ -252,7 +254,7 @@ and overwrite `src` with re-aligned TriMesh.
 See also: [`realign`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> src = load_trimesh("teapot.obj")
 julia> tgt = scale(src, 2.0)
 julia> realign!(src, tgt)
@@ -300,7 +302,7 @@ Re-Align the TriMesh `src` with the axis aligned bounding box of mesh at `index`
 See also: [`realign`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> src = load_trimesh("teapot.obj")
 julia> tgt = scale(src, 2.0)
 julia> src = realign(src, tgt)
@@ -334,11 +336,11 @@ in all dimension.
 See also: [`translate`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> translate!(m, 0.0)
 julia> translate!(m, [0.0, 0.0, 0.0])
-
+```
 """
 translate!(m::TriMesh, vector::Float32) = translate!(m, fill(vector, (3,)))
 
@@ -364,11 +366,11 @@ by same number in all dimension.
 See also: [`translate!`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> m = translate(m, 0.0)
 julia> m = translate(m, [0.0, 0.0, 0.0])
-
+```
 """
 function translate(m::TriMesh, args...)
     m = deepcopy(m)
@@ -384,11 +386,11 @@ and overwrite `m` with updated TriMesh.
 See also: [`offset`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> offset_verts = ones(get_verts_packed(m))
 julia> offset!(m, offset_verts)
-
+```
 """
 
 function offset!(m::TriMesh, offset_verts_packed::AbstractArray{Float32,2})
@@ -411,11 +413,11 @@ Add offset to the vertices of the TriMesh `m` by offset vertices `offset_verts_p
 See also: [`offset!`](@ref)
 
 ### Examples:
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> offset_verts = ones(get_verts_packed(m))
 julia> m = offset(m, offset_verts)
-
+```
 """
 function offset(m::TriMesh, offset_verts_packed::AbstractArray{<:Number,2})
     m = deepcopy(m)

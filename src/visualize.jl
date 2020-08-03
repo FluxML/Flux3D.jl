@@ -1,4 +1,4 @@
-import Makie: AbstractPlotting
+import AbstractPlotting
 import GeometryBasics
 export visualize
 
@@ -12,16 +12,18 @@ Dimension of points in PointCloud `pcloud` must be 3.
 ### Optional Arguments:
 - color (Symbol)       - Color of the marker, default `:blue`
 - markersize (Number)  - Size of the marker, default `0.02*npoints(pcloud)/1024`
+
 """
-function visualize(v::PointCloud, index::Number = 1; kwargs...)
+function visualize(v::PointCloud, index::Number=1; kwargs...)
     points = v[index]
-    size(points, 1) == 3 || error("dimension of points in PointCloud must be 3.")
+    size(points,1)==3 || error("dimension of points in PointCloud must be 3.")
 
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :blue)
     get!(kwargs, :markersize, 40 / npoints(v))
 
-    AbstractPlotting.meshscatter(v.points[:, 1], v.points[:, 2], v.points[:, 3]; kwargs...)
+    AbstractPlotting.meshscatter(v.points[3,:], v.points[1,:],v.points[2,:];
+                                 kwargs...)
 end
 
 """
@@ -31,9 +33,10 @@ end
 Visualize mesh at `index` in TriMesh `m`.
 
 ### Optional Arguments:
-"""
+- color (Symbol)       - Color of the marker, default `:red`
 
-function visualize(m::GeometryBasics.Mesh; kwargs...) where {T,R}
+"""
+function visualize(m::GeometryBasics.Mesh; kwargs...) where{T,R}
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :red)
 

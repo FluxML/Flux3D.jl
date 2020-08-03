@@ -97,12 +97,12 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer,S} <: AbstractObject
     _edges_to_key::Union{Nothing,Dict{Tuple{R,R},R}}
 end
 
-TriMesh(
-    verts::Vector{<:AbstractArray{T,2}},
-    faces::Vector{<:AbstractArray{R,2}};
-    offset::Number = -1,
-) where {T<:Number,R<:Number} =
-    TriMesh([Float32.(v) for v in verts], [UInt32.(f) for f in faces]; offset = offset)
+# TriMesh(
+#     verts::Vector{<:AbstractArray{T,2}},
+#     faces::Vector{<:AbstractArray{R,2}};
+#     offset::Number = -1,
+# ) where {T<:Number,R<:Number} =
+#     TriMesh([Float32.(v) for v in verts], [UInt32.(f) for f in faces]; offset = offset)
 
 TriMesh(
     verts::Vector{<:CuArray{T,2}},
@@ -186,12 +186,12 @@ TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
 
 # @functor TriMesh
 functor(x::TriMesh) =
-    (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list)
+    (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list; offset=x.offset)
 
 function Base.show(io::IO, m::TriMesh{T,R,S}) where {T,R,S}
     print(
         io,
-        "TriMesh Structure:\n    Batch size: ",
+        "TriMesh{$(T), $(R), $(S)} Structure:\n    Batch size: ",
         m.N,
         "\n    Max verts: ",
         m.V,
@@ -365,10 +365,10 @@ See also: [`get_verts_padded`](@ref), [`get_verts_list`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_verts_packed(m)
-````
+```
 """
 function get_verts_packed(m::TriMesh{T,R,S}; refresh::Bool = false)::S{T,2} where {T,R,S}
     _compute_verts_packed(m, refresh)
@@ -387,10 +387,10 @@ See also: [`get_verts_packed`](@ref), [`get_verts_list`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_verts_padded(m)
-````
+```
 """
 function get_verts_padded(m::TriMesh{T,R,S}; refresh::Bool = false)::S{T,3} where {T,R,S}
     _compute_verts_padded(m, refresh)
@@ -409,10 +409,10 @@ See also: [`get_verts_padded`](@ref), [`get_verts_packed`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_verts_list(m)
-````
+```
 """
 function get_verts_list(
     m::TriMesh{T,R,S};
@@ -434,10 +434,10 @@ See also: [`get_faces_padded`](@ref), [`get_faces_list`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_faces_packed(m)
-````
+```
 """
 function get_faces_packed(m::TriMesh{T,R}; refresh::Bool = false)::Array{R,2} where {T,R}
     @ignore _compute_faces_packed(m, refresh)
@@ -456,10 +456,10 @@ See also: [`get_faces_padded`](@ref), [`get_faces_list`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_faces_padded(m)
-````
+```
 """
 function get_faces_padded(m::TriMesh{T,R}; refresh::Bool = false)::Array{R,3} where {T,R}
     @ignore _compute_faces_padded(m, refresh)
@@ -478,10 +478,10 @@ See also: [`get_faces_padded`](@ref), [`get_faces_list`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_faces_list(m)
-````
+```
 """
 function get_faces_list(
     m::TriMesh{T,R};
@@ -503,10 +503,10 @@ See also: [`get_verts_packed`](@ref), [`get_faces_to_edges_packed`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_edges_packed(m)
-````
+```
 """
 function get_edges_packed(m::TriMesh{T,R}; refresh::Bool = false)::Array{R,2} where {T,R}
     @ignore _compute_edges_packed(m, refresh)
@@ -526,10 +526,10 @@ See also: [`get_verts_packed`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_edges_to_key(m)
-````
+```
 """
 function get_edges_to_key(
     m::TriMesh{T,R};
@@ -554,10 +554,10 @@ See also: [`get_edges_packed`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_faces_to_edges_packed(m)
-````
+```
 """
 function get_faces_to_edges_packed(
     m::TriMesh{T,R};
@@ -580,10 +580,10 @@ See also: [`laplacian_loss`](@ref)
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> get_laplacian_packed(m)
-````
+```
 """
 function get_laplacian_packed(
     m::TriMesh{T,R};
@@ -610,10 +610,10 @@ See also: [`compute_verts_normals_padded`](@ref), [`compute_verts_normals_list`]
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_verts_normals_packed(m)
-````
+```
 """
 function compute_verts_normals_packed(m::TriMesh{T,R,S})::S{T,2} where {T,R,S}
 
@@ -661,10 +661,10 @@ See also: [`compute_verts_normals_packed`](@ref), [`compute_verts_normals_list`]
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_verts_normals_padded(m)
-````
+```
 """
 function compute_verts_normals_padded(m::TriMesh{T,R,S})::S{T,3} where {T,R,S}
     normals_packed = compute_verts_normals_packed(m)
@@ -687,10 +687,10 @@ See also: [`compute_verts_normals_padded`](@ref), [`compute_verts_normals_packed
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_verts_normals_list(m)
-````
+```
 """
 function compute_verts_normals_list(m::TriMesh{T,R,S})::Vector{<:S{T,2}} where {T,R,S}
     normals_packed = compute_verts_normals_packed(m)
@@ -710,10 +710,10 @@ See also: [`compute_faces_normals_padded`](@ref), [`compute_faces_normals_list`]
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_normals_packed(m)
-````
+```
 """
 function compute_faces_normals_packed(m::TriMesh{T,R,S})::S{T,2} where {T,R,S}
     verts = get_verts_packed(m)
@@ -740,10 +740,10 @@ See also: [`compute_faces_normals_packed`](@ref), [`compute_faces_normals_list`]
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_normals_padded(m)
-````
+```
 """
 function compute_faces_normals_padded(m::TriMesh{T,R,S})::S{T,3} where {T,R,S}
     normals_packed = compute_faces_normals_packed(m)
@@ -763,10 +763,10 @@ See also: [`compute_faces_normals_padded`](@ref), [`compute_faces_normals_packed
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_normals_list(m)
-````
+```
 """
 function compute_faces_normals_list(m::TriMesh{T,R,S})::Vector{<:S{T,2}} where {T,R,S}
     normals_packed = compute_faces_normals_packed(m)
@@ -786,10 +786,10 @@ See also: [`compute_faces_areas_padded`](@ref), [`compute_faces_areas_list`](@re
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_areas_packed(m)
-````
+```
 """
 function compute_faces_areas_packed(
     m::TriMesh{T,R,S};
@@ -820,10 +820,10 @@ See also: [`compute_faces_areas_packed`](@ref), [`compute_faces_areas_list`](@re
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_areas_padded(m)
-````
+```
 """
 function compute_faces_areas_padded(
     m::TriMesh{T,R,S};
@@ -848,10 +848,10 @@ See also: [`compute_faces_areas_padded`](@ref), [`compute_faces_areas_packed`](@
 
 ### Examples:
 
-```julia
+```jldoctest
 julia> m = load_trimesh("teapot.obj")
 julia> compute_faces_areas_list(m)
-````
+```
 """
 function compute_faces_areas_list(
     m::TriMesh{T,R,S};

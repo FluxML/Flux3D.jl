@@ -55,13 +55,13 @@ struct ModelNet40PCloud <: AbstractDataset
 end
 
 function pcloud_extract(path, npoints)
-    pset = Array{Float32}(undef, npoints, 3)
-    nset = Array{Float32}(undef, npoints, 3)
+    pset = Array{Float32}(undef, 3, npoints)
+    nset = Array{Float32}(undef, 3, npoints)
     stream = open(path, "r")
-    for i = 1:npoints
-        tmp = map((x -> parse(Float32, x)), split(readline(stream, keep = false), ","))
-        pset[i, :] = tmp[1:3]
-        nset[i, :] = tmp[4:6]
+    for i in 1:npoints
+        tmp = map((x->parse(Float32, x)), split(readline(stream, keep=false), ","))
+        pset[:, i] = tmp[1:3]
+        nset[:, i] = tmp[4:6]
     end
     return (pset, nset)
 end

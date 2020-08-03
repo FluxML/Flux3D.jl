@@ -38,15 +38,12 @@ function realign_point_cloud(npoints)
     return rot(pc)
 end
 
-<<<<<<< HEAD
 function realign_trimesh(_npoints)
     pc = generate_trimesh(_npoints)
     rot = RotateTriMesh(-ROT_MATRIX)
     return rot(pc)
 end
 
-=======
->>>>>>> master
 ROT_MATRIX = [
     1.0 2.0 3.0
     0.2 0.5 0.9
@@ -78,7 +75,6 @@ gpu_bm_trimesh = setup_benchmark_record(names)
 
 println("DEVICE: CPU")
 for _npoints in npoint_arr
-<<<<<<< HEAD
     pcloud_arr = [
         (ScalePointCloud(0.5; inplace = false), "ScalePointCloud"),
         (RotatePointCloud(ROT_MATRIX; inplace = false), "RotatePointCloud"),
@@ -89,25 +85,6 @@ for _npoints in npoint_arr
                RotatePointCloud(ROT_MATRIX; inplace = false),
                ReAlignPointCloud(realign_point_cloud(_npoints);inplace = false,),
                NormalizePointCloud()),"Chain",)
-=======
-    arr = [
-        (ScalePointCloud(0.5; inplace = false), "ScalePointCloud"),
-        (RotatePointCloud(ROT_MATRIX; inplace = false), "RotatePointCloud"),
-        (
-            ReAlignPointCloud(realign_point_cloud(_npoints); inplace = false),
-            "RealignPointCloud",
-        ),
-        (NormalizePointCloud(inplace = false), "NormalizePointCloud"),
-        (
-            Chain(
-                ScalePointCloud(0.5; inplace = false),
-                RotatePointCloud(ROT_MATRIX; inplace = false),
-                ReAlignPointCloud(realign_point_cloud(_npoints); inplace = false),
-                NormalizePointCloud(),
-            ),
-            "Chain",
-        ),
->>>>>>> master
     ]
 
     trimesh_arr = [
@@ -146,7 +123,6 @@ if has_cuda()
     println("CUDA is on. Running GPU Benchmarks")
     println("DEVICE: GPU")
     for _npoints in npoint_arr
-<<<<<<< HEAD
         pcloud_arr = [
             (ScalePointCloud(0.5; inplace = false), "ScalePointCloud"),
             (RotatePointCloud(ROT_MATRIX; inplace = false), "RotatePointCloud"),
@@ -186,66 +162,26 @@ if has_cuda()
             generate_trimesh,
             (op, pc) -> (CUDA.@sync op(pc)),
             gpu
-=======
-        arr = [
-            (ScalePointCloud(0.5; inplace = false), "ScalePointCloud"),
-            (RotatePointCloud(ROT_MATRIX; inplace = false), "RotatePointCloud"),
-            (
-                ReAlignPointCloud(realign_point_cloud(_npoints); inplace = false),
-                "RealignPointCloud",
-            ),
-            (NormalizePointCloud(inplace = false), "NormalizePointCloud"),
-            (
-                Chain(
-                    ScalePointCloud(0.5; inplace = false),
-                    RotatePointCloud(ROT_MATRIX; inplace = false),
-                    ReAlignPointCloud(realign_point_cloud(_npoints); inplace = false),
-                    NormalizePointCloud(inplace = false),
-                ),
-                "Chain",
-            ),
-        ]
-
-        println("Running benchmarks for npoints = $_npoints")
-        run_benchmarks!(
-            gpu_benchmarks,
-            arr,
-            _npoints,
-            (op, pc) -> (CuArrays.@sync op(pc)),
-            gpu,
->>>>>>> master
         )
         println()
     end
 end
 
-<<<<<<< HEAD
 function save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks)
-=======
-function save_bm(fname, cpu_benchmarks, gpu_benchmarks)
->>>>>>> master
     open(fname, "w") do io
         device = "cpu"
         for (key, values) in cpu_benchmarks
             for (p, v) in zip(npoint_arr, values)
-<<<<<<< HEAD
                 Printf.@printf(io, "%s %s %s %d %f ms\n",
                                rep, device, key, p, v)
-=======
-                Printf.@printf(io, "%s %s %d %f ms\n", device, key, p, v)
->>>>>>> master
             end
         end
 
         device = "gpu"
         for (key, values) in gpu_benchmarks
             for (p, v) in zip(npoint_arr, values)
-<<<<<<< HEAD
                 Printf.@printf(io, "%s %s %s %d %f ms\n",
                                rep, device, key, p, v)
-=======
-                Printf.@printf(io, "%s %s %d %f ms\n", device, key, p, v)
->>>>>>> master
             end
         end
     end
