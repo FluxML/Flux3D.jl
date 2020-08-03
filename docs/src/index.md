@@ -4,13 +4,15 @@ CurrentModule = Flux3D
 
 # Flux3D: 3D Deep Learning Library in Julia
 
-Flux3D.jl is a 3D computer vision library, written completely in Julia. It provide following functionalities:
+Flux3D.jl is a 3D vision library, written completely in Julia. This package utilizes [Flux.jl](github.com/FluxML/Flux.jl) and [Zygote.jl](github.com/FluxML/Zygote.jl) as its building blocks for training 3D vision models and for supporting differentiation. This package also have support of CUDA GPU acceleration with [CUDA.jl](github.com/JuliaGPU/CUDA.jl).The primary motivation for this library is to provide:
 
 * Batched Data structure for 3D data like PointCloud and TriMesh for storing and computation.
 * Transforms and general utilities for processing 3D structures.
 * Metrics for defining loss objectives and predefined 3D models.
 * Easy access to loading an pre-processing standard 3D datasets.
 * Visualization utilities for PointCloud and TriMesh.
+
+Any suggestions, issues and pull requests are most welcome.
 
 ---
 

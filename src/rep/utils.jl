@@ -49,15 +49,18 @@ function _list_to_padded(
     list::Vector{<:AbstractArray{T,2}},
     pad_value::Number,
     pad_size::Union{Nothing,Tuple} = nothing;
-    is_similar::Bool = false,
 ) where {T<:Number}
 
     all(ndims.(list) .== 2) || error("only 2d arrays are supported")
-    if is_similar
-        return Flux.stack(list, ndims(list[1]) + 1)
+
+    if pad_size isa Nothing
+        pad_size = (maximum(size.(list, 1)), maximum(size.(list, 2)))
+    else
+        length(pad_size) == 2 || error("pad_size should be a tuple of length 2")
     end
+
     padded = @ignore similar(list[1], pad_size..., length(list))
-    padded = _list_to_padded!(padded, list, pad_value, pad_size, is_similar=is_similar)
+    padded = _list_to_padded!(padded, list, pad_value, pad_size)
     return padded
 end
 
@@ -66,13 +69,9 @@ function _list_to_padded!(
     list::Vector{<:AbstractArray{T, 2}},
     pad_value::Number,
     pad_size::Union{Nothing, Tuple}=nothing;
-    is_similar::Bool = false
 )   where {T<:Number}
 
     all(ndims.(list) .== 2) || error("only 2d arrays are supported")
-    # if is_similar
-    #     return Flux.stack(list, ndims(list[1])+1)
-    # end
 
     if pad_size isa Nothing
         pad_size = (maximum(size.(list, 1)), maximum(size.(list, 2)))
