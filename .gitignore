@@ -3,7 +3,6 @@
 *.jl.mem
 Manifest.toml
 /docs/build/
-Manifest.toml
 .vscode
 /examples/results/
 /examples/assets/
