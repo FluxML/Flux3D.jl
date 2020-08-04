@@ -66,13 +66,13 @@ function Base.show(io::IO, m::PointCloud{T}) where {T}
     print(
         io,
         "PointCloud{$(T)} Structure:\n    Batch size: ",
-        size(m.points,3),
+        size(m.points, 3),
         "\n    Points: ",
-        size(m.points,2),
+        size(m.points, 2),
         "\n    Normals ",
-        (m.normals===nothing ? 0 : size(m.normals,2)),
+        (m.normals === nothing ? 0 : size(m.normals, 2)),
         "\n    Storage type: ",
-        typeof(m.points)
+        typeof(m.points),
     )
 end
 

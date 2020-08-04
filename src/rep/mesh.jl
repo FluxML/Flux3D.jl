@@ -185,8 +185,8 @@ TriMesh(m::GeometryBasics.Mesh) = TriMesh([m])
 TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
 
 # @functor TriMesh
-functor(x::TriMesh) =
-    (_verts_list = x._verts_list,), xs -> TriMesh(xs._verts_list, x._faces_list; offset=x.offset)
+functor(x::TriMesh) = (_verts_list = x._verts_list,),
+xs -> TriMesh(xs._verts_list, x._faces_list; offset = x.offset)
 
 function Base.show(io::IO, m::TriMesh{T,R,S}) where {T,R,S}
     print(

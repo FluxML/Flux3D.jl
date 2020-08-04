@@ -72,14 +72,10 @@ visualize(dset[11], markersize = 0.1)
 # ## Preparing Dataloader for training.
 
 data = [dset[i].data.points for i = 1:length(dset)]
-labels =
-    onehotbatch([dset[i].ground_truth for i = 1:length(dset)], 1:num_classes)
+labels = onehotbatch([dset[i].ground_truth for i = 1:length(dset)], 1:num_classes)
 
 valX = cat([val_dset[i].data.points for i = 1:length(val_dset)]..., dims = 3)
-valY = onehotbatch(
-    [val_dset[i].ground_truth for i = 1:length(val_dset)],
-    1:num_classes,
-)
+valY = onehotbatch([val_dset[i].ground_truth for i = 1:length(val_dset)], 1:num_classes)
 
 TRAIN = [
     (cat(data[i]..., dims = 3), labels[:, i])
@@ -96,8 +92,7 @@ m = DGCNN(num_classes, K, npoints)
 # ## Defining loss and validating objectives
 
 loss(x, y) = crossentropy(m(x), y)
-accuracy(x, y) =
-    mean(onecold(cpu(m(x)), 1:num_classes) .== onecold(cpu(y), 1:num_classes))
+accuracy(x, y) = mean(onecold(cpu(m(x)), 1:num_classes) .== onecold(cpu(y), 1:num_classes))
 
 # ## Defining learning rate and optimizer
 opt = Flux.ADAM(lr)

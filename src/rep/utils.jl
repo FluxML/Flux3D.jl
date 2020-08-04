@@ -48,7 +48,7 @@ end
 function _list_to_padded(
     list::Vector{<:AbstractArray{T,2}},
     pad_value::Number,
-    pad_size::Union{Nothing,Tuple} = nothing;
+    pad_size::Union{Nothing,Tuple} = nothing;,
 ) where {T<:Number}
 
     all(ndims.(list) .== 2) || error("only 2d arrays are supported")
@@ -66,10 +66,10 @@ end
 
 function _list_to_padded!(
     padded::AbstractArray{T,3},
-    list::Vector{<:AbstractArray{T, 2}},
+    list::Vector{<:AbstractArray{T,2}},
     pad_value::Number,
-    pad_size::Union{Nothing, Tuple}=nothing;
-)   where {T<:Number}
+    pad_size::Union{Nothing,Tuple} = nothing;,
+) where {T<:Number}
 
     all(ndims.(list) .== 2) || error("only 2d arrays are supported")
 

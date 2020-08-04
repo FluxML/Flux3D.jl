@@ -1,6 +1,6 @@
 export chamfer_distance
 
-chamfer_distance(A::PointCloud, B::PointCloud; w1::Number=1.0, w2::Number=1.0) =
+chamfer_distance(A::PointCloud, B::PointCloud; w1::Number = 1.0, w2::Number = 1.0) =
     _chamfer_distance(A.points, B.points, Float32(w1), Float32(w2))
 
 chamfer_distance(
@@ -10,8 +10,12 @@ chamfer_distance(
     w2::Number = 1.0,
 ) = _chamfer_distance(Float32.(A), Float32.(B), Float32(w1), Float32(w2))
 
-chamfer_distance(A::AbstractArray{Float32}, B::AbstractArray{Float32}; w1::Number=1.0, w2::Number=1.0) =
-    _chamfer_distance(A, B, Float32(w1), Float32(w2))
+chamfer_distance(
+    A::AbstractArray{Float32},
+    B::AbstractArray{Float32};
+    w1::Number = 1.0,
+    w2::Number = 1.0,
+) = _chamfer_distance(A, B, Float32(w1), Float32(w2))
 
 function _chamfer_distance(
     A::AbstractArray{Float32,2},

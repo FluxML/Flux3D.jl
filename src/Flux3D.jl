@@ -37,7 +37,7 @@ using .Dataset
 export CustomDataset, ModelNet10, ModelNet40
 
 # visualization
-@init @require AbstractPlotting="537997a7-5e4e-5d89-9595-2241ea00577e" include("visualize.jl")
+@init @require AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e" include("visualize.jl")
 
 
 # models
@@ -48,12 +48,12 @@ include("models/pointnet.jl")
 # borowed from Flux.jl
 const use_cuda = Ref(false)
 @init begin
-  use_cuda[] = CUDA.functional() # Can be overridden after load with `Flux.use_cuda[] = false`
-  if CUDA.functional()
-    if !CUDA.has_cudnn()
-      @warn "CUDA.jl found cuda, but did not find libcudnn. Some functionality will not be available."
+    use_cuda[] = CUDA.functional() # Can be overridden after load with `Flux.use_cuda[] = false`
+    if CUDA.functional()
+        if !CUDA.has_cudnn()
+            @warn "CUDA.jl found cuda, but did not find libcudnn. Some functionality will not be available."
+        end
     end
-  end
 end
 
 end # module
