@@ -87,16 +87,16 @@ Flux implementation of Dynamic-Graph CNN classification model.
 struct DGCNN
     EdgeConv1::EdgeConv
     EdgeConv2::EdgeConv
-    conv_3
-    maxpool_3
-    fc_4
-    drop_4
-    fc_5
-    drop_5
-    fc_6
+    conv_3::Any
+    maxpool_3::Any
+    fc_4::Any
+    drop_4::Any
+    fc_5::Any
+    drop_5::Any
+    fc_6::Any
 end
 
-function DGCNN(num_classes::Int=10, K::Int=10, npoints::Int=1024)
+function DGCNN(num_classes::Int = 10, K::Int = 10, npoints::Int = 1024)
     DGCNN(
         EdgeConv([3, 32, 64, 64], K),
         EdgeConv([64, 128, 256], K),

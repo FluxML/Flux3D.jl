@@ -24,10 +24,11 @@ Makie.AbstractPlotting.set_theme!(show_axis = false)
 
 # ## Downloading obj file of sphere and dolphin
 
-download("https://github.com/nirmalsuthar/public_files/raw/master/dolphin.obj",
-         "dolphin.obj")
-download("https://github.com/nirmalsuthar/public_files/raw/master/sphere.obj",
-         "sphere.obj")
+download(
+    "https://github.com/nirmalsuthar/public_files/raw/master/dolphin.obj",
+    "dolphin.obj",
+)
+download("https://github.com/nirmalsuthar/public_files/raw/master/sphere.obj", "sphere.obj")
 
 # ## Loading Triangle Mesh
 # Triangle Mesh is handled by TriMesh in Flux3D. TriMesh also supports batched
@@ -45,7 +46,7 @@ src = load_trimesh("sphere.obj")
 
 tgt = deepcopy(dolphin)
 verts = get_verts_packed(tgt)
-center = mean(verts, dims=2)
+center = mean(verts, dims = 2)
 verts = verts .- center
 scale = maximum(abs.(verts))
 verts = verts ./ scale
@@ -79,7 +80,7 @@ function loss_dolphin(x::AbstractArray, src::TriMesh, tgt::TriMesh)
     loss1 = chamfer_distance(src, tgt, 5000)
     loss2 = laplacian_loss(src)
     loss3 = edge_loss(src)
-    return loss1 + 0.1*loss2 + loss3
+    return loss1 + 0.1 * loss2 + loss3
 end
 # ## Defining learning rate and optimizer
 
@@ -101,12 +102,12 @@ _offset = zeros(Float32, size(get_verts_packed(src))...) |> gpu
 
 @info("Training...")
 θ = Zygote.Params([_offset])
-for itr in 1:2001
+for itr = 1:2001
     gs = gradient(θ) do
         loss_dolphin(_offset, src, tgt)
     end
     Flux.update!(opt, _offset, gs[_offset])
-    if (itr%10 == 1)
+    if (itr % 10 == 1)
         loss = loss_dolphin(_offset, src, tgt)
         @show itr, loss
         save("src_$(itr).png", visualize(Flux3D.offset(src, _offset)))
@@ -114,7 +115,7 @@ for itr in 1:2001
 end
 
 anim = @animate for i ∈ 1:8
-    Plots.plot(load("src_$(1+250*(i-1)).png"), showaxis=false)
+    Plots.plot(load("src_$(1+250*(i-1)).png"), showaxis = false)
 end
 gif(anim, "src_deform.gif", fps = 2)
 

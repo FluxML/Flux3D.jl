@@ -11,16 +11,7 @@ function read_bm_transforms(fname, framework)
     )
     for line in eachline(fname)
         raw = split(line)
-        push!(
-            data,
-            (
-                raw[1],
-                raw[2],
-                raw[3],
-                parse(Int, raw[4]),
-                parse(Float64, raw[5]),
-            ),
-        )
+        push!(data, (raw[1], raw[2], raw[3], parse(Int, raw[4]), parse(Float64, raw[5])))
     end
     data[!, :framework] .= framework
     return data
@@ -40,14 +31,7 @@ function read_bm_metrics(fname)
         raw = split(line)
         push!(
             data,
-            (
-                raw[1],
-                raw[2],
-                raw[3],
-                raw[4],
-                parse(Int, raw[5]),
-                parse(Float64, raw[6]),
-            ),
+            (raw[1], raw[2], raw[3], raw[4], parse(Int, raw[5]), parse(Float64, raw[6])),
         )
     end
     return data

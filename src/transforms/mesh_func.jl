@@ -31,8 +31,10 @@ function sample_points(
     #TODO: condition for probvec fails in Float32
     faces_areas_prob = Zygote.ignore() do
         faces_areas_padded = Float64.(faces_areas_padded)
-        faces_areas_prob = faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 2), eps)
-        faces_areas_prob[:,end,:] += reshape(1 .- sum(faces_areas_prob; dims=2),1,:)
+        faces_areas_prob =
+            faces_areas_padded ./ max.(sum(faces_areas_padded; dims = 2), eps)
+        faces_areas_prob[:, end, :] +=
+            reshape(1 .- sum(faces_areas_prob; dims = 2), 1, :)
         return faces_areas_prob
     end
     samples = @ignore similar(verts_padded, 3, num_samples, m.N)

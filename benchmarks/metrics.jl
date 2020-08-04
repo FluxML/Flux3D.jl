@@ -25,7 +25,7 @@ function run_benchmarks!(benchmarks, x, benchmark_func, device)
     for (func, args, name) in x
         args = args .|> device
         trial_f = @benchmark $benchmark_func($func, $args)
-        back_args = [x->func(x...), args]
+        back_args = [x -> func(x...), args]
         trial_t = @benchmark $benchmark_func($gradient, $back_args)
         time_f = minimum(trial_f.times) * 1.0e-6
         time_t = minimum(trial_t.times) * 1.0e-6
@@ -33,18 +33,13 @@ function run_benchmarks!(benchmarks, x, benchmark_func, device)
         println("$name (forward): $time_f ms")
         println("$name (back): $time_b ms")
         println("$name (total): $time_t ms")
-        push!(benchmarks[name], [time_f,time_b,time_t])
+        push!(benchmarks[name], [time_f, time_b, time_t])
     end
 end
 
 npoint_arr = 2 .^ [6, 8, 10, 12, 14]
 
-names = [
-    "sample_points",
-    "chamfer_distance",
-    "edge_loss",
-    "laplacian_loss"
-]
+names = ["sample_points", "chamfer_distance", "edge_loss", "laplacian_loss"]
 
 cpu_bm = setup_benchmark_record(names)
 gpu_bm = setup_benchmark_record(names)
@@ -54,19 +49,16 @@ for _npoints in npoint_arr
     arr = [
         # (sample_points, [generate_trimesh(_npoints), _npoints],
         #  "sample_points"),
-        (chamfer_distance,
-         [generate_pcloud(_npoints), generate_pcloud(_npoints)],
-         "chamfer_distance"),
+        (
+            chamfer_distance,
+            [generate_pcloud(_npoints), generate_pcloud(_npoints)],
+            "chamfer_distance",
+        ),
         (edge_loss, [generate_trimesh(_npoints)], "edge_loss"),
-        (laplacian_loss, [generate_trimesh(_npoints)], "laplacian_loss")
+        (laplacian_loss, [generate_trimesh(_npoints)], "laplacian_loss"),
     ]
     println("Running benchmarks for npoints = $_npoints")
-    run_benchmarks!(
-        cpu_bm,
-        arr,
-        (op, pc) -> op(pc...),
-        cpu,
-    )
+    run_benchmarks!(cpu_bm, arr, (op, pc) -> op(pc...), cpu)
     println()
 end
 
@@ -78,19 +70,16 @@ if has_cuda()
         arr = [
             # (sample_points, [generate_trimesh(_npoints), _npoints],
             #  "sample_points"),
-            (chamfer_distance,
-             [generate_pcloud(_npoints), generate_pcloud(_npoints)],
-             "chamfer_distance"),
+            (
+                chamfer_distance,
+                [generate_pcloud(_npoints), generate_pcloud(_npoints)],
+                "chamfer_distance",
+            ),
             (edge_loss, [generate_trimesh(_npoints)], "edge_loss"),
             (laplacian_loss, [generate_trimesh(_npoints)], "laplacian_loss"),
         ]
         println("Running benchmarks for npoints = $_npoints")
-        run_benchmarks!(
-            gpu_bm,
-            arr,
-            (op, pc) -> (CUDA.@sync op(pc...)),
-            gpu
-        )
+        run_benchmarks!(gpu_bm, arr, (op, pc) -> (CUDA.@sync op(pc...)), gpu)
         println()
     end
 end
@@ -100,24 +89,66 @@ function save_bm(fname, rep, cpu_benchmarks, gpu_benchmarks)
         device = "cpu"
         for (key, values) in cpu_benchmarks
             for (p, v) in zip(npoint_arr, values)
-                Printf.@printf(io, "Flux3D(Forward) %s %s %s %d %f ms\n",
-                               rep, device, key, p, v[1])
-                Printf.@printf(io, "Flux3D(Backward) %s %s %s %d %f ms\n",
-                              rep, device, key, p, v[2])
-                Printf.@printf(io, "Flux3D(Total) %s %s %s %d %f ms\n",
-                             rep, device, key, p, v[3])
+                Printf.@printf(
+                    io,
+                    "Flux3D(Forward) %s %s %s %d %f ms\n",
+                    rep,
+                    device,
+                    key,
+                    p,
+                    v[1]
+                )
+                Printf.@printf(
+                    io,
+                    "Flux3D(Backward) %s %s %s %d %f ms\n",
+                    rep,
+                    device,
+                    key,
+                    p,
+                    v[2]
+                )
+                Printf.@printf(
+                    io,
+                    "Flux3D(Total) %s %s %s %d %f ms\n",
+                    rep,
+                    device,
+                    key,
+                    p,
+                    v[3]
+                )
             end
         end
 
         device = "gpu"
         for (key, values) in gpu_benchmarks
             for (p, v) in zip(npoint_arr, values)
-                Printf.@printf(io, "Flux3D(Forward) %s %s %s %d %f ms\n",
-                               rep, device, key, p, v[1])
-                Printf.@printf(io, "Flux3D(Backward) %s %s %s %d %f ms\n",
-                              rep, device, key, p, v[2])
-                Printf.@printf(io, "Flux3D(Total) %s %s %s %d %f ms\n",
-                             rep, device, key, p, v[3])
+                Printf.@printf(
+                    io,
+                    "Flux3D(Forward) %s %s %s %d %f ms\n",
+                    rep,
+                    device,
+                    key,
+                    p,
+                    v[1]
+                )
+                Printf.@printf(
+                    io,
+                    "Flux3D(Backward) %s %s %s %d %f ms\n",
+                    rep,
+                    device,
+                    key,
+                    p,
+                    v[2]
+                )
+                Printf.@printf(
+                    io,
+                    "Flux3D(Total) %s %s %s %d %f ms\n",
+                    rep,
+                    device,
+                    key,
+                    p,
+                    v[3]
+                )
             end
         end
     end

@@ -16,7 +16,7 @@ stnKD(K::Int) = Chain(
     Dense(256, K * K),
     x -> reshape(x, K, K, size(x, 2)),
     # x -> x .+ I, #TODO: add identity matrix compatible with gpu
-    x -> PermutedDimsArray(x, (2,1,3)),
+    x -> PermutedDimsArray(x, (2, 1, 3)),
 )
 
 """
