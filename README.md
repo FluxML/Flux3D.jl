@@ -33,16 +33,16 @@ Any suggestions, issues and pull requests are most welcome.
 
 ## Installation
 
-This packages is currently not registered and under development. To install the master branch, type the following in the Julia 1.3+ prompt.
+This package is under active development but we believe it is stable enough for use in 3D Machine Learning Research. It has been registered. To install the latest release, type the following in the Julia 1.3+ prompt.
 
 ```julia
-julia> ] add https://github.com/nirmal-suthar/Flux3D.jl
+julia> ] Flux3D
 ```
 
-To reproduce the benchmarks, install the ns/benchmarks branch by typing following in the Julia prompt.
+To install the master branch type the following
 
 ```julia
-julia> ] add https://github.com/nirmal-suthar/Flux3D.jl#ns/benchmarks
+julia> ] Flux3D#master
 ```
 
 ## Examples
