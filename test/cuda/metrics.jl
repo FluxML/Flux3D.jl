@@ -105,17 +105,26 @@
         @test gradient(x -> chamfer_distance(x, x), m) isa Tuple
 
         # naive chamfer distance
-        x = rand(3, 1000) |> gpu
-        y = rand(3, 500) |> gpu
-        xx = sum(x .^ 2, dims = 1)
-        yy = sum(y .^ 2, dims = 1)
-        zz = x' * y
-        rx = reshape(xx, size(xx, 2), 1)
-        ry = reshape(yy, 1, size(yy, 2))
-        P = (rx .+ ry) .- (2 .* zz)
-        distA = minimum(P; dims = 2)
-        distB = minimum(P; dims = 1)
-        loss = mean(distA) + mean(distB)
-        @test isapprox(chamfer_distance(x, y), loss)
+        function naive_chamfer(x,y)
+            xx = sum(x .^ 2, dims = 1)
+            yy = sum(y .^ 2, dims = 1)
+            zz = Flux3D.Flux.batched_mul(permutedims(x, (2, 1, 3)), y)
+            rx = reshape(xx, size(xx, 2), 1, :)
+            ry = reshape(yy, 1, size(yy, 2), :)
+            P = (rx .+ ry) .- (2 .* zz)
+            nn_for_x = minimum(P; dims = 2)
+            nn_for_y = minimum(P; dims = 1)
+            nn_for_x = mean(nn_for_x; dims = 2)
+            nn_for_y = mean(nn_for_y; dims = 2)
+            loss = mean(nn_for_x) + mean(nn_for_y)
+            return loss
+        end
+
+        x = rand(Float32, 3, 1000, 2) |> gpu
+        y = rand(Float32, 3, 500, 2) |> gpu
+        @test isapprox(chamfer_distance(x, y), naive_chamfer(x,y))
+        grad1 = gradient(x -> chamfer_distance(x, y), x)[1]
+        grad2 = gradient(x -> naive_chamfer(x, y), x)[1]
+        @test isapprox(grad1,grad2,atol=1e-2,rtol=1e-3)
     end
 end

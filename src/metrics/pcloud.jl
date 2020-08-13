@@ -34,26 +34,33 @@ function _chamfer_distance(
     w1::Float32 = 1.f0,
     w2::Float32 = 1.f0,
 )
-    nn_for_A, nn_for_B = _nearest_neighbors(A, B)
-    # pcloud Batch reduction
-    nn_for_A = mean(nn_for_A; dims = 2)
-    nn_for_B = mean(nn_for_B; dims = 2)
-    # pcloud mean reduction
-    dist_to_B = mean(nn_for_A)
-    dist_to_A = mean(nn_for_B)
+    nn_for_A, nn_for_B = @ignore _nearest_neighbors(A, B)
 
-    distance = (Float32(w1) * dist_to_B) + (Float32(w2) * dist_to_A)
+    dist_A_to_B = mean((A .- B[:,nn_for_A]) .^ 2) * 3.f0
+    dist_B_to_A = mean((B .- A[:,nn_for_B]) .^ 2) * 3.f0
+
+    distance = (w1 * dist_A_to_B) + (w2 * dist_B_to_A)
     return distance
 end
 
-function _nearest_neighbors(x::AbstractArray{Float32,3}, y::AbstractArray{Float32,3})
+function _nearest_neighbors(x::Array{Float32,3}, y::Array{Float32,3})
+    nn_for_x = cat([CartesianIndex.(reduce(vcat, knn(KDTree(y[:,:,i]), x[:,:,i], 1)[1]),i) for i in 1:size(x,3)]...,dims=2)
+    nn_for_y = cat([CartesianIndex.(reduce(vcat, knn(KDTree(x[:,:,i]), y[:,:,i], 1)[1]),i) for i in 1:size(x,3)]...,dims=2)
+    return nn_for_x, nn_for_y
+end
+
+function _nearest_neighbors(x::CuArray{Float32,3}, y::CuArray{Float32,3})
     xx = sum(x .^ 2, dims = 1)
     yy = sum(y .^ 2, dims = 1)
     zz = Flux.batched_mul(permutedims(x, (2, 1, 3)), y)
     rx = reshape(xx, size(xx, 2), 1, :)
     ry = reshape(yy, 1, size(yy, 2), :)
     P = (rx .+ ry) .- (2 .* zz)
-    nn_for_x = minimum(P; dims = 2)
-    nn_for_y = minimum(P; dims = 1)
+
+    nn_for_x = argmin(P; dims = 2) |> Array
+    nn_for_y = argmin(P; dims = 1) |> Array
+
+    nn_for_x = reshape(map(x->CartesianIndex(x[2],x[3]),nn_for_x),:,size(x,3))
+    nn_for_y = reshape(map(y->CartesianIndex(y[1],y[3]),nn_for_y),:,size(y,3))
     return nn_for_x, nn_for_y
 end
