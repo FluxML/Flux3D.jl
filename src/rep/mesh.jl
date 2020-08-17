@@ -183,6 +183,7 @@ end
 
 TriMesh(m::GeometryBasics.Mesh) = TriMesh([m])
 TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
+TriMesh(v::AbstractArray{2},f::AbstractArray{2}) = TriMesh([v],[f])
 
 # @functor TriMesh
 functor(x::TriMesh) = (_verts_list = x._verts_list,),

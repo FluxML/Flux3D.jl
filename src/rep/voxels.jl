@@ -22,11 +22,11 @@ mutable struct VoxelGrid{T<:Float32} <: AbstractObject
     voxels::AbstractArray{T,4}
 end
 
-VoxelGrid(voxels::AbstractArray{Float32,4}) = VoxelGrid(voxels)
+# VoxelGrid(voxels::AbstractArray{Float32,4}) = VoxelGrid(voxels)
 
 VoxelGrid(voxels::AbstractArray{T,4}) where {T} = VoxelGrid(Float32.(voxels))
 
-function VoxelGrid(voxels::AbstractArray{T,3})(
+function VoxelGrid(voxels::AbstractArray{T,3}) where {T}
     voxels = reshape(voxels, size(voxels)...,1)
     return VoxelGrid(voxels)
 end
@@ -49,3 +49,5 @@ function Base.show(io::IO, m::VoxelGrid{T}) where {T}
         typeof(m.voxels),
     )
 end
+
+_assert_voxel(v::VoxelGrid) = all(0.0 .>= v .<= 1.0)
