@@ -15,106 +15,77 @@
 end
 
 @info "Testing ModelNet..."
-@testset "ModelNet10 PointCloud dataset" begin
+@testset "ModelNet10" begin
+    _categories = ["sofa","table"]
+    _root = joinpath(@__DIR__,"./assets")
     for (split, train) in [("train", true), ("test", false)]
-        npoints = 32
-        dset = ModelNet10.dataset(; mode = :pointcloud, train = train, npoints = npoints)
-        print(@__DIR__)
+        dset = ModelNet10(root=_root, train=train, categories=_categories)
         @test dset isa Flux3D.Dataset.AbstractDataset
-        @test dset.root == normpath(@__DIR__, "../datasets/modelnet")
+        @test dset.root == normpath(_root)
         @test dset.path ==
-              normpath(@__DIR__, "../datasets/modelnet/modelnet40_normal_resampled")
+              normpath(_root, "ModelNet10")
         @test dset.train == train
-        @test dset.npoints == npoints
-        @test dset.sampling isa Nothing   #TODO: add appropriate test
         @test dset.transform isa Nothing
-        @test dset.datapaths isa AbstractArray
 
-        if train
-            @test dset.length == 3991
-            @test size(dset) == (3991,)
-            @test length(dset) == 3991
-        else
-            @test dset.length == 908
-            @test size(dset) == (908,)
-            @test length(dset) == 908
-        end
+        @test dset.length == 2
+        @test size(dset) == (2,)
+        @test length(dset) == 2
 
-        dpoint1 = dset[1]
-        @test dpoint1 isa Flux3D.Dataset.AbstractDataPoint
-        @test dpoint1 isa ModelNet10.MN10DataPoint
-        @test dpoint1.data isa PointCloud
+        dpoint = dset[1]
+        @test dpoint isa Flux3D.Dataset.DataPoint
+        @test dpoint.data isa TriMesh{Float32,UInt32}
+        @test dpoint.category_name in _categories
 
-        t = Compose(ScalePointCloud(2))
-        dset = ModelNet10.dataset(;
-            mode = :pointcloud,
+        points = 32
+        t = Chain(TriMeshToPointCloud(points))
+        dset = ModelNet10(
+            root=_root,
             train = train,
-            npoints = npoints,
+            categories=_categories,
             transform = t,
         )
-        @test dset.transform isa Compose
-        dpoint2 = dset[1]
-        @test dpoint2 isa Flux3D.Dataset.AbstractDataPoint
-        @test dpoint2 isa ModelNet10.MN10DataPoint
-        @test dpoint2.data isa PointCloud
-
-        @test all(isapprox.(
-            2 .* dpoint1.data.points,
-            dpoint2.data.points,
-            rtol = 1e-5,
-            atol = 1e-5,
-        ))
+        @test dset.transform isa Chain
+        dpoint2 = dset[2]
+        @test dpoint2 isa Flux3D.Dataset.DataPoint
+        @test dpoint2.data isa PointCloud{Float32}
+        @test dpoint2.category_name in _categories
     end
 end
 
-@testset "ModelNet40 PointCloud dataset" begin
+@info "Testing ModelNet..."
+@testset "ModelNet40" begin
+    _categories = ["desk","monitor"]
+    _root = joinpath(@__DIR__,"./assets")
     for (split, train) in [("train", true), ("test", false)]
-        npoints = 32
-        dset = ModelNet40.dataset(; mode = :pointcloud, train = train, npoints = npoints)
-
+        dset = ModelNet40(root=_root, train=train, categories=_categories)
         @test dset isa Flux3D.Dataset.AbstractDataset
-        @test dset.root == normpath(@__DIR__, "../datasets/modelnet")
+        @test dset.root == normpath(_root)
         @test dset.path ==
-              normpath(@__DIR__, "../datasets/modelnet/modelnet40_normal_resampled")
+              normpath(_root, "ModelNet40")
         @test dset.train == train
-        @test dset.npoints == npoints
-        @test dset.sampling isa Nothing  #TODO: add appropriate test
         @test dset.transform isa Nothing
-        @test dset.datapaths isa AbstractArray
 
-        if train
-            @test dset.length == 9843
-            @test size(dset) == (9843,)
-            @test length(dset) == 9843
-        else
-            @test dset.length == 2468
-            @test size(dset) == (2468,)
-            @test length(dset) == 2468
-        end
+        @test dset.length == 2
+        @test size(dset) == (2,)
+        @test length(dset) == 2
 
-        dpoint1 = dset[1]
-        @test dpoint1 isa Flux3D.Dataset.AbstractDataPoint
-        @test dpoint1 isa ModelNet40.MN40DataPoint
-        @test dpoint1.data isa PointCloud
+        dpoint = dset[1]
+        @test dpoint isa Flux3D.Dataset.DataPoint
+        @test dpoint.data isa TriMesh{Float32,UInt32}
+        @test dpoint.category_name in _categories
 
-        t = Compose(ScalePointCloud(2))
-        dset = ModelNet40.dataset(;
-            mode = :pointcloud,
+        points = 32
+        t = Chain(TriMeshToPointCloud(points))
+        dset = ModelNet40(
+            root=_root,
             train = train,
-            npoints = npoints,
+            categories=_categories,
             transform = t,
         )
-        @test dset.transform isa Compose
-        dpoint2 = dset[1]
-        @test dpoint2 isa Flux3D.Dataset.AbstractDataPoint
-        @test dpoint2 isa ModelNet40.MN40DataPoint
-        @test dpoint2.data isa PointCloud
-
-        @test all(isapprox.(
-            2 .* dpoint1.data.points,
-            dpoint2.data.points,
-            rtol = 1e-5,
-            atol = 1e-5,
-        ))
+        @test dset.transform isa Chain
+        dpoint2 = dset[2]
+        @test dpoint2 isa Flux3D.Dataset.DataPoint
+        @test dpoint2.data isa PointCloud{Float32}
+        @test dpoint2.category_name in _categories
     end
 end
