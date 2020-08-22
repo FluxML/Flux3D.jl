@@ -1,8 +1,8 @@
 @testset "TriMesh Metrics" begin
 
     _mesh = load_trimesh([
-        joinpath(@__DIR__, "meshes/teapot.obj"),
-        joinpath(@__DIR__, "meshes/sphere.obj"),
+        joinpath(@__DIR__, "assets/teapot.obj"),
+        joinpath(@__DIR__, "assets/sphere.obj"),
     ])
 
     @testset "Laplacian loss" begin

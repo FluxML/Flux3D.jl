@@ -3,8 +3,8 @@
 
     _mesh =
         load_trimesh([
-            joinpath(@__DIR__, "../meshes/teapot.obj"),
-            joinpath(@__DIR__, "../meshes/sphere.obj"),
+            joinpath(@__DIR__, "../assets/teapot.obj"),
+            joinpath(@__DIR__, "../assets/sphere.obj"),
         ]) |> gpu
 
     @testset "Laplacian loss" begin
@@ -87,8 +87,8 @@
     @testset "sample_points" begin
         m =
             load_trimesh([
-                joinpath(@__DIR__, "../meshes/sphere.obj"),
-                joinpath(@__DIR__, "../meshes/sphere.obj"),
+                joinpath(@__DIR__, "../assets/sphere.obj"),
+                joinpath(@__DIR__, "../assets/sphere.obj"),
             ]) |> gpu
 
         samples = sample_points(m, 1000)
