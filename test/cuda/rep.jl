@@ -1,4 +1,5 @@
-@testset "Representation" begin
+@info "Testing PointCloud..."
+@testset "PointCloud" begin
     for T in [Float32, Float64], _N in [true, false]
         points = rand(T, 3, 16, 4)
         _normals = rand(T, 3, 16, 4)
@@ -20,6 +21,26 @@
         @test size(crep.points) == size(points)
         @test crep.points isa CuArray{Float32,3}
     end
+end
+
+@info "Testing VoxelGrid..."
+@testset "VoxelGrid" begin
+    res = 4
+    voxels = rand(Float32, res, res, res, 2)
+    v = VoxelGrid(voxels) |> gpu
+    @test Flux3D._assert_voxel(v)
+    @test v isa VoxelGrid{Float32}
+    @test v[1] == voxels[:,:,:,1]
+    @test v[2] == voxels[:,:,:,2]
+    @test v.voxels isa CuArray{Float32,4}
+    @test size(v.voxels) == (res, res, res, 2)
+
+    voxels = rand(Float32, res, res, res)
+    v2 = VoxelGrid(voxels) |> gpu
+    @test v2 isa VoxelGrid{Float32}
+    @test v2.voxels isa CuArray{Float32,4}
+    @test v2[1] == voxels[:,:,:,1]
+    @test size(v2.voxels) == (res, res, res, 1)
 end
 
 @info "Testing TriMesh..."
