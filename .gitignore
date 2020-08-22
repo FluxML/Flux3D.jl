@@ -6,7 +6,9 @@ Manifest.toml
 .vscode
 /examples/results/
 /examples/assets/
-/datasets/modelnet/
+/datasets/*
 /benchmarks/bm_*
 /benchmarks/pics/*
+/test/assets/ModelNet10/
+/test/assets/ModelNet40/
 tmp.jl

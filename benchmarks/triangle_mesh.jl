@@ -1,7 +1,7 @@
 using Flux3D, BenchmarkTools
 
-# mesh = load_trimesh(joinpath(@__DIR__, "../test/meshes/teapot.obj"))
-mesh = load_trimesh("./test/meshes/teapot.obj")
+# mesh = load_trimesh(joinpath(@__DIR__, "../assets/teapot.obj"))
+mesh = load_trimesh("./assets/teapot.obj")
 
 trail = @benchmark $get_edges_packed($mesh; refresh = true)
 minimum(trail.times) * 1.0e-6

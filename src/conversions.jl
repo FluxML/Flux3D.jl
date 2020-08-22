@@ -1,10 +1,10 @@
-function TriMesh(p::PointCloud, res::Int=32)
+function TriMesh(p::PointCloud, res::Int=32; algo=:MarchingCubes)
     voxel = pointcloud_to_voxel(p, res)
     v = VoxelGrid(voxel)
-    return TriMesh(v)
+    return TriMesh(v; algo=algo)
 end
 
-function TriMesh(v::VoxelGrid, thresh::Number=0.49f0, algo=:Exact)
+function TriMesh(v::VoxelGrid; thresh::Number=0.5f0, algo=:MarchingCubes)
     verts,faces = voxel_to_trimesh(v,Float32(thresh),algo)
     return TriMesh(verts,faces)
 end
@@ -14,8 +14,8 @@ function PointCloud(m::TriMesh, npoints::Int=1000)
     return PointCloud(p)
 end
 
-function PointCloud(v::VoxelGrid,npoints::Int=1000,thresh::Number=0.49f0, algo=:Exact)
-    m = TriMesh(v,thresh,algo)
+function PointCloud(v::VoxelGrid, npoints::Int=1000; thresh::Number=0.5f0, algo=:MarchingCubes)
+    m = TriMesh(v, thresh=thresh, algo=algo)
     points = sample_points(m, npoints)
     return PointCloud(points)
 end
@@ -34,7 +34,7 @@ function pointcloud_to_voxel(
     pcloud::PointCloud,
     resolution::Int = 32,
 )
-    p = pcloud.points
+    p = cpu(pcloud.points)
     _, _N, _B = size(p)
     verts_max = maximum(maximum(p, dims = 1), dims = 2)
     verts_min = minimum(minimum(p, dims = 1), dims = 2)
@@ -66,9 +66,10 @@ function pointcloud_to_voxel(
         dims = 2,
     )
 
-    dists = sum((grid_points .- cloud[:, nn_idx]) .^ 2, dims = 1)
+    dists_vec = (grid_points .- cloud[:, nn_idx])
+    dists = sum((dists_vec .^ 2), dims = 1)
     dists = reshape(dists, resolution, resolution, resolution, _B)
-    voxels = typeof(similar(p,1,1,1,1))(dists .<= (0.6 / (resolution * resolution)))
+    voxels = typeof(similar(pcloud.points,1,1,1,1))(dists .<= (0.6 / (resolution * resolution)))
     return voxels
 end
 
@@ -78,15 +79,16 @@ function trimesh_to_voxel(m::TriMesh{T,R,S},res::Int=32)    where {T,R,S}
 
     _B = length(verts_list)
     voxels = S{T,4}(undef,res,res,res,_B)
+    # print(typeof(verts_list))
     for (i,v,f) in zip(1:_B,verts_list, faces_list)
-        voxels[:,:,:,i] = _voxelize(v,f,res)
+        voxels[:,:,:,i] = _voxelize(cpu(v),f,res)
     end
     return voxels
 end
 
 function _voxelize(
-    v::AbstractArray{<:AbstractFloat,2},
-    f::AbstractArray{<:Integer,2},
+    v::Array{<:AbstractFloat,2},
+    f::Array{<:Integer,2},
     resolution::Int = 32,
 )
     verts_max = maximum(v)
@@ -158,11 +160,12 @@ function _voxelize(
     return voxels
 end
 
-function voxel_to_trimesh(v::VoxelGrid, thresh::Float32=0.49f0, algo=:Exact)
+function voxel_to_trimesh(v::VoxelGrid, thresh, algo)
     algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
         error("given algo: $(algo) is not supported. Accepted algo are
               {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
 
+    _assert_voxel(v) || error("invalid VoxelGrid, found element which is not between [0,1].")
     voxel = v.voxels
     T = typeof(similar(voxel,1,1))
     R = Array{UInt32,2}
@@ -172,26 +175,29 @@ function voxel_to_trimesh(v::VoxelGrid, thresh::Float32=0.49f0, algo=:Exact)
 
     for i in 1:size(voxel,4)
         v,f = method(cpu(voxel[:,:,:,i]),thresh,algo)
-        push!(verts, T(v))
-        push!(faces, R(f))
+        v = T(v)
+        v = v ./ maximum(v)
+        f = R(f)
+        push!(verts, v)
+        push!(faces, f)
     end
     return verts, faces
 end
 
-function _voxel_algo(v, thresh::Float32=0.49, algo=:MarchingCubes)
+function _voxel_algo(v, thresh, algo)
     res = size(v,1)
-    voxel = similar(v,res+2,res+2,res+2)
+    voxel = zeros(eltype(v),res+2,res+2,res+2)
     voxel[2:end-1,2:end-1,2:end-1] .= v
     algo = eval(algo)
-    voxel = voxel .> thresh
+    voxel = voxel .>= thresh
     v, f = isosurface(voxel, algo(iso = 0, insidepositive = true))
     verts = reduce(hcat, v)
     faces = reduce(hcat, f)
     return verts, faces
 end
 
-function _voxel_exact(voxel, thresh::Float32=0.49, algo=:Exact)
-    voxel = voxel .> thresh
+function _voxel_exact(voxel, thresh, algo)
+    voxel = voxel .>= thresh
     res = size(voxel, 1)
     if res >= 3
         voxel[2:res-1, 2:res-1, 2:res-1] =

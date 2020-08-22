@@ -50,4 +50,4 @@ function Base.show(io::IO, m::VoxelGrid{T}) where {T}
     )
 end
 
-_assert_voxel(v::VoxelGrid) = all(0.0 .>= v .<= 1.0)
+_assert_voxel(v::VoxelGrid) = all(0.0 .<= v.voxels .<= 1.0)
