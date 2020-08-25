@@ -110,9 +110,7 @@ function _voxelize(
         sides = reshape(maximum(sides, dims = 1), :)
 
         keep = sides .> smallest_side
-        if !(any(keep))
-            break
-        end
+        !(any(keep)) && break
 
         v1 = v1[:, keep]
         v2 = v2[:, keep]
