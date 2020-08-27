@@ -230,7 +230,7 @@ function Base.setproperty!(m::TriMesh, f::Symbol, v)
     end
 end
 
-Base.getindex(m::TriMesh, inds...) = (m._verts_list[inds...], m._faces_list[inds...])
+Base.getindex(m::TriMesh, inds...) = (get_verts_list(m)[inds...], get_faces_list(m)[inds...])
 
 """
     GBMesh(m::TriMesh; index::Int = 1)
