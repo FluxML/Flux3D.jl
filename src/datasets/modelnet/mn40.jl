@@ -6,7 +6,6 @@ Returns ModelNet40 dataset.
 ### Optional Key Arguments:
     * `root::String=default_root`   - Root directory of dataset
     * `train::Bool=true`            - Specifies the trainset
-    * `donwload::Bool=true`         - Specifies to auto-download the dataset incase specified dataset is found in root directory
     * `transform=nothing`           - Transform to be applied to data point.
     * `categories::Vector{String}`  - Specifies the categories to be used in dataset.
 
@@ -20,7 +19,7 @@ julia> typeof(dset[1].data) == TriMesh
 ModelNet40(;
     root::String = default_root,
     train::Bool = true,
-    download::Bool = true,
+    download::Bool = false,
     transform = nothing,
     categories::Vector{String} = MN10_classes,
 ) = _mn_dataset(root, train, download, transform, categories, 40)
