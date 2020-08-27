@@ -11,18 +11,18 @@ Dimension of points in PointCloud `pcloud` must be 3.
 
 ### Optional Arguments:
 - color (Symbol)       - Color of the marker, default `:blue`
-- markersize (Number)  - Size of the marker, default `0.02*npoints(pcloud)/1024`
+- markersize (Number)  - Size of the marker, default `npoints(pcloud)/5000`
 
 """
 function visualize(p::PointCloud, index::Number = 1; kwargs...)
-    points = p[index]
+    points = cpu(p[index])
     size(points, 1) == 3 || error("dimension of points in PointCloud must be 3.")
 
     kwargs = convert(Dict{Symbol,Any}, kwargs)
-    get!(kwargs, :color, :blue)
-    get!(kwargs, :markersize, 0.5)
+    get!(kwargs, :color, :lightgreen)
+    get!(kwargs, :markersize, npoints(p)/5000)
 
-    AbstractPlotting.meshscatter(points[3, :], points[1, :], points[2, :]; kwargs...)
+    AbstractPlotting.meshscatter(points[1, :], points[2, :], points[3, :]; kwargs...)
 end
 
 """
