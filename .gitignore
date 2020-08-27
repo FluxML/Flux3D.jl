@@ -8,7 +8,7 @@ Manifest.toml
 /examples/assets/
 /datasets/*
 /benchmarks/bm_*
-/benchmarks/pics/*
+/benchmarks/plots/*
 /test/assets/ModelNet10/
 /test/assets/ModelNet40/
 tmp.jl
