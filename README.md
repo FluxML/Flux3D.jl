@@ -6,17 +6,17 @@
 </p>
 
 <p align="center">
-  <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev" alt="Dev">
+  <a href="https://fluxml.ai/Flux3D.jl/dev" alt="Dev">
     <img src="https://img.shields.io/badge/docs-dev-blue.svg"/>
   </a>
-  <a href="https://github.com/nirmal-suthar/Flux3D.jl/actions" alt="Build Status">
-    <img src="https://github.com/nirmal-suthar/Flux3D.jl/workflows/CI/badge.svg"/>
+  <a href="https://github.com/FluxML/Flux3D.jl/actions" alt="Build Status">
+    <img src="https://github.com/FluxML/Flux3D.jl/workflows/CI/badge.svg"/>
   </a>
   <a href="https://gitlab.com/JuliaGPU/Flux3D-jl/commits/master" alt="Pipeline Status">
     <img src="https://gitlab.com/JuliaGPU/Flux3D-jl/badges/master/pipeline.svg"/>
   </a>
-  <a href="https://codecov.io/gh/nirmal-suthar/Flux3D.jl" alt="Codecov">
-    <img src="https://codecov.io/gh/nirmal-suthar/Flux3D.jl/branch/master/graph/badge.svg?token=8kpPqDfChf"/>
+  <a href="https://codecov.io/gh/FluxML/Flux3D.jl" alt="Codecov">
+    <img src="https://codecov.io/gh/FluxML/Flux3D.jl/branch/master/graph/badge.svg?token=8kpPqDfChf"/>
   </a>
 </p>
 <br/>
@@ -51,28 +51,28 @@ julia> ] Flux3D#master
   <table>
     <tr>
       <th style="text-align:center">
-        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/pointnet">PointNet Classfication</a>
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/pointnet">PointNet Classfication</a>
       </th>
       <th style="text-align:center">
-        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/dgcnn">DGCNN Classification</a>
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/dgcnn">DGCNN Classification</a>
       </th>
       <th style="text-align:center">
-        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/fit_mesh">Supervised 3D recontruction</a>
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/fit_mesh">Supervised 3D recontruction</a>
       </th>
     </tr>
     <tr>
       <td align="center">
-        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/pointnet">
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/pointnet">
           <img border="0" src="docs/src/assets/pcloud_anim.gif" width="200" height="200">
         </a>
       </td>
       <td align="center">
-        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/dgcnn">
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/dgcnn">
           <img border="0" src="docs/src/assets/edgeconv.png" width="200" height="200">
         </a>
       </td>
       <td align="center">
-        <a href="https://nirmal-suthar.github.io/Flux3D.jl/dev/tutorials/fit_mesh">
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/fit_mesh">
           <img border="0" src="docs/src/assets/fitmesh_anim.gif" width="180" height="200">
         </a>
       </td>

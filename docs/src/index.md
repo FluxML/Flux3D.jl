@@ -23,7 +23,7 @@ Download Julia 1.3 or later.
 Currently the library is under development and is not registered. But to install the master branch, type the following in the julia prompt.
 
 ```julia
-] add https://github.com/nirmal-suthar/Flux3D.jl
+] add https://github.com/FluxML/Flux3D.jl
 ```
 
 !!! note

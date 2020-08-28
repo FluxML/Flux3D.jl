@@ -6,11 +6,11 @@ makedocs(;
     modules = [Flux3D],
     doctest = false,
     authors = "Nirmal P. Suthar <nirmalps@iitk.ac.in>",
-    repo = "https://github.com/nirmal-suthar/Flux3D.jl/blob/{commit}{path}#L{line}",
+    repo = "https://github.com/FluxML/Flux3D.jl/blob/{commit}{path}#L{line}",
     sitename = "Flux3D.jl",
     format = Documenter.HTML(;
         prettyurls = get(ENV, "CI", "false") == "true",
-        canonical = "https://nirmal-suthar.github.io/Flux3D.jl",
+        canonical = "https://fluxml.ai/Flux3D.jl",
         assets = String["assets/favicon.ico"],
         analytics = "UA-154580699-2",
     ),
@@ -35,4 +35,4 @@ makedocs(;
     ],
 )
 
-deploydocs(; repo = "github.com/nirmal-suthar/Flux3D.jl.git")
+deploydocs(; repo = "github.com/FluxML/Flux3D.jl.git")

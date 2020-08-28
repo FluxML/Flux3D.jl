@@ -338,7 +338,7 @@ function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
 
     # write header
     write(io, "# Flux3D.jl v0.1.0 OBJ File: \n")
-    write(io, "# www.github.com/nirmal-suthar/Flux3D.jl \n")
+    write(io, "# www.github.com/FluxML/Flux3D.jl \n")
 
     # write vertices data
     for v in vts
