@@ -5,15 +5,15 @@ ModelNet dataset.
 
 ### Fields:
 
-* `root::String`                                        - Root directory of dataset
-* `path::String`                                        - Directory of dataset
-* `train::Bool`                                         - Specifies the trainset
-* `length::Int`                                         - Length of dataset
-* `datapaths::Array`                                    - Array containing the shape and path for each datapoint
-* `transform::Union{Flux3D.AbstractTransform, Nothing}` - Transform to be applied to data point
-* `categories::Vector{String}`                          - Categories to be used in dataset
-* `classes_to_idx::Dict{String, UInt8}`                 - Dict mapping from shape name to class_idx
-* `idx_to_classes::Dict{UInt8, String}`                 - Dict mapping from class_idx to shape name
+* `root::String`                           - Root directory of dataset
+* `path::String`                           - Directory of dataset
+* `train::Bool`                            - Specifies the trainset
+* `length::Int`                            - Length of dataset
+* `datapaths::Array`                       - Array containing the shape and path for each datapoint
+* `transform`                              - Transform to be applied to data point
+* `categories::Vector{String}`             - Categories to be used in dataset
+* `classes_to_idx::Dict{String, UInt8}`    - Dict mapping from shape name to class_idx
+* `idx_to_classes::Dict{UInt8, String}`    - Dict mapping from class_idx to shape name
 """
 struct ModelNet <: AbstractDataset
     root::String

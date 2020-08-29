@@ -282,7 +282,7 @@
     for algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets]
         @testset "VoxelGridToTriMesh algo=$(algo)" begin
             v = deepcopy(_v)
-            t = VoxelGridToTriMesh(thresh, algo)
+            t = VoxelGridToTriMesh(thresh=thresh, algo=algo)
             m = t(v)
             @test m isa TriMesh{Float32, UInt32, CuArray}
         end
@@ -291,7 +291,7 @@
     for algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets]
         @testset "PointCloudToTriMesh algo=$(algo)" begin
             p = deepcopy(_p)
-            t = PointCloudToTriMesh(res, algo)
+            t = PointCloudToTriMesh(res, algo=algo)
             m = t(p)
             @test m isa TriMesh{Float32, UInt32, CuArray}
         end
@@ -309,7 +309,7 @@
     for algo in [:Exact, :MarchingCubes, :MarchingTetrahedra]#, :NaiveSurfaceNets]
         @testset "VoxelGridToPointCloud algo=$(algo)" begin
             v = deepcopy(_v)
-            t = VoxelGridToPointCloud(points, thresh, algo)
+            t = VoxelGridToPointCloud(points, thresh=thresh, algo=algo)
             p = t(v)
             @test p isa PointCloud{Float32}
             @test p.points isa CUDA.CuArray
