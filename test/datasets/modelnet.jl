@@ -1,23 +1,8 @@
-@info "Testing CustomDataset..."
-@testset "CustomDataset" begin
-    x = rand(100, 8)
-    getdata(idx) = x[idx, :]
-    dset = CustomDataset(size(x, 1), getdata)
-
-    @test size(dset) == (size(x, 1),)
-    @test length(dset) == size(x, 1)
-    @test firstindex(dset) == 1
-    @test lastindex(dset) == size(x, 1)
-    @test lastindex(dset) == size(x, 1)
-    @test dset[1] == x[1, :]
-    @test dset[3:8] == [x[i, :] for i = 3:8]
-    @test dset[:] == [x[i, :] for i = 1:size(x, 1)]
-end
 
 @info "Testing ModelNet..."
 @testset "ModelNet10" begin
     _categories = ["sofa","table"]
-    _root = joinpath(@__DIR__,"./assets")
+    _root = normpath(@__DIR__,"../assets")
     for (split, train) in [("train", true), ("test", false)]
         dset = ModelNet10(root=_root, train=train, categories=_categories)
         @test dset isa Flux3D.Dataset.AbstractDataset
@@ -55,7 +40,7 @@ end
 @info "Testing ModelNet..."
 @testset "ModelNet40" begin
     _categories = ["desk","monitor"]
-    _root = joinpath(@__DIR__,"./assets")
+    _root = normpath(@__DIR__,"../assets")
     for (split, train) in [("train", true), ("test", false)]
         dset = ModelNet40(root=_root, train=train, categories=_categories)
         @test dset isa Flux3D.Dataset.AbstractDataset

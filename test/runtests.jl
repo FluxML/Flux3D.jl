@@ -33,7 +33,12 @@ include("utils.jl")
 
     @info "Testing Dataset..."
     @testset "Dataset" begin
-        include("dataset.jl")
+        include("datasets/custom.jl")
+
+        # FIXME unzip throws error on GPU CI due to weird reason
+        if !Flux3D.use_cuda[]
+            include("datasets/modelnet.jl")
+        end
     end
 
     @info "Testing GPU support..."
