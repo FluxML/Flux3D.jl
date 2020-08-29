@@ -3,8 +3,8 @@
 
     @testset "sample_points" begin
         m = load_trimesh([
-            joinpath(@__DIR__, "../meshes/sphere.obj"),
-            joinpath(@__DIR__, "../meshes/sphere.obj"),
+            joinpath(@__DIR__, "../assets/sphere.obj"),
+            joinpath(@__DIR__, "../assets/sphere.obj"),
         ])
 
         samples = sample_points(m, 1000)
@@ -14,8 +14,8 @@
     end
 
     _mesh = load_trimesh([
-        joinpath(@__DIR__, "../meshes/teapot.obj"),
-        joinpath(@__DIR__, "../meshes/sphere.obj"),
+        joinpath(@__DIR__, "../assets/teapot.obj"),
+        joinpath(@__DIR__, "../assets/sphere.obj"),
     ])
 
     for (inplace, FUNC) in [(true, Flux3D.normalize!), (false, Flux3D.normalize)]

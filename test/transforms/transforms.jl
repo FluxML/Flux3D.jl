@@ -84,8 +84,8 @@
     end
 
     _mesh = load_trimesh([
-        joinpath(@__DIR__, "../meshes/teapot.obj"),
-        joinpath(@__DIR__, "../meshes/sphere.obj"),
+        joinpath(@__DIR__, "../assets/teapot.obj"),
+        joinpath(@__DIR__, "../assets/sphere.obj"),
     ])
 
     for inplace in [true, false]
@@ -233,6 +233,69 @@
                 rtol = 1e-5,
                 atol = 1e-5,
             ))
+        end
+    end
+
+    _voxels = zeros(Float32,32,32,32,2)
+    _voxels[1:15,2:10,18:32,:] .= 1
+
+    _v = VoxelGrid(_voxels)
+    _m = load_trimesh([joinpath(@__DIR__,"../assets/teapot.obj"),joinpath(@__DIR__,"../assets/sphere.obj")])
+    _p = PointCloud(sample_points(_m,1024))
+
+    res = 28
+    points = 512
+    thresh = 0.9
+
+    @testset "TriMeshToVoxelGrid" begin
+        m = deepcopy(_m)
+        t = TriMeshToVoxelGrid(res)
+        v = t(m)
+        @test v isa VoxelGrid{Float32}
+        @test size(v.voxels) == (res, res, res, 2)
+    end
+
+    @testset "PointCloudToVoxelGrid" begin
+        p = deepcopy(_p)
+        t = PointCloudToVoxelGrid(res)
+        v = t(p)
+        @test v isa VoxelGrid{Float32}
+        @test size(v.voxels) == (res, res, res, 2)
+    end
+
+    for algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets]
+        @testset "VoxelGridToTriMesh algo=$(algo)" begin
+            v = deepcopy(_v)
+            t = VoxelGridToTriMesh(thresh=thresh, algo=algo)
+            m = t(v)
+            @test m isa TriMesh{Float32, UInt32, Array}
+        end
+    end
+
+    for algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets]
+        @testset "PointCloudToTriMesh algo=$(algo)" begin
+            p = deepcopy(_p)
+            t = PointCloudToTriMesh(res, algo=algo)
+            m = t(p)
+            @test m isa TriMesh{Float32, UInt32, Array}
+        end
+    end
+
+    @testset "TriMeshToPointCloud" begin
+        m = deepcopy(_m)
+        t = TriMeshToPointCloud(points)
+        p = t(m)
+        @test p isa PointCloud{Float32}
+        @test size(p.points) == (3, points, 2)
+    end
+
+    for algo in [:Exact, :MarchingCubes, :MarchingTetrahedra]#, :NaiveSurfaceNets]
+        @testset "VoxelGridToPointCloud algo=$(algo)" begin
+            v = deepcopy(_v)
+            t = VoxelGridToPointCloud(points, thresh=thresh, algo=algo)
+            p = t(v)
+            @test p isa PointCloud{Float32}
+            @test size(p.points) == (3, points, 2)
         end
     end
 end # transforms

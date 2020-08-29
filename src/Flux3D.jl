@@ -8,7 +8,8 @@ using Flux,
     CUDA,
     FileIO,
     SparseArrays,
-    Requires
+    Requires,
+    Meshing
 using Base: tail
 import Zygote: @nograd, @ignore
 import GeometryBasics
@@ -20,6 +21,10 @@ export gpu, cpu, Chain, visualize
 include("rep/utils.jl")
 include("rep/pcloud.jl")
 include("rep/mesh.jl")
+include("rep/voxels.jl")
+
+# conversions
+include("conversions.jl")
 
 # transforms
 include("transforms/utils.jl")
@@ -38,7 +43,6 @@ export CustomDataset, ModelNet10, ModelNet40
 
 # visualization
 @init @require AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e" include("visualize.jl")
-
 
 # models
 include("models/utils.jl")

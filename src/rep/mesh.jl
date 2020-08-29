@@ -183,6 +183,7 @@ end
 
 TriMesh(m::GeometryBasics.Mesh) = TriMesh([m])
 TriMesh(m::TriMesh) = TriMesh(get_verts_list(m), get_faces_list(m))
+TriMesh(v::AbstractArray{2},f::AbstractArray{2}) = TriMesh([v],[f])
 
 # @functor TriMesh
 functor(x::TriMesh) = (_verts_list = x._verts_list,),
@@ -229,7 +230,7 @@ function Base.setproperty!(m::TriMesh, f::Symbol, v)
     end
 end
 
-Base.getindex(m::TriMesh, inds...) = (m._verts_list[inds...], m._faces_list[inds...])
+Base.getindex(m::TriMesh, inds...) = (get_verts_list(m)[inds...], get_faces_list(m)[inds...])
 
 """
     GBMesh(m::TriMesh; index::Int = 1)

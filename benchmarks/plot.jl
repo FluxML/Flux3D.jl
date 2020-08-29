@@ -37,7 +37,7 @@ function read_bm_metrics(fname)
     return data
 end
 
-function save_benchmarks(fname, bm, xlabel)
+function save_benchmarks(fname, bm, variant, xlabel)
     # using Theme(background_color = colorant"white")
     # as arg in plot to force white background
     p = plot(
@@ -63,20 +63,22 @@ bm_flux3d_metrics = read_bm_metrics(joinpath(@__DIR__, "bm_flux3d_metrics.txt"))
 bm_kaolin_metrics = read_bm_metrics(joinpath(@__DIR__, "bm_kaolin_metrics.txt"))
 bm_metrics = vcat(bm_flux3d_metrics, bm_kaolin_metrics)
 
+ispath(joinpath(@__DIR__,"plots")) || mkdir(joinpath(@__DIR__,"plots"))
+
 save_benchmarks(
-    joinpath(@__DIR__, "pics/bm_pcloud.png"),
+    joinpath(@__DIR__, "plots/bm_pcloud.png"),
     bm[bm[!, :category].=="PointCloud", :],
     "PointCloud",
     "No. of points in PointCloud",
 )
 save_benchmarks(
-    joinpath(@__DIR__, "pics/bm_trimesh.png"),
+    joinpath(@__DIR__, "plots/bm_trimesh.png"),
     bm[bm[!, :category].=="TriMesh", :],
     "TriMesh",
     "No. of verts in TriMesh",
 )
 save_benchmarks(
-    joinpath(@__DIR__, "pics/bm_metrics.png"),
+    joinpath(@__DIR__, "plots/bm_metrics.png"),
     bm_metrics,
     "Metrics",
     "No. of verts in TriMesh",

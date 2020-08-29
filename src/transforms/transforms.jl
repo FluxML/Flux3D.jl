@@ -7,7 +7,14 @@ export ScalePointCloud,
     ReAlignTriMesh,
     NormalizeTriMesh,
     TranslateTriMesh,
-    OffsetTriMesh
+    OffsetTriMesh,
+    TriMeshToVoxelGrid,
+    PointCloudToVoxelGrid,
+    VoxelGridToTriMesh,
+    PointCloudToTriMesh,
+    TriMeshToPointCloud,
+    VoxelGridToPointCloud
+
 
 """
     ScalePointCloud(factor::Number; inplace::Bool=true)
@@ -332,3 +339,137 @@ end
 
 Base.show(io::IO, t::OffsetTriMesh) =
     print(io, "$(typeof(t))(offset_verts; inplace=$(t.inplace))")
+
+"""
+    TriMeshToVoxelGrid(resolution::Int=32)
+
+
+    Converts a TriMesh to VoxelGrid having specified `resolution`.
+See also: [`TriMesh`](@ref), [`VoxelGrid`](@ref)
+"""
+struct TriMeshToVoxelGrid <: AbstractTransform
+    resolution::Int
+    TriMeshToVoxelGrid(res::Int=32) = new(res)
+end
+
+(t::TriMeshToVoxelGrid)(m::TriMesh) = VoxelGrid(m,t.resolution)
+
+Base.show(io::IO, t::TriMeshToVoxelGrid) =
+    print(io, "$(typeof(t))(resolution=$(t.resolution))")
+
+"""
+    PointCloudToVoxelGrid(resolution::Int=32)
+
+Converts a PointCloud to VoxelGrid having specified `resolution`.
+
+See also: [`PointCloud`](@ref), [`VoxelGrid`](@ref)
+"""
+struct PointCloudToVoxelGrid <: AbstractTransform
+    resolution::Int
+    PointCloudToVoxelGrid(res::Int=32) = new(res)
+end
+
+(t::PointCloudToVoxelGrid)(p::PointCloud) = VoxelGrid(p,t.resolution)
+
+Base.show(io::IO, t::PointCloudToVoxelGrid) =
+    print(io, "$(typeof(t))(resolution=$(t.resolution))")
+
+"""
+    VoxelGridToTriMesh(; threshold=0.5, algo=:Exact)
+
+Converts a VoxelGrid to TriMesh.
+
+`threshold` is the threshold from which to make binary voxels, and `algo`
+is the mode to be used to convert binary voxels. Available `algo` are
+[:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets].
+
+See also: [`TriMesh`](@ref), [`VoxelGrid`](@ref)
+"""
+struct VoxelGridToTriMesh <: AbstractTransform
+    threshold::Float32
+    algo::Symbol
+end
+
+function VoxelGridToTriMesh(;thresh::Number=0.5f0, algo=:MarchingCubes)
+    algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
+        error("given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
+    (0 <= thresh <= 1) || error("given threshold=$(thresh) is not between [0,1]")
+    return VoxelGridToTriMesh(Float32(thresh),algo)
+end
+
+(t::VoxelGridToTriMesh)(v::VoxelGrid) = TriMesh(v;thresh=t.threshold,algo=t.algo)
+
+Base.show(io::IO, t::VoxelGridToTriMesh) =
+    print(io, "$(typeof(t))((threshold=$(t.threshold), algo=$(t.algo))")
+
+"""
+    PointCloudToTriMesh(resolution::Int=32)
+
+Converts a PointCloud to TriMesh having specified `resolution`.
+
+See also: [`PointCloud`](@ref), [`TriMesh`](@ref)
+"""
+struct PointCloudToTriMesh <: AbstractTransform
+    resolution::Int
+    algo::Symbol
+    function PointCloudToTriMesh(res::Int=32; algo=:MarchingCubes)
+        algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
+            error("given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
+        return new(res,algo)
+    end
+end
+
+(t::PointCloudToTriMesh)(p::PointCloud) = TriMesh(p,t.resolution)
+
+Base.show(io::IO, t::PointCloudToTriMesh) =
+    print(io, "$(typeof(t))(resolution=$(t.resolution))")
+
+"""
+    TriMeshToPointCloud(npoints::Int=1000)
+
+Converts a TriMesh to PointCloud having `npoints`.
+
+See also: [`TriMesh`](@ref), [`PointCloud`](@ref)
+"""
+struct TriMeshToPointCloud <: AbstractTransform
+    npoints::Int
+    function TriMeshToPointCloud(npoints::Int=1024)
+        npoints>=0 || error("npoints cannot be less than 0")
+        return new(npoints)
+    end
+end
+
+(t::TriMeshToPointCloud)(m::TriMesh) = PointCloud(m,t.npoints)
+
+Base.show(io::IO, t::TriMeshToPointCloud) =
+    print(io, "$(typeof(t))(npoints=$(t.npoints))")
+
+"""
+    VoxelGridToPointCloud(npoints::Int=1000; threshold=0.5, algo=:Exact)
+
+Converts a VoxelGrid to PointCloud having `npoints`.
+
+`threshold` is the threshold from which to make binary voxels, and `algo`
+is the mode to be used to convert binary voxels. Available `algo` are
+[:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets].
+
+See also: [`PointCloud`](@ref), [`VoxelGrid`](@ref)
+"""
+struct VoxelGridToPointCloud <: AbstractTransform
+    npoints::Int
+    threshold::Float32
+    algo::Symbol
+end
+
+function VoxelGridToPointCloud(npoints::Int=1024; thresh::Number=0.5f0, algo::Symbol=:MarchingCubes)
+    npoints>=0 || error("npoints cannot be less than 0")
+    algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
+        error("given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
+    (0 <= thresh <= 1) || error("given threshold=$(thresh) is not between [0,1]")
+    return VoxelGridToPointCloud(npoints, Float32(thresh), algo)
+end
+
+(t::VoxelGridToPointCloud)(v::VoxelGrid) = PointCloud(v,t.npoints;thresh=t.threshold,algo=t.algo)
+
+Base.show(io::IO, t::VoxelGridToPointCloud) =
+    print(io, "$(typeof(t))(npoints=$(t.npoints), threshold=$(t.threshold), algo=$(t.algo))")

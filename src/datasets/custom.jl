@@ -2,12 +2,12 @@
     CustomDataset
 
 Minimal Custom Dataset.
-`CustomDataset` also support indexing and slicing. 
+`CustomDataset` also support indexing and slicing.
 
 ### Fields:
 
-* `length::Int`         - Length of dataset. 
-* `getdata::Function`   - Function which takes `idx` as input and returns corresponding data   
+* `length::Int`         - Length of dataset.
+* `getdata::Function`   - Function which takes `idx` as input and returns corresponding data
 
 ### Available Contructor:
 
@@ -40,5 +40,11 @@ Base.getindex(d::CustomDataset, idx::Int) = d.getdata(idx)
 Base.getindex(d::CustomDataset, r::AbstractArray{<:Any,1}) = [d[ri] for ri in r] #TODO: revise this
 Base.getindex(d::CustomDataset, c::Colon) = d[1:length(d)]
 
-Base.show(io::IO, d::CustomDataset) =
-    print(io, "CustomDataset(length=$(d.length), getdata=$(d.getdata))")
+function Base.show(io::IO, d::CustomDataset)
+    print(
+        io,
+        "Custom Dataset:",
+        "\n    length: $(d.length)",
+        "\n    getdata: $(d.getdata)"
+    )
+end

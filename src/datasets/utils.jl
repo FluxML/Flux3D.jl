@@ -1,6 +1,8 @@
 abstract type AbstractDataset end
 abstract type AbstractDataPoint end
 
+const default_root = normpath(@__DIR__, "../../datasets/")
+
 function download_and_verify(url, path, hash)
     tmppath = tempname()
     download(url, tmppath)
@@ -16,14 +18,33 @@ function download_and_verify(url, path, hash)
     mv(tmppath, path; force = true)
 end
 
+struct DataPoint <: AbstractDataPoint
+    idx::Int
+    data::Flux3D.AbstractObject
+    ground_truth::UInt8
+    category_name::String
+end
+
+function Base.show(io::IO, d::DataPoint)
+    print(
+        io,
+        "DataPoint:",
+        "\n    idx: ",
+        d.idx,
+        "\n    data: ",
+        typeof(d.data),
+        "\n    ground_truth: ",
+        d.ground_truth,
+        "\n    category_name: ",
+        d.category_name,
+    )
+end
+
 Base.size(d::AbstractDataset) = error("define Base.size of dataset type: $(typeof(d)).")
 Base.length(d::AbstractDataset) = error("define Base.length of dataset type: $(typeof(d)).")
 
 Base.show(io::IO, p::AbstractDataPoint) =
     print(io, "idx: $(p.idx), data: $(typeof(p.data))")
-
-Base.show(io::IO, ::MIME"text/plain", p::AbstractDataPoint) =
-    print(io, "DataPoint:\n   ", p)
 
 function Base.show(io::IO, dset::AbstractDataset)
     print(io, "Dataset(")
