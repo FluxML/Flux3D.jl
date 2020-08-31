@@ -63,7 +63,7 @@ bm_flux3d_metrics = read_bm_metrics(joinpath(@__DIR__, "bm_flux3d_metrics.txt"))
 bm_kaolin_metrics = read_bm_metrics(joinpath(@__DIR__, "bm_kaolin_metrics.txt"))
 bm_metrics = vcat(bm_flux3d_metrics, bm_kaolin_metrics)
 
-ispath(joinpath(@__DIR__,"plots")) || mkdir(joinpath(@__DIR__,"plots"))
+ispath(joinpath(@__DIR__, "plots")) || mkdir(joinpath(@__DIR__, "plots"))
 
 save_benchmarks(
     joinpath(@__DIR__, "plots/bm_pcloud.png"),

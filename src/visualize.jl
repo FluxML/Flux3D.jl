@@ -20,7 +20,7 @@ function visualize(p::PointCloud, index::Number = 1; kwargs...)
 
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :lightgreen)
-    get!(kwargs, :markersize, npoints(p)/5000)
+    get!(kwargs, :markersize, npoints(p) / 5000)
 
     AbstractPlotting.meshscatter(points[1, :], points[2, :], points[3, :]; kwargs...)
 end
@@ -52,16 +52,22 @@ Visualize voxel at `index` in VoxelGrid `v`.
 - color (Symbol)       - Color of the marker, default `:red`
 
 """
-function visualize(v::VoxelGrid, index::Int=1, thresh::Number=0.49f0; algo=:Exact, kwargs...)
+function visualize(
+    v::VoxelGrid,
+    index::Int = 1,
+    thresh::Number = 0.49f0;
+    algo = :Exact,
+    kwargs...,
+)
     algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
         error("given algo: $(algo) is not supported. Accepted algo are
               {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :violet)
-    method = algo==:Exact ? _voxel_exact : _voxel_algo
-    v,f = method(cpu(v[index]),Float32(thresh),algo)
+    method = algo == :Exact ? _voxel_exact : _voxel_algo
+    v, f = method(cpu(v[index]), Float32(thresh), algo)
 
-    m = GBMesh(v,f)
+    m = GBMesh(v, f)
     AbstractPlotting.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 

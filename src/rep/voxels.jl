@@ -27,11 +27,11 @@ end
 VoxelGrid(voxels::AbstractArray{T,4}) where {T} = VoxelGrid(Float32.(voxels))
 
 function VoxelGrid(voxels::AbstractArray{T,3}) where {T}
-    voxels = reshape(voxels, size(voxels)...,1)
+    voxels = reshape(voxels, size(voxels)..., 1)
     return VoxelGrid(voxels)
 end
 
-VoxelGrid(;voxels) = VoxelGrid(voxels)
+VoxelGrid(; voxels) = VoxelGrid(voxels)
 VoxelGrid(v::VoxelGrid) = VoxelGrid(v.voxels)
 
 @functor VoxelGrid

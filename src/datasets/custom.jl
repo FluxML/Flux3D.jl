@@ -41,10 +41,5 @@ Base.getindex(d::CustomDataset, r::AbstractArray{<:Any,1}) = [d[ri] for ri in r]
 Base.getindex(d::CustomDataset, c::Colon) = d[1:length(d)]
 
 function Base.show(io::IO, d::CustomDataset)
-    print(
-        io,
-        "Custom Dataset:",
-        "\n    length: $(d.length)",
-        "\n    getdata: $(d.getdata)"
-    )
+    print(io, "Custom Dataset:", "\n    length: $(d.length)", "\n    getdata: $(d.getdata)")
 end

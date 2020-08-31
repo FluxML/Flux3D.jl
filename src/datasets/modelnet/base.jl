@@ -21,7 +21,7 @@ struct ModelNet <: AbstractDataset
     train::Bool
     length::Int
     datapaths::Array
-    transform
+    transform::Any
     categories::Vector{String}
     classes_to_idx::Dict{String,UInt8}
     idx_to_classes::Dict{UInt8,String}
@@ -51,10 +51,8 @@ function _mn_dataset(
         append!(datapaths, datapath)
     end
 
-    classes_to_idx =
-        Dict{String,UInt8}([(categories[i], i) for i = 1:length(categories)])
-    idx_to_classes =
-        Dict{UInt8,String}([(i, categories[i]) for i = 1:length(categories)])
+    classes_to_idx = Dict{String,UInt8}([(categories[i], i) for i = 1:length(categories)])
+    idx_to_classes = Dict{UInt8,String}([(i, categories[i]) for i = 1:length(categories)])
 
     _length = length(datapaths)
     return ModelNet(

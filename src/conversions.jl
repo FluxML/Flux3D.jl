@@ -1,39 +1,41 @@
-function TriMesh(p::PointCloud, res::Int=32; algo=:MarchingCubes)
+function TriMesh(p::PointCloud, res::Int = 32; algo = :MarchingCubes)
     voxel = pointcloud_to_voxel(p, res)
     v = VoxelGrid(voxel)
-    return TriMesh(v; algo=algo)
+    return TriMesh(v; algo = algo)
 end
 
-function TriMesh(v::VoxelGrid; thresh::Number=0.5f0, algo=:MarchingCubes)
-    verts,faces = voxel_to_trimesh(v,Float32(thresh),algo)
-    return TriMesh(verts,faces)
+function TriMesh(v::VoxelGrid; thresh::Number = 0.5f0, algo = :MarchingCubes)
+    verts, faces = voxel_to_trimesh(v, Float32(thresh), algo)
+    return TriMesh(verts, faces)
 end
 
-function PointCloud(m::TriMesh, npoints::Int=1000)
+function PointCloud(m::TriMesh, npoints::Int = 1000)
     p = sample_points(m, npoints)
     return PointCloud(p)
 end
 
-function PointCloud(v::VoxelGrid, npoints::Int=1000; thresh::Number=0.5f0, algo=:MarchingCubes)
-    m = TriMesh(v, thresh=thresh, algo=algo)
+function PointCloud(
+    v::VoxelGrid,
+    npoints::Int = 1000;
+    thresh::Number = 0.5f0,
+    algo = :MarchingCubes,
+)
+    m = TriMesh(v, thresh = thresh, algo = algo)
     points = sample_points(m, npoints)
     return PointCloud(points)
 end
 
-function VoxelGrid(m::TriMesh,res::Int=32)
-    v = trimesh_to_voxel(m,res)
+function VoxelGrid(m::TriMesh, res::Int = 32)
+    v = trimesh_to_voxel(m, res)
     return VoxelGrid(v)
 end
 
-function VoxelGrid(p::PointCloud, res::Int=32)
+function VoxelGrid(p::PointCloud, res::Int = 32)
     v = pointcloud_to_voxel(p, res)
     return VoxelGrid(v)
 end
 
-function pointcloud_to_voxel(
-    pcloud::PointCloud,
-    resolution::Int = 32,
-)
+function pointcloud_to_voxel(pcloud::PointCloud, resolution::Int = 32)
     p = cpu(pcloud.points)
     _, _N, _B = size(p)
     verts_max = maximum(maximum(p, dims = 1), dims = 2)
@@ -69,28 +71,26 @@ function pointcloud_to_voxel(
     dists_vec = (grid_points .- cloud[:, nn_idx])
     dists = sum((dists_vec .^ 2), dims = 1)
     dists = reshape(dists, resolution, resolution, resolution, _B)
-    voxels = typeof(similar(pcloud.points,1,1,1,1))(dists .<= (0.6 / (resolution * resolution)))
+    voxels = typeof(similar(pcloud.points, 1, 1, 1, 1))(
+        dists .<= (0.6 / (resolution * resolution)),
+    )
     return voxels
 end
 
-function trimesh_to_voxel(m::TriMesh{T,R,S},res::Int=32)    where {T,R,S}
+function trimesh_to_voxel(m::TriMesh{T,R,S}, res::Int = 32) where {T,R,S}
     verts_list = get_verts_list(m)
     faces_list = get_faces_list(m)
 
     _B = length(verts_list)
-    voxels = S{T,4}(undef,res,res,res,_B)
+    voxels = S{T,4}(undef, res, res, res, _B)
     # print(typeof(verts_list))
-    for (i,v,f) in zip(1:_B,verts_list, faces_list)
-        voxels[:,:,:,i] = _voxelize(cpu(v),f,res)
+    for (i, v, f) in zip(1:_B, verts_list, faces_list)
+        voxels[:, :, :, i] = _voxelize(cpu(v), f, res)
     end
     return voxels
 end
 
-function _voxelize(
-    v::Array{<:AbstractFloat,2},
-    f::Array{<:Integer,2},
-    resolution::Int = 32,
-)
+function _voxelize(v::Array{<:AbstractFloat,2}, f::Array{<:Integer,2}, resolution::Int = 32)
     verts_max = maximum(v)
     verts_min = minimum(v)
     verts = ((v .- verts_min) ./ (verts_max - verts_min))
@@ -134,11 +134,8 @@ function _voxelize(
                 if i == 1
                     push!(new_verts, vertex_set[new_traingles[i, j]])
                 else
-                    new_verts[j] = cat(
-                        new_verts[j],
-                        vertex_set[new_traingles[i, j]],
-                        dims = 2,
-                    )
+                    new_verts[j] =
+                        cat(new_verts[j], vertex_set[new_traingles[i, j]], dims = 2)
                 end
             end
         end
@@ -149,10 +146,8 @@ function _voxelize(
     voxels = zeros(resolution, resolution, resolution)
     idx =
         (
-            (
-                round.(Int, points .* (resolution - 1), RoundToZero) .+
-                resolution
-            ) .% resolution
+            (round.(Int, points .* (resolution - 1), RoundToZero) .+ resolution) .%
+            resolution
         ) .+ 1
     voxels[CartesianIndex.(idx[1, :], idx[2, :], idx[3, :])] .= 1
     return voxels
@@ -163,16 +158,17 @@ function voxel_to_trimesh(v::VoxelGrid, thresh, algo)
         error("given algo: $(algo) is not supported. Accepted algo are
               {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
 
-    _assert_voxel(v) || error("invalid VoxelGrid, found element which is not between [0,1].")
+    _assert_voxel(v) ||
+        error("invalid VoxelGrid, found element which is not between [0,1].")
     voxel = v.voxels
-    T = typeof(similar(voxel,1,1))
+    T = typeof(similar(voxel, 1, 1))
     R = Array{UInt32,2}
-    verts = Vector{T}(undef,0)
-    faces = Vector{R}(undef,0)
-    method = algo==:Exact ? _voxel_exact : _voxel_algo
+    verts = Vector{T}(undef, 0)
+    faces = Vector{R}(undef, 0)
+    method = algo == :Exact ? _voxel_exact : _voxel_algo
 
-    for i in 1:size(voxel,4)
-        v,f = method(cpu(voxel[:,:,:,i]),thresh,algo)
+    for i = 1:size(voxel, 4)
+        v, f = method(cpu(voxel[:, :, :, i]), thresh, algo)
         v = T(v)
         v = v ./ maximum(v)
         f = R(f)
@@ -183,9 +179,9 @@ function voxel_to_trimesh(v::VoxelGrid, thresh, algo)
 end
 
 function _voxel_algo(v, thresh, algo)
-    res = size(v,1)
-    voxel = zeros(eltype(v),res+2,res+2,res+2)
-    voxel[2:end-1,2:end-1,2:end-1] .= v
+    res = size(v, 1)
+    voxel = zeros(eltype(v), res + 2, res + 2, res + 2)
+    voxel[2:end-1, 2:end-1, 2:end-1] .= v
     algo = eval(algo)
     voxel = voxel .>= thresh
     v, f = isosurface(voxel, algo(iso = 0, insidepositive = true))
@@ -229,27 +225,27 @@ function _add_face!(i, v, f)
     x, y, z = i[1], i[2], i[3]
 
     cube_verts = [
-        x-1,
-        y-1,
-        z-1,
-        x-1,
-        y-1,
+        x - 1,
+        y - 1,
+        z - 1,
+        x - 1,
+        y - 1,
         z,
-        x-1,
+        x - 1,
         y,
-        z-1,
-        x-1,
+        z - 1,
+        x - 1,
         y,
-        z,
-        x,
-        y-1,
-        z-1,
-        x,
-        y-1,
         z,
         x,
+        y - 1,
+        z - 1,
+        x,
+        y - 1,
+        z,
+        x,
         y,
-        z-1,
+        z - 1,
         x,
         y,
         z,

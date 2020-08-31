@@ -36,16 +36,28 @@ function _chamfer_distance(
 )
     nn_for_A, nn_for_B = @ignore _nearest_neighbors(A, B)
 
-    dist_A_to_B = mean((A .- B[:,nn_for_A]) .^ 2) * 3.f0
-    dist_B_to_A = mean((B .- A[:,nn_for_B]) .^ 2) * 3.f0
+    dist_A_to_B = mean((A .- B[:, nn_for_A]) .^ 2) * 3.f0
+    dist_B_to_A = mean((B .- A[:, nn_for_B]) .^ 2) * 3.f0
 
     distance = (w1 * dist_A_to_B) + (w2 * dist_B_to_A)
     return distance
 end
 
 function _nearest_neighbors(x::Array{Float32,3}, y::Array{Float32,3})
-    nn_for_x = cat([CartesianIndex.(reduce(vcat, knn(KDTree(y[:,:,i]), x[:,:,i], 1)[1]),i) for i in 1:size(x,3)]...,dims=2)
-    nn_for_y = cat([CartesianIndex.(reduce(vcat, knn(KDTree(x[:,:,i]), y[:,:,i], 1)[1]),i) for i in 1:size(x,3)]...,dims=2)
+    nn_for_x = cat(
+        [
+            CartesianIndex.(reduce(vcat, knn(KDTree(y[:, :, i]), x[:, :, i], 1)[1]), i)
+            for i = 1:size(x, 3)
+        ]...,
+        dims = 2,
+    )
+    nn_for_y = cat(
+        [
+            CartesianIndex.(reduce(vcat, knn(KDTree(x[:, :, i]), y[:, :, i], 1)[1]), i)
+            for i = 1:size(x, 3)
+        ]...,
+        dims = 2,
+    )
     return nn_for_x, nn_for_y
 end
 
@@ -60,7 +72,7 @@ function _nearest_neighbors(x::CuArray{Float32,3}, y::CuArray{Float32,3})
     nn_for_x = argmin(P; dims = 2) |> Array
     nn_for_y = argmin(P; dims = 1) |> Array
 
-    nn_for_x = reshape(map(x->CartesianIndex(x[2],x[3]),nn_for_x),:,size(x,3))
-    nn_for_y = reshape(map(y->CartesianIndex(y[1],y[3]),nn_for_y),:,size(y,3))
+    nn_for_x = reshape(map(x -> CartesianIndex(x[2], x[3]), nn_for_x), :, size(x, 3))
+    nn_for_y = reshape(map(y -> CartesianIndex(y[1], y[3]), nn_for_y), :, size(y, 3))
     return nn_for_x, nn_for_y
 end
