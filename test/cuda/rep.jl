@@ -30,8 +30,8 @@ end
     v = VoxelGrid(voxels) |> gpu
     @test Flux3D._assert_voxel(v)
     @test v isa VoxelGrid{Float32}
-    @test v[1] == voxels[:,:,:,1]
-    @test v[2] == voxels[:,:,:,2]
+    @test v[1] == voxels[:, :, :, 1]
+    @test v[2] == voxels[:, :, :, 2]
     @test v.voxels isa CuArray{Float32,4}
     @test size(v.voxels) == (res, res, res, 2)
 
@@ -39,7 +39,7 @@ end
     v2 = VoxelGrid(voxels) |> gpu
     @test v2 isa VoxelGrid{Float32}
     @test v2.voxels isa CuArray{Float32,4}
-    @test v2[1] == voxels[:,:,:,1]
+    @test v2[1] == voxels[:, :, :, 1]
     @test size(v2.voxels) == (res, res, res, 1)
 end
 

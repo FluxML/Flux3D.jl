@@ -40,15 +40,15 @@ end
     v = VoxelGrid(voxels)
     @test Flux3D._assert_voxel(v)
     @test v isa VoxelGrid{Float32}
-    @test v[1] == voxels[:,:,:,1]
-    @test v[2] == voxels[:,:,:,2]
+    @test v[1] == voxels[:, :, :, 1]
+    @test v[2] == voxels[:, :, :, 2]
     @test v.voxels isa Array{Float32,4}
     @test size(v.voxels) == (res, res, res, 2)
 
     voxels = rand(Float32, res, res, res)
     v2 = VoxelGrid(voxels)
     @test v2 isa VoxelGrid{Float32}
-    @test v2[1] == voxels[:,:,:,1]
+    @test v2[1] == voxels[:, :, :, 1]
     @test size(v2.voxels) == (res, res, res, 1)
 end
 
