@@ -286,23 +286,16 @@ function _load_meta(m::GeometryBasics.Mesh)
 end
 
 """
-    load_trimesh(fn::String)
-    load_trimesh(fns::Vector{String})
+    load_trimesh(fn::String...)
 
 Load TriMesh from file(s).
-It will load TriMesh with multiple meshes, if list of files `fns` is given.
+It will load TriMesh with multiple meshes, if multiple files are given.
 
 Supported formats are `obj`, `stl`, `ply`, `off` and `2DM`.
 
 """
-function load_trimesh(fn::String; elements_types...)
-    mesh = load(fn; elements_types...)
-    verts, faces = _load_meta(mesh)
-    # offset is always -1 when loaded from MeshIO
-    return TriMesh([verts], [faces])
-end
 
-function load_trimesh(fns::Vector{String}; elements_types...)
+function load_trimesh(fns::String...; elements_types...)
     verts_list = Array{Float32,2}[]
     faces_list = Array{UInt32,2}[]
     for (i, fn) in enumerate(fns)

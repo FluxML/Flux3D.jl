@@ -22,12 +22,13 @@ makedocs(;
             "Supervised 3D reconstruction" => "tutorials/fit_mesh.md",
         ],
         "3D Structure" =>
-            ["PointCloud" => "rep/pointcloud.md", "TriMesh" => "rep/trimesh.md"],
+            ["PointCloud" => "rep/pointcloud.md", "TriMesh" => "rep/trimesh.md", "VoxelGrid" => "rep/voxels.md"],
         "Datasets" =>
             ["ModelNet" => "datasets/modelnet.md", "Custom Dataset" => "datasets/utils.md"],
         "Transforms" => "api/transforms.md",
         "Metrics" => "api/metrics.md",
         "API Documentation" => [
+            # "Conversions" => "api/conversions.md"
             "Helper function" => "api/utils.md",
             "Visualization" => "api/visualize.md",
             "3D Models" => "api/models.md",

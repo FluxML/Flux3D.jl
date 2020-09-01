@@ -52,6 +52,7 @@ TriMesh{Float32, UInt32, Array} Structure:
 ## List of all available Transforms
 
 ```@index
+Pages = ["transforms.md"]
 ```
 
 ---
@@ -76,4 +77,17 @@ NormalizePointCloud
 ScalePointCloud
 RotatePointCloud
 ReAlignPointCloud
+```
+
+---
+
+## Conversions Transforms
+
+```@docs
+TriMeshToVoxelGrid
+PointCloudToVoxelGrid
+VoxelGridToTriMesh
+PointCloudToTriMesh
+TriMeshToPointCloud
+VoxelGridToPointCloud
 ```

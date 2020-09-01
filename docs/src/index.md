@@ -44,6 +44,7 @@ Depth = 2
 Pages = [
     "rep/pointcloud.md"
     "rep/trimesh.md"
+    "rep/voxels.md"
 ]
 Depth = 2
 ```
