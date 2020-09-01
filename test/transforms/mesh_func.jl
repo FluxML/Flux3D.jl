@@ -2,10 +2,10 @@
 @testset "Transforms mesh_func" begin
 
     @testset "sample_points" begin
-        m = load_trimesh([
+        m = load_trimesh(
             joinpath(@__DIR__, "../assets/sphere.obj"),
             joinpath(@__DIR__, "../assets/sphere.obj"),
-        ])
+        )
 
         samples = sample_points(m, 1000)
         _radius = sqrt.(sum(samples .^ 2; dims = 1))
@@ -13,10 +13,10 @@
         @test gradient(x -> sum(sample_points(x, 1000)), m) isa Tuple
     end
 
-    _mesh = load_trimesh([
+    _mesh = load_trimesh(
         joinpath(@__DIR__, "../assets/teapot.obj"),
         joinpath(@__DIR__, "../assets/sphere.obj"),
-    ])
+    )
 
     for (inplace, FUNC) in [(true, Flux3D.normalize!), (false, Flux3D.normalize)]
         @testset "$(FUNC)" begin

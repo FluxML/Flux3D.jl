@@ -83,10 +83,10 @@
         @test all(isapprox.(std(pc1.points; dims = 2), 1, rtol = 1e-5, atol = 1e-4))
     end
 
-    _mesh = load_trimesh([
+    _mesh = load_trimesh(
         joinpath(@__DIR__, "../assets/teapot.obj"),
         joinpath(@__DIR__, "../assets/sphere.obj"),
-    ])
+    )
 
     for inplace in [true, false]
         @testset "ScaleTriMesh inplace=$(inplace)" begin
@@ -240,10 +240,10 @@
     _voxels[1:15, 2:10, 18:32, :] .= 1
 
     _v = VoxelGrid(_voxels)
-    _m = load_trimesh([
+    _m = load_trimesh(
         joinpath(@__DIR__, "../assets/teapot.obj"),
         joinpath(@__DIR__, "../assets/sphere.obj"),
-    ])
+    )
     _p = PointCloud(sample_points(_m, 1024))
 
     res = 28

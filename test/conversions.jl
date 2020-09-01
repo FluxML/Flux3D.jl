@@ -3,10 +3,10 @@
     _voxels[1:15, 2:10, 18:32, :] .= 1
 
     _v = VoxelGrid(_voxels)
-    _m = load_trimesh([
+    _m = load_trimesh(
         joinpath(@__DIR__, "./assets/teapot.obj"),
         joinpath(@__DIR__, "./assets/sphere.obj"),
-    ])
+    )
     _p = PointCloud(sample_points(_m, 1024))
 
     res = 28
