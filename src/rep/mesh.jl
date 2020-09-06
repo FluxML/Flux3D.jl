@@ -293,7 +293,6 @@ It will load TriMesh with multiple meshes, if multiple files are given.
 Supported formats are `obj`, `stl`, `ply`, `off` and `2DM`.
 
 """
-
 function load_trimesh(fns::String...; elements_types...)
     verts_list = Array{Float32,2}[]
     faces_list = Array{UInt32,2}[]

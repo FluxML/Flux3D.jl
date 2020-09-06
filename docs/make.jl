@@ -28,7 +28,7 @@ makedocs(;
         "Transforms" => "api/transforms.md",
         "Metrics" => "api/metrics.md",
         "API Documentation" => [
-            # "Conversions" => "api/conversions.md"
+            "Conversions" => "api/conversions.md",
             "Helper function" => "api/utils.md",
             "Visualization" => "api/visualize.md",
             "3D Models" => "api/models.md",

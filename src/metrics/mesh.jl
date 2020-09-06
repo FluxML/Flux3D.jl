@@ -1,5 +1,11 @@
 export laplacian_loss, edge_loss
 
+"""
+    laplacian_loss(m::TriMesh)
+
+Computes the laplacian smoothning metrics for TriMesh `m`
+
+"""
 function laplacian_loss(m::TriMesh)
     L = @ignore get_laplacian_packed(m)
     verts = get_verts_packed(m)
@@ -8,6 +14,13 @@ function laplacian_loss(m::TriMesh)
     return mean(L)
 end
 
+"""
+    edge_loss(m::TriMesh, target_length::Number = 0.0)
+
+Computes mean edge length in TriMesh. 
+
+`target_length` is the optional arguments for computing edge length. 
+"""
 function edge_loss(m::TriMesh, target_length::Number = 0.0)
     verts = get_verts_packed(m)
     edges = @ignore get_edges_packed(m)

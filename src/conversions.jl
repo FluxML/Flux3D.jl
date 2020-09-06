@@ -1,19 +1,58 @@
+"""
+    TriMesh(p::PointCloud, res::Int = 32; algo = :MarchingCubes)
+
+Initialize TriMesh from PointCloud structures having specified `resolution`.
+
+`algo` is the mode to be used to convert binary voxels. Available `algo` are
+[:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets].
+
+See also: [`PointCloudToTriMesh`](@ref)
+"""
 function TriMesh(p::PointCloud, res::Int = 32; algo = :MarchingCubes)
     voxel = pointcloud_to_voxel(p, res)
     v = VoxelGrid(voxel)
     return TriMesh(v; algo = algo)
 end
 
+"""
+    TriMesh(v::VoxelGrid; thresh::Number = 0.5f0, algo = :MarchingCubes)
+
+Initialize TriMesh from the VoxelGrid structures.
+
+`threshold` is the threshold from which to make binary voxels, and `algo`
+is the mode to be used to convert binary voxels. Available `algo` are
+[:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets].
+
+See also: [`VoxelGridToTriMesh`](@ref)
+"""
 function TriMesh(v::VoxelGrid; thresh::Number = 0.5f0, algo = :MarchingCubes)
     verts, faces = voxel_to_trimesh(v, Float32(thresh), algo)
     return TriMesh(verts, faces)
 end
 
+"""
+    PointCloud(m::TriMesh, npoints::Int = 1000)
+
+Initialize PointCloud, having `npoints`, from the TriMesh structure.
+
+See also: [`TriMeshToPointCloud`](@ref)
+"""
 function PointCloud(m::TriMesh, npoints::Int = 1000)
     p = sample_points(m, npoints)
     return PointCloud(p)
 end
 
+"""
+    PointCloud(v::VoxelGrid, npoints::Int = 1000; thresh::Number = 0.5f0, algo = :MarchingCubes)
+
+Initialize PointCloud from the VoxelGrid Structures having `npoints`.
+
+`thresh` is the threshold from which to make binary voxels, and `algo`
+is the mode to be used to convert binary voxels. Available `algo` are
+[:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets].
+
+See also: [`VoxelGridToPointCloud`](@ref)
+"""
 function PointCloud(
     v::VoxelGrid,
     npoints::Int = 1000;
@@ -25,11 +64,25 @@ function PointCloud(
     return PointCloud(points)
 end
 
+"""
+    VoxelGrid(m::TriMesh, res::Int = 32)
+
+Initialize VoxelGrid, having specified `resolution`, from TriMesh Structure.
+
+See also: [`TriMeshToVoxelGrid`](@ref)
+"""
 function VoxelGrid(m::TriMesh, res::Int = 32)
     v = trimesh_to_voxel(m, res)
     return VoxelGrid(v)
 end
 
+"""
+    VoxelGrid(p::PointCloud, res::Int = 32)
+
+Initialize VoxelGrid, having specified `resolution`, from PointCloud Structure.
+
+See also: [`PointCloudToVoxelGrid`](@ref)
+"""
 function VoxelGrid(p::PointCloud, res::Int = 32)
     v = pointcloud_to_voxel(p, res)
     return VoxelGrid(v)

@@ -343,8 +343,8 @@ Base.show(io::IO, t::OffsetTriMesh) =
 """
     TriMeshToVoxelGrid(resolution::Int=32)
 
+Converts a TriMesh to VoxelGrid having specified `resolution`.
 
-    Converts a TriMesh to VoxelGrid having specified `resolution`.
 See also: [`TriMesh`](@ref), [`VoxelGrid`](@ref)
 """
 struct TriMeshToVoxelGrid <: AbstractTransform
