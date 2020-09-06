@@ -4,8 +4,14 @@ CurrentModule = Flux3D
 
 # 3D Deep Learning Models
 
+## Dynamic-Graph CNN
 
-```@autodocs
-Modules = [Flux3D]
-Pages = ["models/dgcnn.jl, models/pointnet.jl"]
+```@docs
+DGCNN
+```
+
+## PointNet
+
+```@docs
+PointNet
 ```

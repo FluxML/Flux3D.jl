@@ -23,26 +23,31 @@
 
 Flux3D.jl is a 3D vision library, written completely in Julia. This package utilizes [Flux.jl](github.com/FluxML/Flux.jl) and [Zygote.jl](github.com/FluxML/Zygote.jl) as its building blocks for training 3D vision models and for supporting differentiation. This package also have support of CUDA GPU acceleration with [CUDA.jl](github.com/JuliaGPU/CUDA.jl).The primary motivation for this library is to provide:
 
-* Batched Data structure for 3D data like PointCloud and TriMesh for storing and computation.
+* Batched Data structure for 3D data like PointCloud, TriMesh and VoxelGrid for storing and computation.
 * Transforms and general utilities for processing 3D structures.
 * Metrics for defining loss objectives and predefined 3D models.
-* Easy access to loading an pre-processing standard 3D datasets.
-* Visualization utilities for PointCloud and TriMesh.
+* Easy access to loading and pre-processing standard 3D datasets.
+* Visualization utilities for PointCloud, TriMesh and VoxelGrid.
+* Inter-Conversion between different 3D structures.
 
 Any suggestions, issues and pull requests are most welcome.
+
+<p align="center">
+    <img width=400 height=230 src="docs/src/assets/visualize_anim.gif">
+</p>
 
 ## Installation
 
 This package is under active development but we believe it is stable enough for use in 3D Machine Learning Research. It has been registered. To install the latest release, type the following in the Julia 1.3+ prompt.
 
 ```julia
-julia> ] Flux3D
+julia> ] add Flux3D
 ```
 
 To install the master branch type the following
 
 ```julia
-julia> ] Flux3D#master
+julia> ] add Flux3D#master
 ```
 
 ## Examples
@@ -132,6 +137,6 @@ julia> save_trimesh("normalized_teapot.obj", new_m)
 - [X] Add Transforms/Metrics for PointCloud and TriMesh.
 - [X] GPU Support using CUDA.jl
 - [X] Add Dataset support for ModelNet10/40.
-- [ ] Add Batched 3D structure and Transform for Voxels.
-- [ ] Interconversion between different 3D structures like PointCloud, Voxel and TriMesh.
+- [X] Add Batched 3D structure and Transform for Voxels.
+- [X] Interconversion between different 3D structures like PointCloud, Voxel and TriMesh.
 - [ ] Add more metrics for TriMesh (like normal_consistency and cloud_mesh_distance)

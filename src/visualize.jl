@@ -36,7 +36,7 @@ Visualize mesh at `index` in TriMesh `m`.
 """
 function visualize(m::GeometryBasics.Mesh; kwargs...) where {T,R}
     kwargs = convert(Dict{Symbol,Any}, kwargs)
-    get!(kwargs, :color, :red)
+    get!(kwargs, :color, :orange)
 
     AbstractPlotting.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end

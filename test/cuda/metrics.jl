@@ -2,10 +2,10 @@
 @testset "TriMesh Metrics" begin
 
     _mesh =
-        load_trimesh([
+        load_trimesh(
             joinpath(@__DIR__, "../assets/teapot.obj"),
             joinpath(@__DIR__, "../assets/sphere.obj"),
-        ]) |> gpu
+        ) |> gpu
 
     @testset "Laplacian loss" begin
 
@@ -86,10 +86,10 @@
 
     @testset "sample_points" begin
         m =
-            load_trimesh([
+            load_trimesh(
                 joinpath(@__DIR__, "../assets/sphere.obj"),
                 joinpath(@__DIR__, "../assets/sphere.obj"),
-            ]) |> gpu
+            ) |> gpu
 
         samples = sample_points(m, 1000)
         _radius = sqrt.(sum(samples .^ 2; dims = 1))

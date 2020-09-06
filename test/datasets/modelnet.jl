@@ -1,5 +1,5 @@
 
-@info "Testing ModelNet..."
+@info "Testing ModelNet10..."
 @testset "ModelNet10" begin
     _categories = ["sofa", "table"]
     _root = normpath(@__DIR__, "../assets")
@@ -32,7 +32,7 @@
     end
 end
 
-@info "Testing ModelNet..."
+@info "Testing ModelNet40..."
 @testset "ModelNet40" begin
     _categories = ["desk", "monitor"]
     _root = normpath(@__DIR__, "../assets")

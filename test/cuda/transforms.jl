@@ -92,10 +92,10 @@
     end
 
     _mesh =
-        load_trimesh([
+        load_trimesh(
             joinpath(@__DIR__, "../assets/teapot.obj"),
             joinpath(@__DIR__, "../assets/sphere.obj"),
-        ]) |> gpu
+        ) |> gpu
 
     for inplace in [true, false]
         @testset "ScaleTriMesh inplace=$(inplace)" begin
@@ -255,10 +255,10 @@
 
     _v = VoxelGrid(_voxels) |> gpu
     _m =
-        load_trimesh([
+        load_trimesh(
             joinpath(@__DIR__, "../assets/teapot.obj"),
             joinpath(@__DIR__, "../assets/sphere.obj"),
-        ]) |> gpu
+        ) |> gpu
     _p = PointCloud(sample_points(_m, 1024)) |> gpu
 
     res = 28

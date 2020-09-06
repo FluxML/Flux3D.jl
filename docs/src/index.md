@@ -6,24 +6,35 @@ CurrentModule = Flux3D
 
 Flux3D.jl is a 3D vision library, written completely in Julia. This package utilizes [Flux.jl](github.com/FluxML/Flux.jl) and [Zygote.jl](github.com/FluxML/Zygote.jl) as its building blocks for training 3D vision models and for supporting differentiation. This package also have support of CUDA GPU acceleration with [CUDA.jl](github.com/JuliaGPU/CUDA.jl).The primary motivation for this library is to provide:
 
-* Batched Data structure for 3D data like PointCloud and TriMesh for storing and computation.
+* Batched Data structure for 3D data like PointCloud, TriMesh and VoxelGrid for storing and computation.
 * Transforms and general utilities for processing 3D structures.
 * Metrics for defining loss objectives and predefined 3D models.
-* Easy access to loading an pre-processing standard 3D datasets.
-* Visualization utilities for PointCloud and TriMesh.
+* Easy access to loading and pre-processing standard 3D datasets.
+* Visualization utilities for PointCloud, TriMesh and VoxelGrid.
+* Inter-Conversion between different 3D structures.
 
 Any suggestions, issues and pull requests are most welcome.
+
+```@raw html
+<p align="center">
+    <img width=450 height=270 src="../../assets/visualize_anim.gif">
+</p>
+```
 
 ---
 
 ## Installation
 
-Download Julia 1.3 or later.
-
-Currently the library is under development and is not registered. But to install the master branch, type the following in the julia prompt.
+This package is under active development but it is stable enough for use in 3D Machine Learning Research. It has been registered. To install the latest release, type the following in the Julia 1.3+ prompt.
 
 ```julia
-] add https://github.com/FluxML/Flux3D.jl
+julia> ] add Flux3D
+```
+
+To install the master branch type the following
+
+```julia
+julia> ] add Flux3D#master
 ```
 
 !!! note
@@ -44,6 +55,7 @@ Depth = 2
 Pages = [
     "rep/pointcloud.md"
     "rep/trimesh.md"
+    "rep/voxels.md"
 ]
 Depth = 2
 ```
@@ -62,6 +74,7 @@ Depth = 2
 
 ```@contents
 Pages = [
+    "api/conversions.md"
     "api/transforms.md"
     "api/metrics.md"
     "api/visualize.md"

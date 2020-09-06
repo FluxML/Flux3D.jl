@@ -1,7 +1,7 @@
 """
     ModelNet
 
-ModelNet dataset.
+Base ModelNet for MN10/40.
 
 ### Fields:
 
