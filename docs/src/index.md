@@ -25,12 +25,16 @@ Any suggestions, issues and pull requests are most welcome.
 
 ## Installation
 
-Download Julia 1.3 or later.
-
-Currently the library is under development and is not registered. But to install the master branch, type the following in the julia prompt.
+This package is under active development but it is stable enough for use in 3D Machine Learning Research. It has been registered. To install the latest release, type the following in the Julia 1.3+ prompt.
 
 ```julia
-] add https://github.com/FluxML/Flux3D.jl
+julia> ] add Flux3D
+```
+
+To install the master branch type the following
+
+```julia
+julia> ] add Flux3D#master
 ```
 
 !!! note
