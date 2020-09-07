@@ -320,7 +320,7 @@ function realign(
     return src
 end
 
-function realign(src::TriMesh, tgt::TriMesh, index::Integer=1)
+function realign(src::TriMesh, tgt::TriMesh, index::Integer = 1)
     src = deepcopy(src)
     realign!(src, tgt, index)
     return src
