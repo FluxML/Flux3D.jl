@@ -17,7 +17,7 @@ Any suggestions, issues and pull requests are most welcome.
 
 ```@raw html
 <p align="center">
-    <img width=450 height=270 src="../../assets/visualize_anim.gif">
+    <img width=450 height=270 src="../assets/visualize_anim.gif">
 </p>
 ```
 
