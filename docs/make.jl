@@ -21,8 +21,11 @@ makedocs(;
             "DGCNN classication" => "tutorials/dgcnn.md",
             "Supervised 3D reconstruction" => "tutorials/fit_mesh.md",
         ],
-        "3D Structure" =>
-            ["PointCloud" => "rep/pointcloud.md", "TriMesh" => "rep/trimesh.md", "VoxelGrid" => "rep/voxels.md"],
+        "3D Structure" => [
+            "PointCloud" => "rep/pointcloud.md",
+            "TriMesh" => "rep/trimesh.md",
+            "VoxelGrid" => "rep/voxels.md",
+        ],
         "Datasets" =>
             ["ModelNet" => "datasets/modelnet.md", "Custom Dataset" => "datasets/utils.md"],
         "Transforms" => "api/transforms.md",
