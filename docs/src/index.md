@@ -42,6 +42,23 @@ julia> ] add Flux3D#master
 
 ---
 
+## Citation
+
+If you use this software as a part of your research or teaching, please cite this github repository. For convenience, we have also provided the bibtex entry in the form of `CITATION.bib` file in our github repo.
+
+```
+@misc{Suthar2020,
+    author = {Nirmal Suthar, Avik Pal, Dhairya Gandhi},
+    title = {Flux3D: A Framework for 3D Deep Learning in Julia},
+    year = {2020},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/FluxML/Flux3D.jl}},
+}
+```
+
+---
+
 ## Contents
 
 ```@contents

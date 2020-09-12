@@ -21,6 +21,9 @@
   <a href="https://codecov.io/gh/FluxML/Flux3D.jl" alt="Codecov">
     <img src="https://codecov.io/gh/FluxML/Flux3D.jl/branch/master/graph/badge.svg?token=8kpPqDfChf"/>
   </a>
+  <a href="https://github.com/SciML/ColPrac" alt="ColPrac: Contributor's Guide on Collaborative Practices for Community Packages">
+    <img src="https://img.shields.io/badge/ColPrac-Contributor's%20Guide-blueviole"/>
+  </a>
 </p>
 <br/>
 
@@ -121,6 +124,21 @@ TriMesh{Float32, UInt32, CUDA.CuArray} Structure:
     Storage type: CUDA.CuArray
 
 julia> save_trimesh("normalized_teapot.obj", new_m)
+```
+
+## Citation
+
+If you use this software as a part of your research or teaching, please cite this github repository. For convenience, we have also provided the bibtex entry in the form of `CITATION.bib` file.
+
+```
+@misc{Suthar2020,
+    author = {Nirmal Suthar, Avik Pal, Dhairya Gandhi},
+    title = {Flux3D: A Framework for 3D Deep Learning in Julia},
+    year = {2020},
+    publisher = {GitHub},
+    journal = {GitHub repository},
+    howpublished = {\url{https://github.com/FluxML/Flux3D.jl}},
+}
 ```
 
 ## Benchmarks

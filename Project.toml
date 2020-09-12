@@ -1,7 +1,7 @@
 name = "Flux3D"
 uuid = "432009dd-59a1-4b72-8c93-6462ce9b220f"
 authors = ["Nirmal P. Suthar <nirmalps@iitk.ac.in>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
