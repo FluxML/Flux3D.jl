@@ -9,6 +9,9 @@
   <a href="https://fluxml.ai/Flux3D.jl/dev" alt="Dev">
     <img src="https://img.shields.io/badge/docs-dev-blue.svg"/>
   </a>
+  <a href="https://fluxml.ai/Flux3D.jl/stable" alt="Dev">
+    <img src="https://img.shields.io/badge/docs-stable-blue.svg"/>
+  </a>
   <a href="https://github.com/FluxML/Flux3D.jl/actions" alt="Build Status">
     <img src="https://github.com/FluxML/Flux3D.jl/workflows/CI/badge.svg"/>
   </a>

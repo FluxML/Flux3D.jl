@@ -90,6 +90,7 @@ scale(pcloud::PointCloud, factor::Number) = scale(pcloud, Float32(factor))
 
 """
     rotate!(pcloud::PointCloud, rotmat::AbstractArray{Number,2})
+    rotate!(pcloud::PointCloud, rotmat::AbstractArray{Number,3})
 
 Rotate the PointCloud `pcloud` by rotation matrix `rotmat`
 and overwrite `pcloud` with rotated PointCloud.
