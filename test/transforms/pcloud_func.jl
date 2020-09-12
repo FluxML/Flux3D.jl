@@ -35,14 +35,20 @@
             p = rand(Float32, 3, 8, 2)
             rotmat = 2 .* one(rand(Float32, 3, 3))
             rotmat_inv = inv(rotmat)
+            rotmat_b = cat(rotmat, rotmat, dims=3)
+            rotmat_inv_b = cat(rotmat_inv, rotmat_inv, dims=3)
             pc1 = PointCloud(p)
             pc2 = FUNC(FUNC(pc1, rotmat), rotmat_inv)
+            pc3 = FUNC(FUNC(pc1, rotmat_b), rotmat_inv_b)
             if inplace
                 @test pc1 == pc2
+                @test pc1 == pc3
             else
                 @test pc1 != pc2
+                @test pc1 != pc3
             end
             @test all(isapprox.(p, pc2.points, rtol = 1e-5, atol = 1e-5))
+            @test all(isapprox.(p, pc3.points, rtol = 1e-5, atol = 1e-5))
         end
     end
 

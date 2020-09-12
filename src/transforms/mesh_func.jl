@@ -199,11 +199,13 @@ scale(m::TriMesh, factor) = scale(m, Float32.(factor))
 
 """
     rotate!(m::TriMesh, rotmat::AbstractArray{<:Number,2})
+    rotate!(m::TriMesh, rotmat::AbstractArray{<:Number,3})
 
 Rotate the TriMesh `m` by rotation matrix `rotmat`
 and overwrite `m` with rotated TriMesh.
 
-Rotation matrix `rotmat` should be of size `(3,3)`
+Rotation matrix `rotmat` should be of size `(3,3)` or `(3,3,B)`
+where B is the batch size of TriMesh.
 
 See also: [`rotate`](@ref)
 
@@ -222,7 +224,15 @@ function rotate!(m::TriMesh, rotmat::AbstractArray{Float32,2})
     return m
 end
 
-rotate!(m::TriMesh, rotmat::AbstractArray{<:Number,2}) = rotate!(m, Float32.(rotmat))
+function rotate!(m::TriMesh, rotmat::AbstractArray{Float32,3})
+    size(rotmat) == (3, 3, m.N) ||
+        error("rotmat must be (3, 3, $(m.N)) array, but instead got $(size(rotmat)) array")
+    verts_padded = Flux.batched_mul(Flux.batched_transpose(rotmat),get_verts_padded(m))
+    m._verts_padded = verts_padded
+    return m
+end
+
+rotate!(m::TriMesh, rotmat::AbstractArray{<:Number}) = rotate!(m, Float32.(rotmat))
 
 """
     rotate(m::TriMesh, rotmat::AbstractArray{<:Number,2})
@@ -240,7 +250,7 @@ julia> rotmat = rand(3,3)
 julia> m = rotate(m, rotmat)
 ```
 """
-function rotate(m::TriMesh, rotmat::AbstractArray{<:Number,2})
+function rotate(m::TriMesh, rotmat::AbstractArray{<:Number})
     m = deepcopy(m)
     rotate!(m, rotmat)
     return m

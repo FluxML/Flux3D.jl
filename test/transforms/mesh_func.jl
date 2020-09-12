@@ -77,15 +77,26 @@
             m = deepcopy(_mesh)
             rotmat = 2 .* one(rand(Float32, 3, 3))
             rotmat_inv = inv(rotmat)
+            rotmat_b = cat(rotmat, rotmat, dims=3)
+            rotmat_inv_b = cat(rotmat_inv, rotmat_inv, dims=3)
             m2 = FUNC(FUNC(m, rotmat), rotmat_inv)
+            m3 = FUNC(FUNC(m, rotmat_b), rotmat_inv_b)
             if inplace
                 @test m2 === m
+                @test m3 === m
             else
                 @test m2 !== m
+                @test m3 !== m
             end
             @test all(isapprox.(
                 get_verts_packed(_mesh),
                 get_verts_packed(m2),
+                rtol = 1e-5,
+                atol = 1e-5,
+            ))
+            @test all(isapprox.(
+                get_verts_packed(_mesh),
+                get_verts_packed(m3),
                 rtol = 1e-5,
                 atol = 1e-5,
             ))
