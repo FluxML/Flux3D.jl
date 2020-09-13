@@ -121,7 +121,7 @@ function rotate!(pcloud::PointCloud, rotmat::AbstractArray{Float32,3})
     size(rotmat) == (3, 3, _B) ||
         error("rotmat must be (3, 3, $(_B)) array, but instead got $(size(rotmat)) array")
     size(pcloud.points, 1) == 3 || error("dimension of points in PointCloud must be 3")
-    pcloud.points = Flux.batched_mul(Flux.batched_transpose(rotmat),pcloud.points)
+    pcloud.points = Flux.batched_mul(Flux.batched_transpose(rotmat), pcloud.points)
     return pcloud
 end
 

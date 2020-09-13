@@ -77,8 +77,8 @@
             m = deepcopy(_mesh)
             rotmat = 2 .* one(rand(Float32, 3, 3))
             rotmat_inv = inv(rotmat)
-            rotmat_b = cat(rotmat, rotmat, dims=3)
-            rotmat_inv_b = cat(rotmat_inv, rotmat_inv, dims=3)
+            rotmat_b = cat(rotmat, rotmat, dims = 3)
+            rotmat_inv_b = cat(rotmat_inv, rotmat_inv, dims = 3)
             m2 = FUNC(FUNC(m, rotmat), rotmat_inv)
             m3 = FUNC(FUNC(m, rotmat_b), rotmat_inv_b)
             if inplace
