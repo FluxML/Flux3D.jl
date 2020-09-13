@@ -227,7 +227,7 @@ end
 function rotate!(m::TriMesh, rotmat::AbstractArray{Float32,3})
     size(rotmat) == (3, 3, m.N) ||
         error("rotmat must be (3, 3, $(m.N)) array, but instead got $(size(rotmat)) array")
-    verts_padded = Flux.batched_mul(Flux.batched_transpose(rotmat),get_verts_padded(m))
+    verts_padded = Flux.batched_mul(Flux.batched_transpose(rotmat), get_verts_padded(m))
     m._verts_padded = verts_padded
     return m
 end
