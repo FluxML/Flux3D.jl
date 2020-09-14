@@ -28,8 +28,8 @@ chamfer_distance(
 function _chamfer_distance(
     A::AbstractArray{Float32,2},
     B::AbstractArray{Float32,2},
-    w1::Float32 = 1.f0,
-    w2::Float32 = 1.f0,
+    w1::Float32 = 1.0f0,
+    w2::Float32 = 1.0f0,
 )
     A = reshape(A, size(A)..., 1)
     B = reshape(B, size(B)..., 1)
@@ -39,13 +39,13 @@ end
 function _chamfer_distance(
     A::AbstractArray{Float32,3},
     B::AbstractArray{Float32,3},
-    w1::Float32 = 1.f0,
-    w2::Float32 = 1.f0,
+    w1::Float32 = 1.0f0,
+    w2::Float32 = 1.0f0,
 )
     nn_for_A, nn_for_B = @ignore _nearest_neighbors(A, B)
 
-    dist_A_to_B = mean((A .- B[:, nn_for_A]) .^ 2) * 3.f0
-    dist_B_to_A = mean((B .- A[:, nn_for_B]) .^ 2) * 3.f0
+    dist_A_to_B = mean((A .- B[:, nn_for_A]) .^ 2) * 3.0f0
+    dist_B_to_A = mean((B .- A[:, nn_for_B]) .^ 2) * 3.0f0
 
     distance = (w1 * dist_A_to_B) + (w2 * dist_B_to_A)
     return distance
