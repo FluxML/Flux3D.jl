@@ -68,7 +68,7 @@ julia> ] add Flux3D#master
         <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/dgcnn">DGCNN Classification</a>
       </th>
       <th style="text-align:center">
-        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/fit_mesh">Supervised 3D recontruction</a>
+        <a href="https://fluxml.ai/Flux3D.jl/dev/tutorials/fit_mesh">Supervised 3D reconstruction</a>
       </th>
     </tr>
     <tr>
@@ -128,7 +128,7 @@ julia> save_trimesh("normalized_teapot.obj", new_m)
 
 ## Citation
 
-If you use this software as a part of your research or teaching, please cite this github repository. For convenience, we have also provided the bibtex entry in the form of `CITATION.bib` file.
+If you use this software as a part of your research or teaching, please cite this GitHub repository. For convenience, we have also provided the BibTeX entry in the form of `CITATION.bib` file.
 
 ```
 @misc{Suthar2020,
