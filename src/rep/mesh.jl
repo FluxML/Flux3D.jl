@@ -26,7 +26,7 @@ export TriMesh,
 
 import GeometryBasics, Printf, MeshIO
 import GeometryBasics:
-    Point3f0, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh
+    Point3f0, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh, value
 
 import Zygote: @ignore
 
@@ -279,7 +279,7 @@ function _load_meta(m::GeometryBasics.Mesh)
     vertices = [Array(v) for v in vs]
     vertices = reduce(hcat, vertices)
     fs = getfield(getfield(m, :simplices), :faces)
-    faces = [Array(UInt32.(GeometryBasics.value.(f))) for f in fs]
+    faces = [Array(UInt32.(value.(f))) for f in fs]
     faces = reduce(hcat, faces)
     return (vertices, faces)
 end
@@ -330,7 +330,7 @@ function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
     fcs = GeometryBasics.faces(msh)
 
     # write header
-    write(io, "# Flux3D.jl v0.1.0 OBJ File: \n")
+    write(io, "# Flux3D.jl OBJ File: \n")
     write(io, "# www.github.com/FluxML/Flux3D.jl \n")
 
     # write vertices data
@@ -340,7 +340,7 @@ function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
 
     # write faces data
     for f in fcs
-        Printf.@printf(io, "f %d %d %d\n", Int.(f)...)
+        Printf.@printf(io, "f %d %d %d\n", Int.(value.(f))...)
     end
 
     close(io)
