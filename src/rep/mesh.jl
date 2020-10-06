@@ -279,7 +279,7 @@ function _load_meta(m::GeometryBasics.Mesh)
     vertices = [Array(v) for v in vs]
     vertices = reduce(hcat, vertices)
     fs = getfield(getfield(m, :simplices), :faces)
-    faces = [Array(UInt32.(f)) for f in fs]
+    faces = [Array(UInt32.(GeometryBasics.value.(f))) for f in fs]
     faces = reduce(hcat, faces)
     return (vertices, faces)
 end
