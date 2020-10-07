@@ -86,6 +86,7 @@ end
 
 lr = 1.0
 opt = Flux.Optimise.Momentum(lr, 0.9)
+_offset = zeros(Float32, size(get_verts_packed(src))...)
 
 # ## Using GPU for fast training [**Optional**]
 # We can convert the TriMesh structure to GPU or CPU using`gpu` and `cpu`
@@ -93,7 +94,7 @@ opt = Flux.Optimise.Momentum(lr, 0.9)
 
 tgt = tgt |> gpu
 src = src |> gpu
-_offset = zeros(Float32, size(get_verts_packed(src))...) |> gpu
+_offset = _offset |> gpu
 
 # ## Optimizing the offset array
 # We first initialize offset array as zeros, hence deformed mesh is equivalent to

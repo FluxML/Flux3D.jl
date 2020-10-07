@@ -99,6 +99,7 @@ end
 ```julia
 lr = 1.0
 opt = Flux.Optimise.Momentum(lr, 0.9)
+_offset = zeros(Float32, size(get_verts_packed(src))...)
 ```
 
 ## Using GPU for fast training [**Optional**]
@@ -108,7 +109,7 @@ function which is exactly the same syntax as Flux.
 ```julia
 tgt = tgt |> gpu
 src = src |> gpu
-_offset = zeros(Float32, size(get_verts_packed(src))...) |> gpu
+_offset = _offset |> gpu
 ```
 
 ## Optimizing the offset array
@@ -179,4 +180,3 @@ metrics.
 ---
 
 *This page was generated using [Literate.jl](https://github.com/fredrikekre/Literate.jl).*
-
