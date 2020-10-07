@@ -870,7 +870,14 @@ end
 
 function _compute_verts_padded(m::TriMesh, refresh::Bool = false)
     if refresh || !(m._verts_padded_valid)
-        _list_to_padded!(m._verts_padded, m._verts_list, 0, (3, m.V))
+
+        # FIXME: #38 chamfer_loss gradient doesn't reach packed, so using temp fix
+        _packed = get_verts_packed(m)
+        _padded = _packed_to_padded(_packed, m._verts_len, 0)
+        m._verts_padded = _padded
+
+        # _list_to_padded!(m._verts_padded, m._verts_list, 0, (3, m.V))
+
         # avoiding setproperty!, as we are building padded
         # from list and list is always valid
         # setfield!(m, :_verts_padded, verts_padded)
