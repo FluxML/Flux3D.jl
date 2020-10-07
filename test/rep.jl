@@ -98,7 +98,7 @@ end
     # IO Tests
     @testset "IO" begin
         mktempdir() do tmpdir
-            # FIXME: MeshIO 2dm save/load breaking #62
+            # FIXME: MeshIO 2dm save/load breaking #62, #63
             # for ext in ["obj", "off", "stl", "ply", "2dm"]
             for ext in ["obj", "off", "stl", "ply"]
                 save_trimesh(joinpath(tmpdir, "test.$(ext)"), m)

@@ -90,7 +90,9 @@ end
     # IO Tests
     @testset "IO" begin
         mktempdir() do tmpdir
-            for ext in ["obj", "off", "stl", "ply", "2dm"]
+            # FIXME: MeshIO 2dm save/load breaking #62, #63
+            # for ext in ["obj", "off", "stl", "ply", "2dm"]
+            for ext in ["obj", "off", "stl", "ply"]
                 save_trimesh(joinpath(tmpdir, "test.$(ext)"), m)
                 m_loaded = load_trimesh(joinpath(tmpdir, "test.$(ext)"))
                 @test all(isapprox.(get_verts_packed(m_loaded), verts_list[1]))

@@ -859,6 +859,7 @@ end
 
 function _compute_verts_packed(m::TriMesh, refresh::Bool = false)
     if refresh || !(m._verts_packed_valid)
+        _compute_verts_list(m)
         verts_packed = _list_to_packed(m._verts_list)
         # avoiding setproperty!, as we are building packed
         # from list and list is always valid
@@ -872,15 +873,15 @@ function _compute_verts_padded(m::TriMesh, refresh::Bool = false)
     if refresh || !(m._verts_padded_valid)
 
         # FIXME: #38 chamfer_loss gradient doesn't reach packed, so using temp fix
-        _packed = get_verts_packed(m)
-        _padded = _packed_to_padded(_packed, m._verts_len, 0)
-        m._verts_padded = _padded
+        _compute_verts_packed(m)
+        verts_padded = _packed_to_padded(m._verts_packed, m._verts_len, 0)
+        # m._verts_padded = _padded
 
-        # _list_to_padded!(m._verts_padded, m._verts_list, 0, (3, m.V))
+        # _list_to_padded!(m._verts_padded, get_verts_list(m), 0, (3, m.V))
 
         # avoiding setproperty!, as we are building padded
         # from list and list is always valid
-        # setfield!(m, :_verts_padded, verts_padded)
+        setfield!(m, :_verts_padded, verts_padded)
         setfield!(m, :_verts_padded_valid, true)
         return nothing
     end
@@ -888,9 +889,9 @@ end
 
 function _compute_verts_list(m::TriMesh, refresh::Bool = false)
     if refresh || !(m._verts_list_valid)
-        if m._verts_packed !== nothing
+        if m._verts_packed_valid
             verts_list = _packed_to_list(m._verts_packed, m._verts_len)
-        elseif m._verts_padded !== nothing
+        elseif m._verts_padded_valid
             verts_list = _padded_to_list(m._verts_padded, m._verts_len)
         else
             error("not possible to contruct list without padded and packed")
