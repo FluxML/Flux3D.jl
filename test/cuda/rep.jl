@@ -283,25 +283,31 @@ end
         @test compute_verts_normals_packed(gm) isa CuArray{T,2}
         @test compute_verts_normals_padded(gm) isa CuArray{T,3}
         @test compute_verts_normals_list(gm) isa Array{<:CuArray{T,2},1}
-        @test all(isapprox.(
-            cat(_normal1, _normal2; dims = 2),
-            normals_packed,
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
+        @test all(
+            isapprox.(
+                cat(_normal1, _normal2; dims = 2),
+                normals_packed,
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
         @test all(isapprox.([_normal1, _normal2], normals_list, rtol = 1e-4, atol = 1e-4))
-        @test all(isapprox.(
-            _normal1,
-            normals_padded[:, 1:size(_normal1, 2), 1],
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
-        @test all(isapprox.(
-            _normal2,
-            normals_padded[:, 1:size(_normal2, 2), 2],
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
+        @test all(
+            isapprox.(
+                _normal1,
+                normals_padded[:, 1:size(_normal1, 2), 1],
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
+        @test all(
+            isapprox.(
+                _normal2,
+                normals_padded[:, 1:size(_normal2, 2), 2],
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
         @test all(normals_padded[:, size(_normal1, 2)+1:end, 1] .== 0)
         @test all(normals_padded[:, size(_normal2, 2)+1:end, 2] .== 0)
 
@@ -311,25 +317,31 @@ end
         @test compute_faces_normals_packed(gm) isa CuArray{T,2}
         @test compute_faces_normals_padded(gm) isa CuArray{T,3}
         @test compute_faces_normals_list(gm) isa Array{<:CuArray{T,2},1}
-        @test all(isapprox.(
-            cat(_fnormal1, _fnormal2; dims = 2),
-            normals_packed,
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
+        @test all(
+            isapprox.(
+                cat(_fnormal1, _fnormal2; dims = 2),
+                normals_packed,
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
         @test all(isapprox.([_fnormal1, _fnormal2], normals_list, rtol = 1e-4, atol = 1e-4))
-        @test all(isapprox.(
-            _fnormal1,
-            normals_padded[:, 1:size(_fnormal1, 2), 1],
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
-        @test all(isapprox.(
-            _fnormal2,
-            normals_padded[:, 1:size(_fnormal2, 2), 2],
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
+        @test all(
+            isapprox.(
+                _fnormal1,
+                normals_padded[:, 1:size(_fnormal1, 2), 1],
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
+        @test all(
+            isapprox.(
+                _fnormal2,
+                normals_padded[:, 1:size(_fnormal2, 2), 2],
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
         @test all(normals_padded[:, size(_fnormal1, 2)+1:end, 1] .== 0)
         @test all(normals_padded[:, size(_fnormal2, 2)+1:end, 2] .== 0)
 
@@ -339,25 +351,31 @@ end
         @test compute_faces_areas_packed(gm) isa CuArray{T,1}
         @test compute_faces_areas_padded(gm) isa CuArray{T,3}
         @test compute_faces_areas_list(gm) isa Array{<:CuArray{T,2},1}
-        @test all(isapprox.(
-            reshape(cat(_farea1, _farea2; dims = 2), :),
-            areas_packed,
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
+        @test all(
+            isapprox.(
+                reshape(cat(_farea1, _farea2; dims = 2), :),
+                areas_packed,
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
         @test all(isapprox.([_farea1, _farea2], areas_list, rtol = 1e-4, atol = 1e-4))
-        @test all(isapprox.(
-            _farea1,
-            areas_padded[:, 1:size(_farea1, 2), 1],
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
-        @test all(isapprox.(
-            _farea2,
-            areas_padded[:, 1:size(_farea2, 2), 2],
-            rtol = 1e-4,
-            atol = 1e-4,
-        ))
+        @test all(
+            isapprox.(
+                _farea1,
+                areas_padded[:, 1:size(_farea1, 2), 1],
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
+        @test all(
+            isapprox.(
+                _farea2,
+                areas_padded[:, 1:size(_farea2, 2), 2],
+                rtol = 1e-4,
+                atol = 1e-4,
+            ),
+        )
         @test all(areas_padded[:, size(_farea1, 2)+1:end, 1] .== 0)
         @test all(areas_padded[:, size(_farea2, 2)+1:end, 2] .== 0)
     end

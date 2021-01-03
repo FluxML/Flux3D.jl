@@ -3,15 +3,21 @@ abstract type AbstractCustomObject <: AbstractObject end
 
 function _lg_cross(A::AbstractArray, B::AbstractArray)
     if !(size(A, 1) == size(B, 1) == 3)
-        throw(DimensionMismatch("cross product is only defined for AbstractArray of dimension 3 at dims 1"))
+        throw(
+            DimensionMismatch(
+                "cross product is only defined for AbstractArray of dimension 3 at dims 1",
+            ),
+        )
     end
     a1, a2, a3 = A[1, :], A[2, :], A[3, :]
     b1, b2, b3 = B[1, :], B[2, :], B[3, :]
-    return vcat(reshape.(
-        [(a2 .* b3) - (a3 .* b2), (a3 .* b1) - (a1 .* b3), (a1 .* b2) - (a2 .* b1)],
-        1,
-        :,
-    )...)
+    return vcat(
+        reshape.(
+            [(a2 .* b3) - (a3 .* b2), (a3 .* b1) - (a1 .* b3), (a1 .* b2) - (a2 .* b1)],
+            1,
+            :,
+        )...,
+    )
 end
 
 function _normalize(A::AbstractArray{T,2}; eps::Number = 1e-6, dims::Int = 2) where {T}

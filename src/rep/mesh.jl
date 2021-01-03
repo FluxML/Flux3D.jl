@@ -123,8 +123,9 @@ function TriMesh(
     offset::Number = -1,
 ) where {S,T<:AbstractFloat,R<:Integer}
 
-    length(verts) == length(faces) ||
-        error("batch size of verts and faces should match, $(length(verts)) != $(length(faces))")
+    length(verts) == length(faces) || error(
+        "batch size of verts and faces should match, $(length(verts)) != $(length(faces))",
+    )
 
     # To remove lazy wrappers on verts and faces list
     verts = [T.(v) for v in verts]
