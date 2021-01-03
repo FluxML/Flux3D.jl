@@ -61,18 +61,12 @@
             pc2 = t(pc1) |> gpu
             @test pc1.points isa CuArray
             @test pc2.points isa CuArray
-            @test all(isapprox.(
-                mean(Array(pc2.points); dims = 2),
-                0,
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                std(Array(pc2.points); dims = 2),
-                1,
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(mean(Array(pc2.points); dims = 2), 0, rtol = 1e-5, atol = 1e-5),
+            )
+            @test all(
+                isapprox.(std(Array(pc2.points); dims = 2), 1, rtol = 1e-5, atol = 1e-5),
+            )
         end
     end
 
@@ -110,12 +104,14 @@
                 @test m2 !== m
             end
             @test get_verts_packed(m2) isa CuArray{Float32,2}
-            @test all(isapprox.(
-                cpu(get_verts_packed(_mesh)),
-                cpu(get_verts_packed(m2)),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    cpu(get_verts_packed(_mesh)),
+                    cpu(get_verts_packed(m2)),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -133,12 +129,14 @@
                 @test m2 !== m
             end
             @test get_verts_packed(m2) isa CuArray{Float32,2}
-            @test all(isapprox.(
-                cpu(get_verts_packed(_mesh)),
-                cpu(get_verts_packed(m2)),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    cpu(get_verts_packed(_mesh)),
+                    cpu(get_verts_packed(m2)),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -179,30 +177,38 @@
                 @test m2 !== m
             end
             @test get_verts_packed(m2) isa CuArray{Float32,2}
-            @test all(isapprox.(
-                mean(cpu(get_verts_list(m2))[1]; dims = 2),
-                0.0,
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                std(cpu(get_verts_list(m2))[1]; dims = 2),
-                1.0,
-                rtol = 1e-4,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                mean(cpu(get_verts_list(m2))[2]; dims = 2),
-                0.0,
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                std(cpu(get_verts_list(m2))[2]; dims = 2),
-                1.0,
-                rtol = 1e-4,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    mean(cpu(get_verts_list(m2))[1]; dims = 2),
+                    0.0,
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
+            @test all(
+                isapprox.(
+                    std(cpu(get_verts_list(m2))[1]; dims = 2),
+                    1.0,
+                    rtol = 1e-4,
+                    atol = 1e-5,
+                ),
+            )
+            @test all(
+                isapprox.(
+                    mean(cpu(get_verts_list(m2))[2]; dims = 2),
+                    0.0,
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
+            @test all(
+                isapprox.(
+                    std(cpu(get_verts_list(m2))[2]; dims = 2),
+                    1.0,
+                    rtol = 1e-4,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -218,12 +224,14 @@
                 @test m2 !== m
             end
             @test get_verts_packed(m2) isa CuArray{Float32,2}
-            @test all(isapprox.(
-                cpu(get_verts_packed(_mesh)),
-                cpu(get_verts_packed(m2)),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    cpu(get_verts_packed(_mesh)),
+                    cpu(get_verts_packed(m2)),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -241,12 +249,14 @@
                 @test m2 !== m
             end
             @test get_verts_packed(m2) isa CuArray{Float32,2}
-            @test all(isapprox.(
-                cpu(get_verts_packed(_mesh)),
-                cpu(get_verts_packed(m2)),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    cpu(get_verts_packed(_mesh)),
+                    cpu(get_verts_packed(m2)),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 

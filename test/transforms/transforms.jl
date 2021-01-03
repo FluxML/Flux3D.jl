@@ -100,12 +100,14 @@
             else
                 @test m2 !== m
             end
-            @test all(isapprox.(
-                get_verts_packed(_mesh),
-                get_verts_packed(m2),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    get_verts_packed(_mesh),
+                    get_verts_packed(m2),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -122,12 +124,14 @@
             else
                 @test m2 !== m
             end
-            @test all(isapprox.(
-                get_verts_packed(_mesh),
-                get_verts_packed(m2),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    get_verts_packed(_mesh),
+                    get_verts_packed(m2),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -167,30 +171,38 @@
             else
                 @test m2 !== m
             end
-            @test all(isapprox.(
-                mean(get_verts_list(m2)[1]; dims = 2),
-                0.0,
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                std(get_verts_list(m2)[1]; dims = 2),
-                1.0,
-                rtol = 1e-4,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                mean(get_verts_list(m2)[2]; dims = 2),
-                0.0,
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
-            @test all(isapprox.(
-                std(get_verts_list(m2)[2]; dims = 2),
-                1.0,
-                rtol = 1e-4,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    mean(get_verts_list(m2)[1]; dims = 2),
+                    0.0,
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
+            @test all(
+                isapprox.(
+                    std(get_verts_list(m2)[1]; dims = 2),
+                    1.0,
+                    rtol = 1e-4,
+                    atol = 1e-5,
+                ),
+            )
+            @test all(
+                isapprox.(
+                    mean(get_verts_list(m2)[2]; dims = 2),
+                    0.0,
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
+            @test all(
+                isapprox.(
+                    std(get_verts_list(m2)[2]; dims = 2),
+                    1.0,
+                    rtol = 1e-4,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -205,12 +217,14 @@
             else
                 @test m2 !== m
             end
-            @test all(isapprox.(
-                get_verts_packed(_mesh),
-                get_verts_packed(m2),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    get_verts_packed(_mesh),
+                    get_verts_packed(m2),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 
@@ -227,12 +241,14 @@
             else
                 @test m2 !== m
             end
-            @test all(isapprox.(
-                get_verts_packed(_mesh),
-                get_verts_packed(m2),
-                rtol = 1e-5,
-                atol = 1e-5,
-            ))
+            @test all(
+                isapprox.(
+                    get_verts_packed(_mesh),
+                    get_verts_packed(m2),
+                    rtol = 1e-5,
+                    atol = 1e-5,
+                ),
+            )
         end
     end
 

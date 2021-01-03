@@ -42,7 +42,9 @@ using .Dataset
 export CustomDataset, ModelNet10, ModelNet40
 
 # visualization
-@init @require AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e" include("visualize.jl")
+@init @require AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e" include(
+    "visualize.jl",
+)
 
 # models
 include("models/utils.jl")

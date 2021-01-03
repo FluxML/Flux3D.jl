@@ -391,8 +391,9 @@ struct VoxelGridToTriMesh <: AbstractTransform
 end
 
 function VoxelGridToTriMesh(; thresh::Number = 0.5f0, algo = :MarchingCubes)
-    algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
-        error("given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
+    algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] || error(
+        "given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.",
+    )
     (0 <= thresh <= 1) || error("given threshold=$(thresh) is not between [0,1]")
     return VoxelGridToTriMesh(Float32(thresh), algo)
 end
@@ -413,8 +414,9 @@ struct PointCloudToTriMesh <: AbstractTransform
     resolution::Int
     algo::Symbol
     function PointCloudToTriMesh(res::Int = 32; algo = :MarchingCubes)
-        algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
-            error("given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
+        algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] || error(
+            "given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.",
+        )
         return new(res, algo)
     end
 end
@@ -466,8 +468,9 @@ function VoxelGridToPointCloud(
     algo::Symbol = :MarchingCubes,
 )
     npoints >= 0 || error("npoints cannot be less than 0")
-    algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] ||
-        error("given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.")
+    algo in [:Exact, :MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets] || error(
+        "given algo=$(algo) is not supported. Accepted algos are {:Exact,:MarchingCubes, :MarchingTetrahedra, :NaiveSurfaceNets}.",
+    )
     (0 <= thresh <= 1) || error("given threshold=$(thresh) is not between [0,1]")
     return VoxelGridToPointCloud(npoints, Float32(thresh), algo)
 end
