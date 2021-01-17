@@ -76,8 +76,8 @@ valX = cat([val_dset[i].data.points for i = 1:length(val_dset)]..., dims = 3)
 valY = onehotbatch([val_dset[i].ground_truth for i = 1:length(val_dset)], 1:num_classes)
 
 TRAIN = [
-    (cat(data[i]..., dims = 3), labels[:, i])
-    for i in partition(1:length(data), batch_size)
+    (cat(data[i]..., dims = 3), labels[:, i]) for
+    i in partition(1:length(data), batch_size)
 ]
 VAL = (valX, valY)
 

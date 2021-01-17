@@ -43,8 +43,7 @@ function _mn_dataset(
         category in MN10_classes ||
             error("given category: $(category) is not a valid ModelNet10 category.")
         datapath = [
-            (category, joinpath(_path, category, _split, filename))
-            for
+            (category, joinpath(_path, category, _split, filename)) for
             filename in readdir(joinpath(_path, category, _split)) if
             split(filename, ".")[end] == "off"
         ]
