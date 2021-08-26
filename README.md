@@ -15,9 +15,6 @@
   <a href="https://github.com/FluxML/Flux3D.jl/actions" alt="Build Status">
     <img src="https://github.com/FluxML/Flux3D.jl/workflows/CI/badge.svg"/>
   </a>
-  <a href="https://gitlab.com/JuliaGPU/Flux3D-jl/commits/master" alt="Pipeline Status">
-    <img src="https://gitlab.com/JuliaGPU/Flux3D-jl/badges/master/pipeline.svg"/>
-  </a>
   <a href="https://codecov.io/gh/FluxML/Flux3D.jl" alt="Codecov">
     <img src="https://codecov.io/gh/FluxML/Flux3D.jl/branch/master/graph/badge.svg?token=8kpPqDfChf"/>
   </a>
