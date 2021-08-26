@@ -324,29 +324,6 @@ function save_trimesh(fn::String, mesh::GeometryBasics.Mesh)
     save(fn, mesh)
 end
 
-# overloading MeshIO.save function to support saving obj file.
-function MeshIO.save(str::Stream{format"OBJ"}, msh::GeometryBasics.AbstractMesh)
-    io = stream(str)
-    vts = GeometryBasics.coordinates(msh)
-    fcs = GeometryBasics.faces(msh)
-
-    # write header
-    write(io, "# Flux3D.jl OBJ File: \n")
-    write(io, "# www.github.com/FluxML/Flux3D.jl \n")
-
-    # write vertices data
-    for v in vts
-        Printf.@printf(io, "v %.6f %.6f %.6f\n", v...)
-    end
-
-    # write faces data
-    for f in fcs
-        Printf.@printf(io, "f %d %d %d\n", Int.(value.(f))...)
-    end
-
-    close(io)
-end
-
 """
     get_verts_packed(m::TriMesh; refresh::Bool = false)
 
