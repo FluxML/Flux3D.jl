@@ -26,7 +26,7 @@ export TriMesh,
 
 import GeometryBasics, Printf, MeshIO
 import GeometryBasics:
-    Point3f0, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh, value
+    Point3f, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh, value
 
 import Zygote: @ignore
 
@@ -242,7 +242,7 @@ Initialize GeometryBasics.Mesh from triangle mesh in TriMesh `m` at `index`.
 See also: [`gbmeshes`](@ref)
 """
 function GBMesh(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}) where {T,R}
-    points = Point3f0[GeometryBasics.Point{3,Float32}(verts[:, i]) for i = 1:size(verts, 2)]
+    points = Point3f[GeometryBasics.Point{3,Float32}(verts[:, i]) for i = 1:size(verts, 2)]
     verts_dim = size(faces, 1)
     poly_face = NgonFace{verts_dim,UInt32}[
         NgonFace{verts_dim,UInt32}(faces[:, i]) for i = 1:size(faces, 2)
