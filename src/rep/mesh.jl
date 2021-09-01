@@ -131,8 +131,8 @@ function TriMesh(
     verts = [T.(v) for v in verts]
     faces = [R.(f) for f in faces]
 
-    _verts_len = cpu(size.(verts, 2))
-    _faces_len = cpu(size.(faces, 2))
+    _verts_len = size.(verts, 2)
+    _faces_len = size.(faces, 2)
 
     N = length(verts)
     V = maximum(_verts_len)
