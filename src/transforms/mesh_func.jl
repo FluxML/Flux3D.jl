@@ -41,7 +41,8 @@ function sample_points(
     samples = Zygote.bufferfrom(samples)
 
     for (i, _len) in enumerate(m._faces_len)
-        probvec = faces_areas_prob[1, 1:_len, i]
+        # Distributions package expects Array!
+        probvec = cpu(faces_areas_prob[1, 1:_len, i])
         dist = Distributions.Categorical(probvec)
         sample_faces_idx = @ignore rand(dist, num_samples)
         sample_faces = faces_padded[:, sample_faces_idx, i]
@@ -95,9 +96,9 @@ julia> m = load_trimesh("teapot.obj")
 julia> normalize!(m)
 ```
 """
-function normalize!(m::TriMesh)
+function normalize!(m::TriMesh{T,R,S}) where {T,R,S}
     verts_padded = get_verts_padded(m)
-    _len = reshape(m._verts_len, 1, 1, :)
+    _len = S(reshape(m._verts_len, 1, 1, :)) # move to `S` storage type
     _centroid = sum(verts_padded; dims = 2) ./ _len
     _correction = ((_centroid .^ 2) .* (m.V .- _len))
     _std =

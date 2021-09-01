@@ -74,8 +74,8 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer,S} <: AbstractObject
     equalised::Bool
     valid::BitArray{1}
     offset::Int8
-    _verts_len::S
-    _faces_len::S
+    _verts_len::Vector{Int64}
+    _faces_len::Vector{Int64}
 
     _verts_packed::S
     _verts_padded::S
@@ -131,8 +131,8 @@ function TriMesh(
     verts = [T.(v) for v in verts]
     faces = [R.(f) for f in faces]
 
-    _verts_len = S(size.(verts, 2))
-    _faces_len = S(size.(faces, 2))
+    _verts_len = cpu(size.(verts, 2))
+    _faces_len = cpu(size.(faces, 2))
 
     N = length(verts)
     V = maximum(_verts_len)
@@ -143,7 +143,7 @@ function TriMesh(
 
     _verts_list = verts::Vector{<:S{T,2}}
     _faces_list = faces::Vector{Array{R,2}}
-
+    
     return TriMesh{T,R,S}(
         N,
         V,
