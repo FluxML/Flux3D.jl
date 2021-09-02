@@ -66,7 +66,7 @@
             end
         end
 
-        verts = get_verts_packed(m)
+        verts = get_verts_packed(m) |> cpu
         L = L * transpose(verts)
         L = Flux3D._norm(L; dims = 2)
         @test isapprox(mean(L), laplacian_loss(m))

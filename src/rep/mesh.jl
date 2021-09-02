@@ -26,7 +26,7 @@ export TriMesh,
 
 import GeometryBasics, Printf, MeshIO
 import GeometryBasics:
-    Point3f0, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh, value
+    Point3f, GLTriangleFace, NgonFace, convert_simplex, meta, triangle_mesh, value
 
 import Zygote: @ignore
 
@@ -74,8 +74,8 @@ mutable struct TriMesh{T<:AbstractFloat,R<:Integer,S} <: AbstractObject
     equalised::Bool
     valid::BitArray{1}
     offset::Int8
-    _verts_len::S
-    _faces_len::S
+    _verts_len::Vector{Int64}
+    _faces_len::Vector{Int64}
 
     _verts_packed::S
     _verts_padded::S
@@ -131,8 +131,8 @@ function TriMesh(
     verts = [T.(v) for v in verts]
     faces = [R.(f) for f in faces]
 
-    _verts_len = S(size.(verts, 2))
-    _faces_len = S(size.(faces, 2))
+    _verts_len = size.(verts, 2)
+    _faces_len = size.(faces, 2)
 
     N = length(verts)
     V = maximum(_verts_len)
@@ -143,7 +143,7 @@ function TriMesh(
 
     _verts_list = verts::Vector{<:S{T,2}}
     _faces_list = faces::Vector{Array{R,2}}
-
+    
     return TriMesh{T,R,S}(
         N,
         V,
@@ -242,7 +242,7 @@ Initialize GeometryBasics.Mesh from triangle mesh in TriMesh `m` at `index`.
 See also: [`gbmeshes`](@ref)
 """
 function GBMesh(verts::AbstractArray{T,2}, faces::AbstractArray{R,2}) where {T,R}
-    points = Point3f0[GeometryBasics.Point{3,Float32}(verts[:, i]) for i = 1:size(verts, 2)]
+    points = Point3f[GeometryBasics.Point{3,Float32}(verts[:, i]) for i = 1:size(verts, 2)]
     verts_dim = size(faces, 1)
     poly_face = NgonFace{verts_dim,UInt32}[
         NgonFace{verts_dim,UInt32}(faces[:, i]) for i = 1:size(faces, 2)

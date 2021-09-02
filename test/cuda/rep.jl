@@ -26,7 +26,7 @@ end
 @info "Testing VoxelGrid..."
 @testset "VoxelGrid" begin
     res = 4
-    voxels = rand(Float32, res, res, res, 2)
+    voxels = rand(Float32, res, res, res, 2) |> gpu
     v = VoxelGrid(voxels) |> gpu
     @test Flux3D._assert_voxel(v)
     @test v isa VoxelGrid{Float32}
@@ -35,7 +35,7 @@ end
     @test v.voxels isa CuArray{Float32,4}
     @test size(v.voxels) == (res, res, res, 2)
 
-    voxels = rand(Float32, res, res, res)
+    voxels = rand(Float32, res, res, res) |> gpu
     v2 = VoxelGrid(voxels) |> gpu
     @test v2 isa VoxelGrid{Float32}
     @test v2.voxels isa CuArray{Float32,4}
