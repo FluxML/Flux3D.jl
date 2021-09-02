@@ -15,6 +15,9 @@
   <a href="https://github.com/FluxML/Flux3D.jl/actions" alt="Build Status">
     <img src="https://github.com/FluxML/Flux3D.jl/workflows/CI/badge.svg"/>
   </a>
+  <a href="https://buildkite.com/julialang/flux3d-dot-jl" alt="BuildKite Build Status">
+    <img src="https://badge.buildkite.com/40bca770b8b1183fa75cb172d706bc71d5cb5ed960cdcb6d2a.svg"/>
+  </a>
   <a href="https://codecov.io/gh/FluxML/Flux3D.jl" alt="Codecov">
     <img src="https://codecov.io/gh/FluxML/Flux3D.jl/branch/master/graph/badge.svg?token=8kpPqDfChf"/>
   </a>
