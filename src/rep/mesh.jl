@@ -143,7 +143,7 @@ function TriMesh(
 
     _verts_list = verts::Vector{<:S{T,2}}
     _faces_list = faces::Vector{Array{R,2}}
-    
+
     return TriMesh{T,R,S}(
         N,
         V,
