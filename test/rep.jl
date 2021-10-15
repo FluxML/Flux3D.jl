@@ -448,8 +448,7 @@ end
 
         @test Flux3D._list_to_packed(_list) == _packed
         @test Flux3D._list_to_packed(_list) isa Array{T,2}
-        @test gradient(x -> 0.5 .* sum(Flux3D._list_to_packed(x) .^ 2), _list)[1] ==
-              _list
+        @test gradient(x -> 0.5 .* sum(Flux3D._list_to_packed(x) .^ 2), _list)[1] == _list
 
         @test Flux3D._packed_to_padded(_packed, items_len, 0) == _padded
         @test Flux3D._packed_to_padded(_packed, items_len, 0) isa Array{T,3}
