@@ -1,4 +1,4 @@
-import AbstractPlotting
+import Makie
 import GeometryBasics
 export visualize
 
@@ -22,7 +22,7 @@ function visualize(p::PointCloud, index::Number = 1; kwargs...)
     get!(kwargs, :color, :lightgreen)
     get!(kwargs, :markersize, npoints(p) / 5000)
 
-    AbstractPlotting.meshscatter(points[1, :], points[2, :], points[3, :]; kwargs...)
+    Makie.meshscatter(points[1, :], points[2, :], points[3, :]; kwargs...)
 end
 
 """
@@ -38,7 +38,7 @@ function visualize(m::GeometryBasics.Mesh; kwargs...) where {T,R}
     kwargs = convert(Dict{Symbol,Any}, kwargs)
     get!(kwargs, :color, :orange)
 
-    AbstractPlotting.mesh(GeometryBasics.normal_mesh(m); kwargs...)
+    Makie.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 
 visualize(m::TriMesh, index::Int = 1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
@@ -68,7 +68,7 @@ function visualize(
     v, f = method(cpu(v[index]), Float32(thresh), algo)
 
     m = GBMesh(v, f)
-    AbstractPlotting.mesh(GeometryBasics.normal_mesh(m); kwargs...)
+    Makie.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 
 visualize(v::Dataset.AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
