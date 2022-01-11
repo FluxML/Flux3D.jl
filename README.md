@@ -44,18 +44,18 @@ Any suggestions, issues and pull requests are most welcome.
 
 ## Installation
 
-This package is stable enough for use in 3D Machine Learning Research. It has been registered. To install the latest release, type the following in the Julia 1.3+ prompt.
+This package is stable enough for use in 3D Machine Learning Research. It has been registered. To install the latest release, type the following in the Julia 1.6+ prompt.
 
 ```julia
 julia> ]
-(v1.3) pkg> add Flux3D
+(v1.6) pkg> add Flux3D
 ```
 
 To install the master branch type the following
 
 ```julia
 julia> ]
-(v1.3) pkg> add Flux3D#master
+(v1.6) pkg> add Flux3D#master
 ```
 
 ## Examples
