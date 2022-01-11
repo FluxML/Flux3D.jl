@@ -1,4 +1,4 @@
 [deps]
-AbstractPlotting = "537997a7-5e4e-5d89-9595-2241ea00577e"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Flux3D = "432009dd-59a1-4b72-8c93-6462ce9b220f"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"

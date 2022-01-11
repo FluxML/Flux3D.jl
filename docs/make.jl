@@ -1,6 +1,6 @@
 using Flux3D
 using Documenter
-using AbstractPlotting
+using Makie
 
 makedocs(;
     modules = [Flux3D],
