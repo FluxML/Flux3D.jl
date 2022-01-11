@@ -5,7 +5,7 @@ CurrentModule = Flux3D
 # Vusualize functions
 
 !!! note
-    Rendering of 3D structure is done using AbstractPlotting. Therefore, for visualization purpose we will be required to install Makie and compatible backend (GLMakie or WGLMakie). To install it simply run `] add Makie` in the julia prompt.
+    Rendering of 3D structure is done using Makie. Therefore, for visualization purpose we will be required to install Makie and compatible backend (GLMakie or WGLMakie). To install it simply run `] add Makie` in the julia prompt.
 
 ## Example
 

@@ -18,7 +18,7 @@ and target shape.
 
 ```julia
 using Flux3D, Zygote, Flux, FileIO, Statistics, Plots
-using AbstractPlotting, GLMakie
+using Makie, GLMakie
 
 Flux3D.Makie.inline!(true)
 Flux3D.Makie.set_theme!(show_axis = false)

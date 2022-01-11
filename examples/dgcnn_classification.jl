@@ -4,7 +4,7 @@
 # !!!note
 #     For visualization purpose we will require to install Makie and
 #     compatible backend (GLMakie or WGLMakie). To install it simply run
-#     `] add AbstractPlotting GLMakie` in the julia prompt.
+#     `] add Makie GLMakie` in the julia prompt.
 
 using Flux3D, Flux, Makie, CUDA
 using Flux: onehotbatch, onecold, onehot, crossentropy
