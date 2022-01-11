@@ -4,15 +4,15 @@
 # !!!note
 #     For visualization purpose we will require to install Makie and
 #     compatible backend (GLMakie or WGLMakie). To install it simply run
-#     `] add AbstractPlotting GLMakie` in the julia prompt.
+#     `] add Makie GLMakie` in the julia prompt.
 
 using Flux3D, Flux, Makie, CUDA
 using Flux: onehotbatch, onecold, onehot, crossentropy
 using Statistics: mean
 using Base.Iterators: partition
 
-Makie.AbstractPlotting.inline!(false)
-Makie.AbstractPlotting.set_theme!(show_axis = false)
+Makie.inline!(false)
+Makie.set_theme!(show_axis = false)
 
 # ## Defining arguments for use in training.
 # * batch_size - batch size of of training data to be passed while training.

@@ -11,8 +11,8 @@ using Flux: onehotbatch, onecold, onehot, crossentropy
 using Statistics: mean
 using Base.Iterators: partition
 
-Makie.AbstractPlotting.inline!(false)
-Makie.AbstractPlotting.set_theme!(show_axis = false)
+Makie.inline!(false)
+Makie.set_theme!(show_axis = false)
 
 # ## Defining arguments for use in training.
 # * batch_size - batch size of of training data to be passed while training.

@@ -19,8 +19,8 @@
 using Flux3D, Zygote, Flux, FileIO, Statistics, Plots
 using Makie
 
-Makie.AbstractPlotting.inline!(true)
-Makie.AbstractPlotting.set_theme!(show_axis = false)
+Makie.inline!(true)
+Makie.set_theme!(show_axis = false)
 
 # ## Downloading obj file of sphere and dolphin
 
@@ -57,7 +57,7 @@ tgt._verts_packed = verts
 # **Makie** for plotting. In fact, we can also visualize PointCloud using this
 # function, which makes this function handy dealing with different 3D format.
 
-Flux3D.AbstractPlotting.vbox(visualize(src), visualize(tgt))
+Flux3D.Makie.vbox(visualize(src), visualize(tgt))
 
 # ```@raw html
 # <p align="center">
@@ -140,7 +140,7 @@ final_mesh = Flux3D.scale!(final_mesh, scale)
 
 save_trimesh("results/final_mesh.off", final_mesh)
 save("results/final_mesh.png", visualize(final_mesh))
-Flux3D.AbstractPlotting.vbox(visualize(final_mesh), visualize(dolphin))
+Flux3D.Makie.vbox(visualize(final_mesh), visualize(dolphin))
 
 # ```@raw html
 # <p align="center">

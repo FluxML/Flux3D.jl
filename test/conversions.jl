@@ -43,8 +43,8 @@ end
 # to cross check the dimension and figure of different conversion.
 
 # using Makie
-# Makie.AbstractPlotting.inline!(true)
-# Makie.AbstractPlotting.set_theme!(show_axis = true)
+# Makie.inline!(true)
+# Makie.set_theme!(show_axis = true)
 #
 # _voxels = zeros(Float32,32,32,32,2)
 # _voxels[1:15,2:10,18:32,:] .= 1

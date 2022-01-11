@@ -20,8 +20,8 @@ and target shape.
 using Flux3D, Zygote, Flux, FileIO, Statistics, Plots
 using AbstractPlotting, GLMakie
 
-Flux3D.AbstractPlotting.inline!(true)
-Flux3D.AbstractPlotting.set_theme!(show_axis = false)
+Flux3D.Makie.inline!(true)
+Flux3D.Makie.set_theme!(show_axis = false)
 ```
 
 ## Downloading obj file of sphere and dolphin
@@ -65,7 +65,7 @@ We will use `visualize` function for visualizing TriMesh. This function uses
 function, which makes this function handy dealing with different 3D format.
 
 ```julia
-Flux3D.AbstractPlotting.vbox(visualize(src), visualize(tgt))
+Flux3D.Makie.vbox(visualize(src), visualize(tgt))
 ```
 
 ```@raw html
@@ -162,7 +162,7 @@ Flux3D provide IO function `save_trimesh`  to save TriMesh
 ```julia
 save_trimesh("results/final_mesh.off", final_mesh)
 save("results/final_mesh.png", visualize(final_mesh))
-Flux3D.AbstractPlotting.vbox(visualize(final_mesh), visualize(dolphin))
+Flux3D.Makie.vbox(visualize(final_mesh), visualize(dolphin))
 ```
 
 ```@raw html
