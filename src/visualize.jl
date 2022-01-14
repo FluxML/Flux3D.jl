@@ -25,6 +25,17 @@ function visualize(p::PointCloud, index::Number = 1; kwargs...)
     Makie.meshscatter(points[1, :], points[2, :], points[3, :]; kwargs...)
 end
 
+function visualize!(axis3::Makie.Axis3, p::PointCloud, index::Number = 1; kwargs...)
+    points = cpu(p[index])
+    size(points, 1) == 3 || error("dimension of points in PointCloud must be 3.")
+
+    kwargs = convert(Dict{Symbol,Any}, kwargs)
+    get!(kwargs, :color, :lightgreen)
+    get!(kwargs, :markersize, npoints(p) / 5000)
+
+    Makie.meshscatter!(axis3, points[1, :], points[2, :], points[3, :]; kwargs...)
+end
+
 """
     visualize(m::TriMesh, index::Int=1; kwargs...)
 
@@ -41,7 +52,21 @@ function visualize(m::GeometryBasics.Mesh; kwargs...) where {T,R}
     Makie.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 
+function visualize!(axis3::Makie.Axis3, m::GeometryBasics.Mesh; kwargs...) where {T,R}
+    Makie.mesh!(
+        axis3,
+        visualize(m; kwargs...).plot.input_args[1].val
+    )
+end
+
 visualize(m::TriMesh, index::Int = 1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
+
+function visualize!(axis3::Makie.Axis3, m::TriMesh, args...; kwargs...)
+    Makie.mesh!(
+        axis3,
+        visualize(GBMesh(m, args...); kwargs...).plot.input_args[1].val
+    )
+end
 
 """
     visualize(v::VoxelGrid, index::Int=1; kwargs...)
@@ -69,6 +94,18 @@ function visualize(
 
     m = GBMesh(v, f)
     Makie.mesh(GeometryBasics.normal_mesh(m); kwargs...)
+end
+
+function visualize!(
+    axis3::Makie.Axis3,
+    v::VoxelGrid,
+    args...;
+    kwargs...,
+)
+    Makie.mesh!(
+        axis3,
+        visualize(v, args...,; kwargs...).plot.input_args[1].val,
+    )
 end
 
 visualize(v::Dataset.AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
