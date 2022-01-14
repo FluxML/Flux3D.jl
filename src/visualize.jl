@@ -1,6 +1,6 @@
 import Makie
 import GeometryBasics
-export visualize
+export visualize, visualize!
 
 """
     visualize(pcloud::PointCloud; kwargs...)
