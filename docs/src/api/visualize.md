@@ -49,3 +49,7 @@ julia> vbox(visulize(m), visualize(p), visualize(v))
 ```@docs
 visualize
 ```
+
+```@docs
+visualize!
+```
