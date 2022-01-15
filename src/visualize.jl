@@ -61,6 +61,11 @@ end
 
 visualize(m::TriMesh, index::Int = 1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
 
+"""
+     visualize!(axis3::Makie.Axis3, object, args...; kwargs...)
+Similar to `Flux3D.visualize` except it accepts `axis3::Makie.Axis3` and update it by rendering `object`.
+See also [`visualize`](@ref).
+"""
 function visualize!(axis3::Makie.Axis3, m::TriMesh, args...; kwargs...)
     Makie.mesh!(
         axis3,
