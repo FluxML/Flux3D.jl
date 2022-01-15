@@ -1,4 +1,4 @@
-import Makie
+import .Makie
 import GeometryBasics
 export visualize
 
