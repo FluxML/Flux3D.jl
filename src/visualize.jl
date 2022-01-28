@@ -103,10 +103,6 @@ function visualize!(
     args...;
     kwargs...,
 )
-    Makie.mesh!(
-        axis3,
-        visualize(v, args...,; kwargs...).plot.input_args[1].val,
-    )
     plt = visualize(v, args..., ; kwargs...)
     Makie.mesh!(axis3, plt.plot.input_args[1].val; plt.plot.attributes...)
 end
