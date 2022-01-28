@@ -10,9 +10,7 @@ CurrentModule = Flux3D
 ## Example
 
 ```julia
-julia> using Flux3D, Makie
-
-julia> Makie.set_theme!(show_axis = false, scale=false)
+julia> using Flux3D, GLMakie
 
 julia> m = load_trimesh("teapot.obj")
 TriMesh{Float32, UInt32, Array} Structure:
@@ -27,15 +25,24 @@ PointCloud{Float32} Structure:
     Batch size: 1
     Points: 1000
     Normals 0
-    Storage type: Array{Float32,3}
+    Storage type: Array{Float32, 3}
 
 julia> v = VoxelGrid(m)
 VoxelGrid{Float32} Structure:
     Batch size: 1
     Voxels features: 32
-    Storage type: Array{Float32,4}
+    Storage type: Array{Float32, 4}
 
-julia> vbox(visulize(m), visualize(p), visualize(v))
+julia> fig = Figure(resolution=(1200, 600))
+
+julia> for (i, obj) in enumerate([m, p, v])
+               ax = Axis3(fig[1, i])
+               plt = visualize!(ax, obj)
+               hidedecorations!(ax)
+               hidespines!(ax)
+       end
+
+julia> fig
 ```
 
 ```@raw html
