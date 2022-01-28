@@ -53,10 +53,8 @@ function visualize(m::GeometryBasics.Mesh; kwargs...) where {T,R}
 end
 
 function visualize!(axis3::Makie.Axis3, m::GeometryBasics.Mesh; kwargs...) where {T,R}
-    Makie.mesh!(
-        axis3,
-        visualize(m; kwargs...).plot.input_args[1].val
-    )
+    plt = visualize(m; kwargs...)
+    Makie.mesh!(axis3, plt.plot.input_args[1].val; plt.plot.attributes...)
 end
 
 visualize(m::TriMesh, index::Int = 1; kwargs...) = visualize(GBMesh(m, index); kwargs...)
@@ -67,10 +65,8 @@ Similar to `Flux3D.visualize` except it accepts `axis3::Makie.Axis3` and update 
 See also [`visualize`](@ref).
 """
 function visualize!(axis3::Makie.Axis3, m::TriMesh, args...; kwargs...)
-    Makie.mesh!(
-        axis3,
-        visualize(GBMesh(m, args...); kwargs...).plot.input_args[1].val
-    )
+    plt = visualize(GBMesh(m, args...); kwargs...)
+    Makie.mesh!(axis3, plt.plot.input_args[1].val; plt.plot.attributes...)
 end
 
 """
@@ -111,6 +107,8 @@ function visualize!(
         axis3,
         visualize(v, args...,; kwargs...).plot.input_args[1].val,
     )
+    plt = visualize(v, args..., ; kwargs...)
+    Makie.mesh!(axis3, plt.plot.input_args[1].val; plt.plot.attributes...)
 end
 
 visualize(v::Dataset.AbstractDataPoint; kwargs...) = visualize(v.data; kwargs...)
