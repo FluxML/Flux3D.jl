@@ -36,10 +36,14 @@ VoxelGrid{Float32} Structure:
 julia> fig = Figure(resolution=(1200, 600))
 
 julia> for (i, obj) in enumerate([m, p, v])
-               ax = Axis3(fig[1, i])
-               plt = visualize!(ax, obj)
-               hidedecorations!(ax)
-               hidespines!(ax)
+           ax = Axis3(
+               fig[1, i],
+               elevation=-π/3,
+               azimuth=π/2,
+           )
+           plt = visualize!(ax, obj)
+           hidedecorations!(ax)
+           hidespines!(ax)
        end
 
 julia> fig
