@@ -97,12 +97,7 @@ function visualize(
     Makie.mesh(GeometryBasics.normal_mesh(m); kwargs...)
 end
 
-function visualize!(
-    axis3::Makie.Axis3,
-    v::VoxelGrid,
-    args...;
-    kwargs...,
-)
+function visualize!(axis3::Makie.Axis3, v::VoxelGrid, args...; kwargs...)
     plt = visualize(v, args..., ; kwargs...)
     Makie.mesh!(axis3, plt.plot.input_args[1].val; plt.plot.attributes...)
 end
